@@ -2,26 +2,24 @@ package com.devmatch.api.user.application.dto.shared;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class UserResponseDto {
-    private Long id;
-    private String username;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String country;
-    private String province;
-    private String city;
-    private String bio;
-    private String githubUrl;
-    private String linkedinUrl;
-    private String portfolioUrl;
-    private String avatarUrl;
-    private boolean isActive;
+    private final Long id;
+    private final String username;
+    private final String email;
+    private final String firstName;
+    private final String lastName;
+    private final String country;
+    private final String province;
+    private final String city;
+    private final String bio;
+    private final String githubUrl;
+    private final String linkedinUrl;
+    private final String portfolioUrl;
+    private final String avatarUrl;
+    private final boolean isActive;
 }

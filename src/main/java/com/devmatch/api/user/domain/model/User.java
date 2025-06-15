@@ -4,13 +4,17 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.devmatch.api.shared.domain.model.BaseDomainEntity;
+import com.devmatch.api.user.domain.model.valueobject.Email;
+import com.devmatch.api.user.domain.model.valueobject.Password;
+import com.devmatch.api.user.domain.model.valueobject.Username;
 
 public class User extends BaseDomainEntity {
 
     // Autenticación
-    private String username;
-    private String email;
-    private String passwordHash;
+    private Username username;
+    private Email email;
+    private Password passwordHash;
+    private String role;
 
     // Datos personales
     private String firstName;
@@ -30,14 +34,14 @@ public class User extends BaseDomainEntity {
     // Descripción
     private String bio;
 
-    // Constructor completo (para reconstrucción desde una fuente externa (BD,
-    // eventos, etc.))
-    public User(Long id, String username, String email, String passwordHash,
+    // Constructor completo
+    public User(Long id, Username username, Email email, Password passwordHash,
             String firstName, String lastName,
             String country, String province, String city,
             String githubUrl, String linkedinUrl, String portfolioUrl,
             String avatarUrl, String bio,
             boolean isActive, boolean isDeleted,
+            String role,
             LocalDateTime createdAt, LocalDateTime updatedAt) {
 
         this.id = id;
@@ -56,12 +60,13 @@ public class User extends BaseDomainEntity {
         this.bio = bio;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
+        this.role = role;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    // Constructor simplificado (creación desde capa de aplicación)
-    public User(String username, String email, String passwordHash,
+    // Constructor simplificado
+    public User(Username username, Email email, Password passwordHash,
             String firstName, String lastName,
             String country, String province, String city,
             String githubUrl, String linkedinUrl, String portfolioUrl,
@@ -80,20 +85,20 @@ public class User extends BaseDomainEntity {
         this.portfolioUrl = portfolioUrl;
         this.avatarUrl = avatarUrl;
         this.bio = bio;
+        this.role = "USER"; // Rol por defecto
         this.createdAt = LocalDateTime.now();
     }
 
-    // Getters (los setters no son públicos, la modificación debe ser intencionada a
-    // través de métodos explícitos como updateProfile)
-    public String getUsername() {
+    // Getters
+    public Username getUsername() {
         return username;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public String getPasswordHash() {
+    public Password getPasswordHash() {
         return passwordHash;
     }
 
@@ -137,6 +142,10 @@ public class User extends BaseDomainEntity {
         return bio;
     }
 
+    public String getRole() {
+        return role;
+    }
+
     // Lógica de dominio
     public void updateProfile(String firstName, String lastName, String country,
             String province, String city,
@@ -155,11 +164,24 @@ public class User extends BaseDomainEntity {
         updateTimestamp();
     }
 
-    // El servicio de autenticación debe llamar a este método para cambiar la
-    // contraseña
-    public void changePassword(String newPasswordHash) {
+    public void changePassword(Password newPasswordHash) {
         this.passwordHash = newPasswordHash;
         updateTimestamp();
+    }
+
+    // Métodos de ciclo de vida
+    public void setActive(boolean active) {
+        this.isActive = active;
+        updateTimestamp();
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.isDeleted = deleted;
+        updateTimestamp();
+    }
+
+    public boolean isAdmin() {
+        return this.role != null && this.role.equals("ADMIN");
     }
 
     // Igualdad basada en identidad
