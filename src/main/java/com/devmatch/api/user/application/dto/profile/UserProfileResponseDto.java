@@ -1,25 +1,22 @@
 package com.devmatch.api.user.application.dto.profile;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
-@Builder
-@AllArgsConstructor
+@Data
 public class UserProfileResponseDto {
-    private final Long id;
-    private final String username;
-    private final String email;
-    private final String firstName;
-    private final String lastName;
-    private final String country;
-    private final String province;
-    private final String city;
-    private final String bio;
-    private final String githubUrl;
-    private final String linkedinUrl;
-    private final String portfolioUrl;
-    private final String avatarUrl;
-    private final boolean isActive;
+    private Long id;
+    private String username;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String country;
+    private String province;
+    private String city;
+    private String githubUrl;
+    private String linkedinUrl;
+    private String portfolioUrl;
+    private String avatarUrl;
+    private String bio;
+    private String role;
+    private boolean isActive;
 } 

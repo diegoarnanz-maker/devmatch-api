@@ -1,39 +1,37 @@
 package com.devmatch.api.user.application.port.in;
 
+import com.devmatch.api.user.application.dto.profile.UserUpdateProfileRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserChangePasswordRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserProfileResponseDto;
-import com.devmatch.api.user.application.dto.profile.UserUpdateProfileRequestDto;
+import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
 /**
- * Casos de uso relacionados con la gestión del perfil del usuario autenticado.
- *
- * Esta interfaz define las operaciones que permiten a un usuario consultar
- * su perfil, actualizar su información personal y cambiar su contraseña.
+ * Caso de uso para la gestión del perfil de usuario.
  */
 public interface ProfileUseCase {
-
+    
     /**
-     * Obtiene el perfil del usuario autenticado a partir de su ID.
+     * Actualiza el perfil de un usuario.
      *
-     * @param userId ID del usuario.
-     * @return DTO con los datos del perfil del usuario.
+     * @param userId ID del usuario
+     * @param dto Datos de actualización del perfil
+     * @return Usuario actualizado
      */
-    UserProfileResponseDto getProfile(Long userId);
+    UserResponseDto updateProfile(Long userId, UserUpdateProfileRequestDto dto);
 
     /**
-     * Actualiza los datos personales del usuario autenticado.
+     * Cambia la contraseña de un usuario.
      *
-     * @param userId ID del usuario que realiza la modificación.
-     * @param dto    DTO con los nuevos valores para el perfil.
-     * @return DTO actualizado con los datos modificados del usuario.
-     */
-    UserProfileResponseDto updateProfile(Long userId, UserUpdateProfileRequestDto dto);
-
-    /**
-     * Permite al usuario cambiar su contraseña actual.
-     *
-     * @param userId ID del usuario que solicita el cambio.
-     * @param dto    DTO con la contraseña actual y la nueva contraseña.
+     * @param userId ID del usuario
+     * @param dto Datos para el cambio de contraseña
      */
     void changePassword(Long userId, UserChangePasswordRequestDto dto);
+
+    /**
+     * Obtiene el perfil de un usuario.
+     *
+     * @param userId ID del usuario
+     * @return Perfil del usuario
+     */
+    UserProfileResponseDto getProfile(Long userId);
 }
