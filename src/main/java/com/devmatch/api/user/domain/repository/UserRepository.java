@@ -5,6 +5,12 @@ import java.util.Optional;
 
 import com.devmatch.api.user.domain.model.User;
 
+/**
+ * Interfaz que define el contrato para la persistencia y recuperación de datos de usuarios.
+ * Esta interfaz forma parte del dominio y sigue los principios de la arquitectura hexagonal,
+ * permitiendo que el dominio sea independiente de la implementación específica de la persistencia.
+ * La implementación concreta se encontrará en la capa de infraestructura.
+ */
 public interface UserRepository {
 
     Optional<User> findById(Long id);
