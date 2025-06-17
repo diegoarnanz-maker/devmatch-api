@@ -1,6 +1,6 @@
 package com.devmatch.api.user.infrastructure.in.security;
 
-import com.devmatch.api.user.application.port.out.UserPersistencePort;
+import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,11 +15,11 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserPersistencePort userPersistencePort;
+    private final UserRepositoryPort userRepositoryPort;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userPersistencePort.findByUsername(username)
+        User user = userRepositoryPort.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         return new org.springframework.security.core.userdetails.User(
@@ -30,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public UserDetails loadUserById(Long id) {
-        User user = userPersistencePort.findById(id)
+        User user = userRepositoryPort.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
 
         return new org.springframework.security.core.userdetails.User(

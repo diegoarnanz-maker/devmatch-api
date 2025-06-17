@@ -5,8 +5,8 @@ import com.devmatch.api.user.application.dto.register.UserRegisterRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.AuthUseCase;
-import com.devmatch.api.user.application.port.out.AuthTokenPort;
-import com.devmatch.api.user.application.port.out.UserPersistencePort;
+import com.devmatch.api.user.application.port.out.AuthTokenRepositoryPort;
+import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.AuthenticationException;
 import com.devmatch.api.user.domain.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.domain.model.User;
@@ -25,15 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService implements AuthUseCase {
 
-    private final UserPersistencePort userPersistencePort;
-    private final AuthTokenPort authTokenPort;
+    private final UserRepositoryPort userRepositoryPort;
+    private final AuthTokenRepositoryPort authTokenRepositoryPort;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public String login(LoginRequestDto dto) {
-        User user = userPersistencePort.findByUsername(dto.getUsername())
+        User user = userRepositoryPort.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new AuthenticationException("Credenciales inválidas"));
 
         if (!user.isActive()) {
@@ -44,17 +44,17 @@ public class AuthService implements AuthUseCase {
             throw new AuthenticationException("Credenciales inválidas");
         }
 
-        return authTokenPort.generateToken(user);
+        return authTokenRepositoryPort.generateToken(user);
     }
 
     @Override
     @Transactional
     public UserResponseDto register(UserRegisterRequestDto dto) {
-        if (userPersistencePort.existsByUsername(dto.getUsername())) {
+        if (userRepositoryPort.existsByUsername(dto.getUsername())) {
             throw new UserAlreadyExistsException("El nombre de usuario ya está en uso");
         }
 
-        if (userPersistencePort.existsByEmail(dto.getEmail())) {
+        if (userRepositoryPort.existsByEmail(dto.getEmail())) {
             throw new UserAlreadyExistsException("El email ya está registrado");
         }
 
@@ -74,7 +74,7 @@ public class AuthService implements AuthUseCase {
             null  // bio
         );
 
-        User savedUser = userPersistencePort.save(user);
+        User savedUser = userRepositoryPort.save(user);
         return userMapper.toDto(savedUser);
     }
 } 

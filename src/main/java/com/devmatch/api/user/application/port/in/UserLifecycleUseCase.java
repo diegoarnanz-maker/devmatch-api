@@ -1,52 +1,45 @@
 package com.devmatch.api.user.application.port.in;
 
 /**
- * Define los casos de uso relacionados con el ciclo de vida de los usuarios.
- * Incluye operaciones de activación, desactivación, eliminación lógica y restauración.
+ * Caso de uso para la gestión del ciclo de vida de usuarios.
+ * Define las operaciones relacionadas con la activación, desactivación y eliminación de usuarios.
  */
 public interface UserLifecycleUseCase {
-
+    
     /**
-     * Desactiva un usuario, estableciendo su estado como inactivo (is_active = false).
-     *
-     * @param userId ID del usuario a desactivar.
+     * Desactiva un usuario por su ID.
+     * @param userId ID del usuario a desactivar
      */
     void deactivateUser(Long userId);
 
     /**
-     * Reactiva un usuario previamente desactivado (is_active = true).
-     *
-     * @param userId ID del usuario a reactivar.
+     * Reactiva un usuario por su ID.
+     * @param userId ID del usuario a reactivar
      */
     void reactivateUser(Long userId);
 
     /**
-     * Marca un usuario como eliminado lógicamente (is_deleted = true).
-     *
-     * @param userId ID del usuario a eliminar.
+     * Elimina un usuario por su ID (soft delete).
+     * @param userId ID del usuario a eliminar
      */
     void deleteUser(Long userId);
 
     /**
-     * Restaura un usuario que había sido eliminado lógicamente (is_deleted = false).
-     *
-     * @param userId ID del usuario a restaurar.
+     * Restaura un usuario eliminado por su ID.
+     * @param userId ID del usuario a restaurar
      */
     void restoreUser(Long userId);
 
     /**
-     * Elimina un usuario si no tiene rol de administrador.
-     * Utilizado para reforzar reglas de negocio en la eliminación.
-     *
-     * @param userId ID del usuario a eliminar.
+     * Elimina un usuario si no es administrador.
+     * @param userId ID del usuario a eliminar
+     * @throws UserOperationNotAllowedException si el usuario es administrador
      */
     void deleteIfNotAdmin(Long userId);
 
     /**
-     * Alterna el estado de actividad del usuario (is_active).
-     * Si está activo, lo desactiva. Si está inactivo, lo activa.
-     *
-     * @param userId ID del usuario cuyo estado se quiere cambiar.
+     * Alterna el estado activo/inactivo de un usuario.
+     * @param userId ID del usuario
      */
     void toggleUserStatus(Long userId);
-}
+} 

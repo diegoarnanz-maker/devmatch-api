@@ -6,7 +6,7 @@ import com.devmatch.api.user.application.dto.profile.UserProfileResponseDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.ProfileUseCase;
-import com.devmatch.api.user.application.port.out.UserPersistencePort;
+import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.model.User;
 import com.devmatch.api.user.domain.model.valueobject.Password;
@@ -22,14 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProfileService implements ProfileUseCase {
 
-    private final UserPersistencePort userPersistencePort;
+    private final UserRepositoryPort userRepositoryPort;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public UserResponseDto updateProfile(Long userId, UserUpdateProfileRequestDto dto) {
-        User user = userPersistencePort.findById(userId)
+        User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         user.updateProfile(
@@ -45,14 +45,14 @@ public class ProfileService implements ProfileUseCase {
             dto.getBio()
         );
 
-        User updatedUser = userPersistencePort.save(user);
+        User updatedUser = userRepositoryPort.save(user);
         return userMapper.toDto(updatedUser);
     }
 
     @Override
     @Transactional
     public void changePassword(Long userId, UserChangePasswordRequestDto dto) {
-        User user = userPersistencePort.findById(userId)
+        User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPasswordHash().getValue())) {
@@ -60,13 +60,13 @@ public class ProfileService implements ProfileUseCase {
         }
 
         user.changePassword(new Password(passwordEncoder.encode(dto.getNewPassword())));
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserProfileResponseDto getProfile(Long userId) {
-        User user = userPersistencePort.findById(userId)
+        User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         return userMapper.toProfileDto(user);
     }

@@ -1,7 +1,7 @@
 package com.devmatch.api.user.application.service;
 
 import com.devmatch.api.user.application.port.in.UserLifecycleUseCase;
-import com.devmatch.api.user.application.port.out.UserPersistencePort;
+import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.model.User;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.exception.UserOperationNotAllowedException;
@@ -13,14 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserLifecycleService implements UserLifecycleUseCase {
 
-    private final UserPersistencePort userPersistencePort;
+    private final UserRepositoryPort userRepositoryPort;
 
     @Override
     @Transactional
     public void deactivateUser(Long userId) {
         User user = findUserOrThrow(userId);
         user.setActive(false);
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class UserLifecycleService implements UserLifecycleUseCase {
     public void reactivateUser(Long userId) {
         User user = findUserOrThrow(userId);
         user.setActive(true);
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class UserLifecycleService implements UserLifecycleUseCase {
     public void deleteUser(Long userId) {
         User user = findUserOrThrow(userId);
         user.setDeleted(true);
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class UserLifecycleService implements UserLifecycleUseCase {
     public void restoreUser(Long userId) {
         User user = findUserOrThrow(userId);
         user.setDeleted(false);
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class UserLifecycleService implements UserLifecycleUseCase {
             throw new UserOperationNotAllowedException("No se puede eliminar un usuario administrador");
         }
         user.setDeleted(true);
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     @Override
@@ -63,11 +63,11 @@ public class UserLifecycleService implements UserLifecycleUseCase {
     public void toggleUserStatus(Long userId) {
         User user = findUserOrThrow(userId);
         user.setActive(!user.isActive());
-        userPersistencePort.save(user);
+        userRepositoryPort.save(user);
     }
 
     private User findUserOrThrow(Long userId) {
-        return userPersistencePort.findById(userId)
+        return userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
     }
 } 

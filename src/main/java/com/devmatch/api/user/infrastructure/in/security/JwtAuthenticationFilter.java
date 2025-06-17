@@ -1,6 +1,6 @@
 package com.devmatch.api.user.infrastructure.in.security;
 
-import com.devmatch.api.user.application.port.out.AuthTokenPort;
+import com.devmatch.api.user.application.port.out.AuthTokenRepositoryPort;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final AuthTokenPort authTokenPort;
+    private final AuthTokenRepositoryPort authTokenRepositoryPort;
     private final CustomUserDetailsService userDetailsService;
 
     @Override
@@ -36,11 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            final String jwt = authTokenPort.extractToken(authHeader);
-            final Long userId = authTokenPort.validateToken(jwt);
+            final String jwt = authTokenRepositoryPort.extractToken(authHeader);
+            final String username = authTokenRepositoryPort.validateTokenAndGetUsername(jwt);
 
-            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserById(userId);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,

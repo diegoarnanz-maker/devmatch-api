@@ -1,4 +1,4 @@
-package com.devmatch.api.user.infrastructure.controller;
+package com.devmatch.api.user.infrastructure.in.controller;
 
 import com.devmatch.api.user.application.dto.profile.UserUpdateProfileRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserChangePasswordRequestDto;
