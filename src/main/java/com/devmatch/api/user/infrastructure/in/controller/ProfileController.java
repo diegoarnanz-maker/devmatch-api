@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * Controlador REST para la gestión del perfil de usuario.
  */
 @RestController
-@RequestMapping("/api/v1/profile")
+@RequestMapping("/api/v1/users/profile")
 @RequiredArgsConstructor
 public class ProfileController {
 

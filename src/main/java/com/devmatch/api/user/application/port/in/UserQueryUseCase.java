@@ -19,12 +19,29 @@ public interface UserQueryUseCase {
     List<UserResponseDto> getAllActiveUsers();
 
     /**
+     * Obtiene todos los usuarios del sistema (incluyendo inactivos y eliminados).
+     * Solo para uso administrativo.
+     *
+     * @return Lista de todos los usuarios.
+     */
+    List<UserResponseDto> findAllUsers();
+
+    /**
      * Busca un usuario por su username, solo si está activo y no eliminado.
      *
      * @param username Nombre de usuario a buscar.
      * @return Usuario correspondiente, si existe y está activo.
      */
     Optional<UserResponseDto> findActiveUserByUsername(String username);
+
+    /**
+     * Busca un usuario por su ID, incluyendo usuarios inactivos o eliminados.
+     * Solo para uso administrativo.
+     *
+     * @param userId ID del usuario a buscar.
+     * @return Usuario correspondiente.
+     */
+    UserResponseDto findUserById(Long userId);
 
     /**
      * Devuelve todos los usuarios activos y no eliminados con un rol específico.
@@ -51,4 +68,13 @@ public interface UserQueryUseCase {
      * @return true si existe, false en caso contrario.
      */
     boolean checkEmailExists(String email);
+
+    /**
+     * Obtiene usuarios filtrados por estado.
+     * Solo para uso administrativo.
+     *
+     * @param status Estado de los usuarios a filtrar (active, inactive, deleted). Si es null, devuelve todos.
+     * @return Lista de usuarios filtrados.
+     */
+    List<UserResponseDto> findUsersByStatus(String status);
 }
