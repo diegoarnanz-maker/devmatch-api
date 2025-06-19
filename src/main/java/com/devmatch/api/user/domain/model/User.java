@@ -1,12 +1,15 @@
 package com.devmatch.api.user.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.devmatch.api.shared.domain.model.BaseDomainEntity;
-import com.devmatch.api.user.domain.model.valueobject.Email;
-import com.devmatch.api.user.domain.model.valueobject.Password;
-import com.devmatch.api.user.domain.model.valueobject.Username;
+import com.devmatch.api.user.domain.model.valueobject.user.Email;
+import com.devmatch.api.user.domain.model.valueobject.user.Password;
+import com.devmatch.api.user.domain.model.valueobject.user.Username;
+import com.devmatch.api.user.domain.model.valueobject.role.RoleName;
 
 public class User extends BaseDomainEntity {
 
@@ -14,7 +17,7 @@ public class User extends BaseDomainEntity {
     private Username username;
     private Email email;
     private Password passwordHash;
-    private String role;
+    private Set<Role> roles = new HashSet<>();
 
     // Datos personales
     private String firstName;
@@ -41,7 +44,7 @@ public class User extends BaseDomainEntity {
             String githubUrl, String linkedinUrl, String portfolioUrl,
             String avatarUrl, String bio,
             boolean isActive, boolean isDeleted,
-            String role,
+            Set<Role> roles,
             LocalDateTime createdAt, LocalDateTime updatedAt) {
 
         this.id = id;
@@ -60,7 +63,7 @@ public class User extends BaseDomainEntity {
         this.bio = bio;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
-        this.role = role;
+        this.roles = new HashSet<>(roles);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -85,7 +88,7 @@ public class User extends BaseDomainEntity {
         this.portfolioUrl = portfolioUrl;
         this.avatarUrl = avatarUrl;
         this.bio = bio;
-        this.role = "USER"; // Rol por defecto
+        this.roles = new HashSet<>();
         this.createdAt = LocalDateTime.now();
     }
 
@@ -142,8 +145,8 @@ public class User extends BaseDomainEntity {
         return bio;
     }
 
-    public String getRole() {
-        return role;
+    public Set<Role> getRoles() {
+        return new HashSet<>(roles);
     }
 
     // Lógica de dominio
@@ -181,7 +184,22 @@ public class User extends BaseDomainEntity {
     }
 
     public boolean isAdmin() {
-        return this.role != null && this.role.equals("ADMIN");
+        return hasRole("ADMIN");
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
+        updateTimestamp();
+    }
+
+    public void removeRole(Role role) {
+        roles.remove(role);
+        updateTimestamp();
+    }
+
+    public boolean hasRole(String roleName) {
+        return roles.stream()
+                .anyMatch(role -> role.getName().getValue().equals(roleName));
     }
 
     // Igualdad basada en identidad

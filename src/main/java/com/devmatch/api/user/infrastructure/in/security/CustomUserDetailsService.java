@@ -9,7 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +23,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepositoryPort.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
+        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().getValue()))
+                .collect(Collectors.toList());
+
         return new org.springframework.security.core.userdetails.User(
             user.getUsername().getValue(),
             user.getPasswordHash().getValue(),
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+            authorities
         );
     }
 
@@ -33,10 +38,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepositoryPort.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
 
+        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().getValue()))
+                .collect(Collectors.toList());
+
         return new org.springframework.security.core.userdetails.User(
             user.getUsername().getValue(),
             user.getPasswordHash().getValue(),
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+            authorities
         );
     }
 } 

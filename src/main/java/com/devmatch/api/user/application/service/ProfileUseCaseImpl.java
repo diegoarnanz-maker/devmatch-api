@@ -9,18 +9,18 @@ import com.devmatch.api.user.application.port.in.ProfileUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.model.User;
-import com.devmatch.api.user.domain.model.valueobject.Password;
+import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Servicio que implementa la lógica de gestión del perfil de usuario.
+ * Implementación del caso de uso de gestión del perfil de usuario.
  */
 @Service
 @RequiredArgsConstructor
-public class ProfileService implements ProfileUseCase {
+public class ProfileUseCaseImpl implements ProfileUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final UserMapper userMapper;

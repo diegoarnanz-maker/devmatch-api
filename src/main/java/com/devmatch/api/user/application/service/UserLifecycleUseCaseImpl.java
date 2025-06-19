@@ -9,9 +9,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Implementación del caso de uso de gestión del ciclo de vida de usuarios.
+ */
 @Service
 @RequiredArgsConstructor
-public class UserLifecycleService implements UserLifecycleUseCase {
+public class UserLifecycleUseCaseImpl implements UserLifecycleUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
 

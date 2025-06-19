@@ -3,27 +3,29 @@ package com.devmatch.api.user.application.service;
 import com.devmatch.api.user.application.dto.auth.LoginRequestDto;
 import com.devmatch.api.user.application.dto.register.UserRegisterRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
+import com.devmatch.api.user.application.exception.AuthenticationException;
+import com.devmatch.api.user.application.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.AuthUseCase;
 import com.devmatch.api.user.application.port.out.AuthTokenRepositoryPort;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
-import com.devmatch.api.user.domain.exception.AuthenticationException;
-import com.devmatch.api.user.domain.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.domain.model.User;
-import com.devmatch.api.user.domain.model.valueobject.Email;
-import com.devmatch.api.user.domain.model.valueobject.Password;
-import com.devmatch.api.user.domain.model.valueobject.Username;
+import com.devmatch.api.user.domain.model.Role;
+import com.devmatch.api.user.domain.model.valueobject.user.Email;
+import com.devmatch.api.user.domain.model.valueobject.user.Password;
+import com.devmatch.api.user.domain.model.valueobject.user.Username;
+import com.devmatch.api.user.domain.model.valueobject.role.RoleName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Servicio que implementa la lógica de autenticación y registro de usuarios.
+ * Implementación del caso de uso de autenticación y registro de usuarios.
  */
 @Service
 @RequiredArgsConstructor
-public class AuthService implements AuthUseCase {
+public class AuthUseCaseImpl implements AuthUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final AuthTokenRepositoryPort authTokenRepositoryPort;
@@ -74,6 +76,11 @@ public class AuthService implements AuthUseCase {
             null  // bio
         );
 
+        // Asignar rol USER por defecto
+        Role userRole = new Role(new RoleName("USER"), "Usuario regular de la plataforma");
+        user.addRole(userRole);
+
+        // Guardar el usuario
         User savedUser = userRepositoryPort.save(user);
         return userMapper.toDto(savedUser);
     }
