@@ -1,5 +1,6 @@
 package com.devmatch.api.user.infrastructure.in.controller;
 
+import com.devmatch.api.user.application.dto.auth.JwtResponse;
 import com.devmatch.api.user.application.dto.auth.LoginRequestDto;
 import com.devmatch.api.user.application.dto.register.UserRegisterRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
@@ -16,9 +17,9 @@ public class AuthController {
     private final AuthUseCase authUseCase;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto loginRequest) {
+    public ResponseEntity<JwtResponse> login(@RequestBody LoginRequestDto loginRequest) {
         String token = authUseCase.login(loginRequest);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @PostMapping("/register")

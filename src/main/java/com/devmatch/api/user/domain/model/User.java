@@ -167,8 +167,64 @@ public class User extends BaseDomainEntity {
         updateTimestamp();
     }
 
+    // Métodos set individuales para actualización parcial
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+        updateTimestamp();
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+        updateTimestamp();
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+        updateTimestamp();
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+        updateTimestamp();
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+        updateTimestamp();
+    }
+
+    public void setGithubUrl(String githubUrl) {
+        this.githubUrl = githubUrl;
+        updateTimestamp();
+    }
+
+    public void setLinkedinUrl(String linkedinUrl) {
+        this.linkedinUrl = linkedinUrl;
+        updateTimestamp();
+    }
+
+    public void setPortfolioUrl(String portfolioUrl) {
+        this.portfolioUrl = portfolioUrl;
+        updateTimestamp();
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+        updateTimestamp();
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+        updateTimestamp();
+    }
+
     public void changePassword(Password newPasswordHash) {
         this.passwordHash = newPasswordHash;
+        updateTimestamp();
+    }
+
+    public void changeEmail(Email newEmail) {
+        this.email = newEmail;
         updateTimestamp();
     }
 
