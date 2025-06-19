@@ -2,7 +2,8 @@ package com.devmatch.api.user.application.port.in;
 
 import com.devmatch.api.user.application.dto.profile.UserUpdateProfileRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserChangePasswordRequestDto;
-import com.devmatch.api.user.application.dto.profile.UserProfileResponseDto;
+import com.devmatch.api.user.application.dto.profile.UserChangeEmailRequestDto;
+import com.devmatch.api.user.application.dto.profile.UserChangeAvatarRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
 /**
@@ -28,10 +29,28 @@ public interface ProfileUseCase {
     void changePassword(Long userId, UserChangePasswordRequestDto dto);
 
     /**
+     * Cambia el email de un usuario.
+     *
+     * @param userId ID del usuario
+     * @param dto Datos para el cambio de email
+     * @return Usuario actualizado
+     */
+    UserResponseDto changeEmail(Long userId, UserChangeEmailRequestDto dto);
+
+    /**
+     * Cambia el avatar de un usuario.
+     *
+     * @param userId ID del usuario
+     * @param dto Datos para el cambio de avatar
+     * @return Usuario actualizado
+     */
+    UserResponseDto changeAvatar(Long userId, UserChangeAvatarRequestDto dto);
+
+    /**
      * Obtiene el perfil de un usuario.
      *
      * @param userId ID del usuario
      * @return Perfil del usuario
      */
-    UserProfileResponseDto getProfile(Long userId);
+    UserResponseDto getProfile(Long userId);
 }
