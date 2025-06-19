@@ -1,6 +1,8 @@
 package com.devmatch.api.user.application.dto.shared;
 
+import com.devmatch.api.user.domain.model.Role;
 import lombok.Data;
+import java.util.Set;
 
 @Data
 public class UserResponseDto {
@@ -17,6 +19,6 @@ public class UserResponseDto {
     private String portfolioUrl;
     private String avatarUrl;
     private String bio;
-    private String role;
-    private boolean isActive;
+    private Set<Role> roles;
+    private boolean active;
 }

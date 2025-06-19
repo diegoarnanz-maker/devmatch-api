@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Mapper para convertir entre entidades de dominio y DTOs de usuario.
+ * Este mapper solo trabaja con entidades de dominio, no con entidades JPA.
  */
 @Component
 public class UserMapper {
@@ -36,11 +37,17 @@ public class UserMapper {
         dto.setPortfolioUrl(user.getPortfolioUrl());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setBio(user.getBio());
-        dto.setRole(user.getRole());
+        dto.setRoles(user.getRoles());
         dto.setActive(user.isActive());
         return dto;
     }
 
+    /**
+     * Convierte una entidad User a UserProfileResponseDto
+     * 
+     * @param user Entidad de dominio
+     * @return DTO de perfil
+     */
     public UserProfileResponseDto toProfileDto(User user) {
         if (user == null) {
             return null;
@@ -60,7 +67,7 @@ public class UserMapper {
         dto.setPortfolioUrl(user.getPortfolioUrl());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setBio(user.getBio());
-        dto.setRole(user.getRole());
+        dto.setRoles(user.getRoles());
         dto.setActive(user.isActive());
         return dto;
     }

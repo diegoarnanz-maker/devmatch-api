@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class UserQueryService implements UserQueryUseCase {
+public class UserQueryUseCaseImpl implements UserQueryUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final UserMapper userMapper;
@@ -43,9 +43,10 @@ public class UserQueryService implements UserQueryUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponseDto> findActiveUsersByRole(String role) {
+    public List<UserResponseDto> findActiveUsersByRole(String roleName) {
         return userRepositoryPort.findAllActive().stream()
-                .filter(user -> user.getRole().equals(role))
+                .filter(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().getValue().equals(roleName)))
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
