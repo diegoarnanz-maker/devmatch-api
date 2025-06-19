@@ -1,5 +1,6 @@
 package com.devmatch.api.user.application.service;
 
+import com.devmatch.api.user.application.dto.admin.UpdateUserRoleDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
@@ -25,18 +26,49 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
 
     @Override
     @Transactional
-    public void updateUserRole(Long userId, String newRole) {
+    public UserResponseDto updateUserRole(Long userId, UpdateUserRoleDto dto) {
         User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         try {
-            RoleName roleName = new RoleName(newRole);
+            RoleName roleName = new RoleName(dto.getRole());
             Role role = new Role(roleName, "Rol asignado por administrador");
+            
+            // Limpiar roles existentes y asignar el nuevo
+            user.getRoles().clear();
             user.addRole(role);
-            userRepositoryPort.save(user);
+            
+            User updatedUser = userRepositoryPort.save(user);
+            return userMapper.toDto(updatedUser);
         } catch (IllegalArgumentException e) {
-            throw new UserOperationNotAllowedException("Rol no válido: " + newRole);
+            throw new UserOperationNotAllowedException("Rol no válido: " + dto.getRole());
         }
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto updateUserStatus(Long userId, boolean active) {
+        User user = userRepositoryPort.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        user.setActive(active);
+        User updatedUser = userRepositoryPort.save(user);
+        return userMapper.toDto(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepositoryPort.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        // Verificar que no sea admin
+        if (user.isAdmin()) {
+            throw new UserOperationNotAllowedException("No se puede eliminar un usuario administrador");
+        }
+
+        user.setDeleted(true);
+        userRepositoryPort.save(user);
     }
 
     @Override
