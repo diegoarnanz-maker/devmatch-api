@@ -70,7 +70,7 @@ public class AdminController {
     @PutMapping("/status/{userId}")
     public ResponseEntity<UserResponseDto> updateUserStatus(
             @PathVariable Long userId,
-            @RequestParam boolean active) {
+            @RequestBody boolean active) {
         return ResponseEntity.ok(adminUserManagementUseCase.updateUserStatus(userId, active));
     }
 
@@ -78,11 +78,13 @@ public class AdminController {
      * Elimina un usuario (soft delete).
      *
      * @param userId ID del usuario
-     * @return Respuesta vacía con código 204
+     * @return Usuario actualizado con estado deleted
      */
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable Long userId) {
         adminUserManagementUseCase.deleteUser(userId);
-        return ResponseEntity.noContent().build();
+        // Obtener el usuario actualizado para devolverlo
+        UserResponseDto deletedUser = userQueryUseCase.findUserById(userId);
+        return ResponseEntity.ok(deletedUser);
     }
 } 

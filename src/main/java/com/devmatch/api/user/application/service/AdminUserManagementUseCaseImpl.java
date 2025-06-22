@@ -59,7 +59,9 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
             throw new UserOperationNotAllowedException("No se puede eliminar un usuario administrador");
         }
 
+        // Soft delete: marcar como eliminado y desactivar
         user.setDeleted(true);
+        user.setActive(false);
         userRepositoryPort.save(user);
     }
 

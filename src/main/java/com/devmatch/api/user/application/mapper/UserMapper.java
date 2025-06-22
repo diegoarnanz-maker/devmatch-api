@@ -38,6 +38,7 @@ public class UserMapper {
         dto.setBio(user.getBio());
         dto.setRole(user.getRole() != null ? user.getRole().getName().getValue() : null);
         dto.setActive(user.isActive());
+        dto.setDeleted(user.isDeleted());
         return dto;
     }
 }

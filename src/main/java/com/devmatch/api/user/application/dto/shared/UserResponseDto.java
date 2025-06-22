@@ -20,4 +20,5 @@ public class UserResponseDto {
     private String bio;
     private String role;
     private boolean active;
+    private boolean deleted;
 }
