@@ -10,7 +10,7 @@ public class RoleName {
     }
 
     private void validate(String value) {
-        if (value == null || value.trim().isEmpty()) {
+        if (value == null || value.trim().isEmpty() || "null".equalsIgnoreCase(value.trim())) {
             throw new IllegalArgumentException("El nombre del rol no puede estar vacío");
         }
         if (value.length() > 30) {

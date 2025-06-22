@@ -29,6 +29,14 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getMyProfile(String username) {
+        User user = userRepositoryPort.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        return userMapper.toDto(user);
+    }
+
+    @Override
     @Transactional
     public UserResponseDto updateProfile(Long userId, UserUpdateProfileRequestDto dto) {
         User user = userRepositoryPort.findById(userId)

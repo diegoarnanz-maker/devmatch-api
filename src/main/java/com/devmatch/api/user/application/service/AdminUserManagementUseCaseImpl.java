@@ -1,6 +1,5 @@
 package com.devmatch.api.user.application.service;
 
-import com.devmatch.api.user.application.dto.admin.UpdateUserRoleDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
@@ -26,23 +25,22 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
 
     @Override
     @Transactional
-    public UserResponseDto updateUserRole(Long userId, UpdateUserRoleDto dto) {
+    public UserResponseDto manageAdminRole(Long userId) {
         User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-        try {
-            RoleName roleName = new RoleName(dto.getRole());
-            Role role = new Role(roleName, "Rol asignado por administrador");
-            
-            // Limpiar roles existentes y asignar el nuevo
-            user.getRoles().clear();
-            user.addRole(role);
-            
-            User updatedUser = userRepositoryPort.save(user);
-            return userMapper.toDto(updatedUser);
-        } catch (IllegalArgumentException e) {
-            throw new UserOperationNotAllowedException("Rol no válido: " + dto.getRole());
+        // Verificar si el usuario ya tiene el rol ADMIN
+        if (user.hasRole("ADMIN")) {
+            // Si ya tiene el rol admin, no hacer ningún cambio (idempotencia)
+            return userMapper.toDto(user);
         }
+
+        // Crear el rol ADMIN y agregarlo al usuario
+        Role adminRole = new Role(new RoleName("ADMIN"), "Rol de administrador");
+        user.addRole(adminRole);
+        
+        User updatedUser = userRepositoryPort.save(user);
+        return userMapper.toDto(updatedUser);
     }
 
     @Override

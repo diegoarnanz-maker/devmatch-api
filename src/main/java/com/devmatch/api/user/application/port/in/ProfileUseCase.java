@@ -12,6 +12,14 @@ import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 public interface ProfileUseCase {
     
     /**
+     * Obtiene el perfil del usuario autenticado.
+     *
+     * @param username Nombre de usuario del usuario autenticado
+     * @return Perfil del usuario
+     */
+    UserResponseDto getMyProfile(String username);
+
+    /**
      * Actualiza el perfil de un usuario.
      *
      * @param userId ID del usuario

@@ -1,6 +1,5 @@
 package com.devmatch.api.user.application.port.in;
 
-import com.devmatch.api.user.application.dto.admin.UpdateUserRoleDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
 /**
@@ -12,13 +11,17 @@ import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 public interface AdminUserManagementUseCase {
 
     /**
-     * Actualiza el rol de un usuario específico, identificado por su ID.
+     * Gestiona el rol de administrador de un usuario.
      * 
-     * @param userId ID del usuario cuyo rol se desea actualizar.
-     * @param dto DTO con el nuevo rol a asignar.
-     * @return Usuario actualizado.
+     * Casos posibles:
+     * - Si el usuario no tiene rol ADMIN: se le agrega
+     * - Si el usuario ya tiene rol ADMIN: no se hace ningún cambio
+     * - Si el usuario tiene otros roles: se mantienen y se agrega ADMIN
+     * 
+     * @param userId ID del usuario al que gestionar el rol admin
+     * @return Usuario actualizado con sus roles
      */
-    UserResponseDto updateUserRole(Long userId, UpdateUserRoleDto dto);
+    UserResponseDto manageAdminRole(Long userId);
 
     /**
      * Actualiza el estado de activación de un usuario.

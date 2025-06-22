@@ -1,10 +1,8 @@
 package com.devmatch.api.user.infrastructure.in.controller;
 
-import com.devmatch.api.user.application.dto.admin.UpdateUserRoleDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
 import com.devmatch.api.user.application.port.in.UserQueryUseCase;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,17 +45,19 @@ public class AdminController {
     }
 
     /**
-     * Actualiza el rol de un usuario.
+     * Gestiona el rol de administrador de un usuario.
+     * 
+     * Casos posibles:
+     * - Si el usuario no tiene rol ADMIN: se le agrega
+     * - Si el usuario ya tiene rol ADMIN: no se hace ningún cambio (idempotencia)
+     * - Si el usuario tiene otros roles: se mantienen y se agrega ADMIN
      *
      * @param userId ID del usuario
-     * @param dto Datos para actualizar el rol
      * @return Usuario actualizado
      */
-    @PutMapping("/{userId}/role")
-    public ResponseEntity<UserResponseDto> updateUserRole(
-            @PathVariable Long userId,
-            @Valid @RequestBody UpdateUserRoleDto dto) {
-        return ResponseEntity.ok(adminUserManagementUseCase.updateUserRole(userId, dto));
+    @PostMapping("/admin-role/{userId}")
+    public ResponseEntity<UserResponseDto> manageAdminRole(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminUserManagementUseCase.manageAdminRole(userId));
     }
 
     /**
@@ -67,7 +67,7 @@ public class AdminController {
      * @param active Estado deseado (true = activo, false = inactivo)
      * @return Usuario actualizado
      */
-    @PutMapping("/{userId}/status")
+    @PutMapping("/status/{userId}")
     public ResponseEntity<UserResponseDto> updateUserStatus(
             @PathVariable Long userId,
             @RequestParam boolean active) {
