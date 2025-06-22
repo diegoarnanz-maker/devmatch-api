@@ -31,13 +31,22 @@ CREATE TABLE users (
     avatar_url VARCHAR(255),
     bio TEXT,
 
+    -- Rol del usuario (relación directa)
+    role_id BIGINT,
+
     -- Estado de la cuenta
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
 
     -- Trazabilidad
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+
+    -- Clave foránea al rol
+    CONSTRAINT fk_users_role_id
+        FOREIGN KEY (role_id)
+        REFERENCES roles(id)
+        ON DELETE SET NULL
 );
 
 -- Índices
@@ -45,6 +54,7 @@ CREATE INDEX idx_users_province ON users(province);
 CREATE INDEX idx_users_city ON users(city);
 CREATE INDEX idx_users_is_active ON users(is_active);
 CREATE INDEX idx_users_is_deleted ON users(is_deleted);
+CREATE INDEX idx_users_role_id ON users(role_id);
 
 -- ==============================================================================
 -- PROFILE TYPES
@@ -207,30 +217,6 @@ CREATE TABLE roles (
     name VARCHAR(30) NOT NULL UNIQUE, -- Ej: USER, ADMIN, MODERATOR
     description TEXT
 );
-
--- ==============================================================================
--- USER ROLES
--- ==============================================================================
-CREATE TABLE user_roles (
-    user_id BIGINT NOT NULL,
-    role_id BIGINT NOT NULL,
-    
-    PRIMARY KEY (user_id, role_id),
-
-    CONSTRAINT fk_user_roles_user_id
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_user_roles_role_id
-        FOREIGN KEY (role_id)
-        REFERENCES roles(id)
-        ON DELETE CASCADE
-);
-
--- Índices
-CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
-CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
 
 -- ==============================================================================
 -- PROJECTS

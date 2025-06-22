@@ -94,8 +94,7 @@ public class UserQueryUseCaseImpl implements UserQueryUseCase {
     @Transactional(readOnly = true)
     public List<UserResponseDto> findActiveUsersByRole(String roleName) {
         return userRepositoryPort.findAllActive().stream()
-                .filter(user -> user.getRoles().stream()
-                        .anyMatch(role -> role.getName().getValue().equals(roleName)))
+                .filter(user -> user.getRole() != null && user.getRole().getName().getValue().equals(roleName))
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }

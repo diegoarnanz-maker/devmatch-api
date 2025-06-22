@@ -17,7 +17,7 @@ public class User extends BaseDomainEntity {
     private Username username;
     private Email email;
     private Password passwordHash;
-    private Set<Role> roles = new HashSet<>();
+    private Role role;
 
     // Datos personales
     private String firstName;
@@ -44,7 +44,7 @@ public class User extends BaseDomainEntity {
             String githubUrl, String linkedinUrl, String portfolioUrl,
             String avatarUrl, String bio,
             boolean isActive, boolean isDeleted,
-            Set<Role> roles,
+            Role role,
             LocalDateTime createdAt, LocalDateTime updatedAt) {
 
         this.id = id;
@@ -63,7 +63,7 @@ public class User extends BaseDomainEntity {
         this.bio = bio;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
-        this.roles = new HashSet<>(roles);
+        this.role = role;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -73,7 +73,7 @@ public class User extends BaseDomainEntity {
             String firstName, String lastName,
             String country, String province, String city,
             String githubUrl, String linkedinUrl, String portfolioUrl,
-            String avatarUrl, String bio) {
+            String avatarUrl, String bio, Role role) {
 
         this.username = username;
         this.email = email;
@@ -88,7 +88,7 @@ public class User extends BaseDomainEntity {
         this.portfolioUrl = portfolioUrl;
         this.avatarUrl = avatarUrl;
         this.bio = bio;
-        this.roles = new HashSet<>();
+        this.role = role;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -145,8 +145,8 @@ public class User extends BaseDomainEntity {
         return bio;
     }
 
-    public Set<Role> getRoles() {
-        return new HashSet<>(roles);
+    public Role getRole() {
+        return role;
     }
 
     // Lógica de dominio
@@ -240,22 +240,12 @@ public class User extends BaseDomainEntity {
     }
 
     public boolean isAdmin() {
-        return hasRole("ADMIN");
+        return role != null && "ADMIN".equals(role.getName().getValue());
     }
 
-    public void addRole(Role role) {
-        roles.add(role);
+    public void setRole(Role role) {
+        this.role = role;
         updateTimestamp();
-    }
-
-    public void removeRole(Role role) {
-        roles.remove(role);
-        updateTimestamp();
-    }
-
-    public boolean hasRole(String roleName) {
-        return roles.stream()
-                .anyMatch(role -> role.getName().getValue().equals(roleName));
     }
 
     // Igualdad basada en identidad

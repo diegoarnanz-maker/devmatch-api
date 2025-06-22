@@ -36,11 +36,7 @@ public class UserMapper {
         dto.setPortfolioUrl(user.getPortfolioUrl());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setBio(user.getBio());
-        dto.setRoles(
-            user.getRoles().stream()
-                .map(role -> role.getName().getValue())
-                .collect(java.util.stream.Collectors.toSet())
-        );
+        dto.setRole(user.getRole() != null ? user.getRole().getName().getValue() : null);
         dto.setActive(user.isActive());
         return dto;
     }

@@ -18,6 +18,6 @@ public class UserResponseDto {
     private String portfolioUrl;
     private String avatarUrl;
     private String bio;
-    private Set<String> roles;
+    private String role;
     private boolean active;
 }

@@ -60,6 +60,7 @@ public class AuthUseCaseImpl implements AuthUseCase {
             throw new UserAlreadyExistsException("El email ya está registrado");
         }
 
+        Role userRole = new Role(new RoleName("USER"), "Usuario regular de la plataforma");
         User user = new User(
             new Username(dto.getUsername()),
             new Email(dto.getEmail()),
@@ -73,12 +74,9 @@ public class AuthUseCaseImpl implements AuthUseCase {
             null, // linkedinUrl
             null, // portfolioUrl
             null, // avatarUrl
-            null  // bio
+            null, // bio
+            userRole
         );
-
-        // Asignar rol USER por defecto
-        Role userRole = new Role(new RoleName("USER"), "Usuario regular de la plataforma");
-        user.addRole(userRole);
 
         // Guardar el usuario
         User savedUser = userRepositoryPort.save(user);

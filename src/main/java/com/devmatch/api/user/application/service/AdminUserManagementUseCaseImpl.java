@@ -29,15 +29,9 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
         User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-        // Verificar si el usuario ya tiene el rol ADMIN
-        if (user.hasRole("ADMIN")) {
-            // Si ya tiene el rol admin, no hacer ningún cambio (idempotencia)
-            return userMapper.toDto(user);
-        }
-
-        // Crear el rol ADMIN y agregarlo al usuario
+        // Asignar el rol ADMIN directamente
         Role adminRole = new Role(new RoleName("ADMIN"), "Rol de administrador");
-        user.addRole(adminRole);
+        user.setRole(adminRole);
         
         User updatedUser = userRepositoryPort.save(user);
         return userMapper.toDto(updatedUser);
