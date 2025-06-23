@@ -7,8 +7,8 @@ import com.devmatch.api.user.application.exception.AuthenticationException;
 import com.devmatch.api.user.application.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.AuthUseCase;
-import com.devmatch.api.user.application.port.out.AuthTokenRepositoryPort;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
+import com.devmatch.api.security.application.port.out.AuthTokenRepositoryPort;
 import com.devmatch.api.user.domain.model.User;
 import com.devmatch.api.user.domain.model.Role;
 import com.devmatch.api.user.domain.model.valueobject.user.Email;
@@ -38,12 +38,12 @@ public class AuthUseCaseImpl implements AuthUseCase {
         User user = userRepositoryPort.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new AuthenticationException("Credenciales inválidas"));
 
-        if (!user.isActive()) {
-            throw new AuthenticationException("Usuario inactivo");
-        }
-
         if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash().getValue())) {
             throw new AuthenticationException("Credenciales inválidas");
+        }
+
+        if (!user.isActive()) {
+            throw new AuthenticationException("Usuario inactivo");
         }
 
         return authTokenRepositoryPort.generateToken(user);
@@ -52,6 +52,7 @@ public class AuthUseCaseImpl implements AuthUseCase {
     @Override
     @Transactional
     public UserResponseDto register(UserRegisterRequestDto dto) {
+        // Verificar si el usuario ya existe
         if (userRepositoryPort.existsByUsername(dto.getUsername())) {
             throw new UserAlreadyExistsException("El nombre de usuario ya está en uso");
         }

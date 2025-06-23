@@ -1,6 +1,6 @@
-package com.devmatch.api.user.infrastructure.in.security;
+package com.devmatch.api.security.infrastructure.in.security;
 
-import com.devmatch.api.user.application.port.out.AuthTokenRepositoryPort;
+import com.devmatch.api.security.application.port.out.AuthTokenRepositoryPort;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

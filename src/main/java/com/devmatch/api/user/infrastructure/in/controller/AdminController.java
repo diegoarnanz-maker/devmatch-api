@@ -1,70 +1,77 @@
 package com.devmatch.api.user.infrastructure.in.controller;
 
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
+import com.devmatch.api.user.application.dto.admin.UpdateUserRoleRequestDto;
+import com.devmatch.api.user.application.dto.admin.UserSearchCriteriaDto;
 import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
 import com.devmatch.api.user.application.port.in.UserQueryUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 /**
- * Controlador REST para la gestión administrativa de usuarios.
- * Solo accesible por usuarios con rol ADMIN.
+ * Controlador para operaciones administrativas de usuarios.
+ * 
+ * Este controlador expone endpoints que requieren permisos de administrador
+ * para gestionar usuarios del sistema.
  */
 @RestController
 @RequestMapping("/api/v1/users/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final AdminUserManagementUseCase adminUserManagementUseCase;
     private final UserQueryUseCase userQueryUseCase;
 
     /**
-     * Obtiene todos los usuarios del sistema con filtro opcional por estado.
+     * Busca usuarios por múltiples criterios opcionales, incluyendo estado.
+     * La búsqueda es parcial (contiene) y todos los parámetros son opcionales.
      *
-     * @param status Estado de los usuarios a filtrar (active, inactive, deleted). Si es null, devuelve todos.
-     * @return Lista de usuarios filtrados
+     * @param criteria DTO con los criterios de búsqueda (email, username, firstName, lastName, status)
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de usuarios que coinciden con los criterios especificados
      */
-    @GetMapping("")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers(
-            @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(userQueryUseCase.findUsersByStatus(status));
+    @PostMapping("/search")
+    public ResponseEntity<Page<UserResponseDto>> searchUsers(@RequestBody UserSearchCriteriaDto criteria, Pageable pageable) {
+        return ResponseEntity.ok(userQueryUseCase.searchUsers(criteria, pageable));
     }
-
+    
     /**
-     * Obtiene un usuario específico por ID.
-     *
+     * Obtiene los detalles de un usuario para administradores.
+     * 
      * @param userId ID del usuario
-     * @return Usuario encontrado
+     * @return Detalles del usuario
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long userId) {
-        return ResponseEntity.ok(userQueryUseCase.findUserById(userId));
+    public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminUserManagementUseCase.getUserDetailsForAdmin(userId));
     }
 
     /**
-     * Gestiona el rol de administrador de un usuario.
+     * Cambia el rol de un usuario de forma flexible.
      * 
-     * Casos posibles:
-     * - Si el usuario no tiene rol ADMIN: se le agrega
-     * - Si el usuario ya tiene rol ADMIN: no se hace ningún cambio (idempotencia)
-     * - Si el usuario tiene otros roles: se mantienen y se agrega ADMIN
-     *
-     * @param userId ID del usuario
-     * @return Usuario actualizado
+     * @param userId ID del usuario al que cambiar el rol
+     * @param request DTO con el nuevo rol a asignar
+     * @return Usuario actualizado con el nuevo rol
      */
-    @PostMapping("/admin-role/{userId}")
-    public ResponseEntity<UserResponseDto> manageAdminRole(@PathVariable Long userId) {
-        return ResponseEntity.ok(adminUserManagementUseCase.manageAdminRole(userId));
+    @PutMapping("/role/{userId}")
+    public ResponseEntity<UserResponseDto> updateUserRole(
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserRoleRequestDto request) {
+        return ResponseEntity.ok(adminUserManagementUseCase.updateUserRole(userId, request));
     }
 
     /**
-     * Activa o desactiva un usuario.
-     *
+     * Actualiza el estado de activación de un usuario.
+     * 
      * @param userId ID del usuario
-     * @param active Estado deseado (true = activo, false = inactivo)
+     * @param active true para activar, false para desactivar
      * @return Usuario actualizado
      */
     @PutMapping("/status/{userId}")
@@ -76,13 +83,15 @@ public class AdminController {
 
     /**
      * Elimina un usuario (soft delete).
-     *
-     * @param userId ID del usuario
-     * @return Respuesta vacía con código 204
+     * 
+     * @param userId ID del usuario a eliminar
+     * @return Usuario eliminado (con isDeleted = true e isActive = false)
      */
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable Long userId) {
         adminUserManagementUseCase.deleteUser(userId);
-        return ResponseEntity.noContent().build();
+        // Obtener el usuario actualizado para devolverlo
+        UserResponseDto deletedUser = userQueryUseCase.findUserById(userId);
+        return ResponseEntity.ok(deletedUser);
     }
 } 

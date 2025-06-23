@@ -1,6 +1,7 @@
 package com.devmatch.api.user.application.service;
 
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
+import com.devmatch.api.user.application.dto.admin.UpdateUserRoleRequestDto;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
@@ -24,14 +25,22 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
     private final UserMapper userMapper;
 
     @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getUserDetailsForAdmin(Long userId) {
+        User user = userRepositoryPort.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        return userMapper.toDto(user);
+    }
+
+    @Override
     @Transactional
-    public UserResponseDto manageAdminRole(Long userId) {
+    public UserResponseDto updateUserRole(Long userId, UpdateUserRoleRequestDto request) {
         User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-        // Asignar el rol ADMIN directamente
-        Role adminRole = new Role(new RoleName("ADMIN"), "Rol de administrador");
-        user.setRole(adminRole);
+        // Crear el nuevo rol con el nombre proporcionado
+        Role newRole = new Role(new RoleName(request.getRoleName()), "Rol asignado por administrador");
+        user.setRole(newRole);
         
         User updatedUser = userRepositoryPort.save(user);
         return userMapper.toDto(updatedUser);
@@ -59,15 +68,9 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
             throw new UserOperationNotAllowedException("No se puede eliminar un usuario administrador");
         }
 
+        // Soft delete: marcar como eliminado y desactivar
         user.setDeleted(true);
+        user.setActive(false);
         userRepositoryPort.save(user);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public UserResponseDto getUserDetailsForAdmin(Long userId) {
-        User user = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        return userMapper.toDto(user);
     }
 } 

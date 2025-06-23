@@ -1,4 +1,4 @@
-package com.devmatch.api.user.infrastructure.in.security;
+package com.devmatch.api.security.infrastructure.in.security;
 
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.model.User;
@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
