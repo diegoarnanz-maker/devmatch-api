@@ -1,7 +1,6 @@
 package com.devmatch.api.user.application.dto.shared;
 
 import lombok.Data;
-import java.util.Set;
 
 @Data
 public class UserResponseDto {

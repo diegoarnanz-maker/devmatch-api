@@ -1,15 +1,12 @@
 package com.devmatch.api.user.domain.model;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import com.devmatch.api.shared.domain.model.BaseDomainEntity;
 import com.devmatch.api.user.domain.model.valueobject.user.Email;
 import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import com.devmatch.api.user.domain.model.valueobject.user.Username;
-import com.devmatch.api.user.domain.model.valueobject.role.RoleName;
 
 public class User extends BaseDomainEntity {
 
@@ -228,7 +225,6 @@ public class User extends BaseDomainEntity {
         updateTimestamp();
     }
 
-    // Métodos de ciclo de vida
     public void setActive(boolean active) {
         this.isActive = active;
         updateTimestamp();
@@ -248,18 +244,16 @@ public class User extends BaseDomainEntity {
         updateTimestamp();
     }
 
-    // Igualdad basada en identidad
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof User other))
-            return false;
-        return Objects.equals(id, other.id);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(username, user.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, username);
     }
 }
