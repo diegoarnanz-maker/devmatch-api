@@ -1,6 +1,7 @@
 package com.devmatch.api.user.application.port.in;
 
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
+import com.devmatch.api.user.application.dto.admin.UpdateUserRoleRequestDto;
 
 /**
  * Casos de uso destinados a la gestión administrativa de usuarios.
@@ -11,17 +12,23 @@ import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 public interface AdminUserManagementUseCase {
 
     /**
-     * Gestiona el rol de administrador de un usuario.
+     * Devuelve los detalles de un usuario, incluso si está desactivado o marcado
+     * como eliminado.
+     * Este método está destinado exclusivamente para uso administrativo.
      * 
-     * Casos posibles:
-     * - Si el usuario no tiene rol ADMIN: se le agrega
-     * - Si el usuario ya tiene rol ADMIN: no se hace ningún cambio
-     * - Si el usuario tiene otros roles: se mantienen y se agrega ADMIN
-     * 
-     * @param userId ID del usuario al que gestionar el rol admin
-     * @return Usuario actualizado con sus roles
+     * @param userId ID del usuario que se desea consultar.
+     * @return Un DTO con la información del usuario.
      */
-    UserResponseDto manageAdminRole(Long userId);
+    UserResponseDto getUserDetailsForAdmin(Long userId);
+
+    /**
+     * Cambia el rol de un usuario de forma flexible.
+     * 
+     * @param userId ID del usuario al que cambiar el rol
+     * @param request DTO con el nuevo rol a asignar
+     * @return Usuario actualizado con el nuevo rol
+     */
+    UserResponseDto updateUserRole(Long userId, UpdateUserRoleRequestDto request);
 
     /**
      * Actualiza el estado de activación de un usuario.
@@ -38,14 +45,4 @@ public interface AdminUserManagementUseCase {
      * @param userId ID del usuario a eliminar.
      */
     void deleteUser(Long userId);
-
-    /**
-     * Devuelve los detalles de un usuario, incluso si está desactivado o marcado
-     * como eliminado.
-     * Este método está destinado exclusivamente para uso administrativo.
-     * 
-     * @param userId ID del usuario que se desea consultar.
-     * @return Un DTO con la información del usuario.
-     */
-    UserResponseDto getUserDetailsForAdmin(Long userId);
 }

@@ -1,8 +1,8 @@
 package com.devmatch.api.user.application.port.in;
 
-import java.util.List;
-import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.devmatch.api.user.application.dto.admin.UserSearchCriteriaDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
 /**
@@ -10,29 +10,6 @@ import com.devmatch.api.user.application.dto.shared.UserResponseDto;
  * Incluye búsquedas por rol, username y validación de existencia.
  */
 public interface UserQueryUseCase {
-
-    /**
-     * Obtiene todos los usuarios que están activos y no han sido eliminados.
-     *
-     * @return Lista de usuarios visibles para operaciones estándar.
-     */
-    List<UserResponseDto> getAllActiveUsers();
-
-    /**
-     * Obtiene todos los usuarios del sistema (incluyendo inactivos y eliminados).
-     * Solo para uso administrativo.
-     *
-     * @return Lista de todos los usuarios.
-     */
-    List<UserResponseDto> findAllUsers();
-
-    /**
-     * Busca un usuario por su username, solo si está activo y no eliminado.
-     *
-     * @param username Nombre de usuario a buscar.
-     * @return Usuario correspondiente, si existe y está activo.
-     */
-    Optional<UserResponseDto> findActiveUserByUsername(String username);
 
     /**
      * Busca un usuario por su ID, incluyendo usuarios inactivos o eliminados.
@@ -44,37 +21,13 @@ public interface UserQueryUseCase {
     UserResponseDto findUserById(Long userId);
 
     /**
-     * Devuelve todos los usuarios activos y no eliminados con un rol específico.
-     *
-     * @param role Rol a filtrar.
-     * @return Lista de usuarios filtrados por rol.
-     */
-    List<UserResponseDto> findActiveUsersByRole(String role);
-
-    /**
-     * Verifica si existe algún usuario con el username especificado,
-     * independientemente de su estado.
-     *
-     * @param username Nombre de usuario.
-     * @return true si existe, false en caso contrario.
-     */
-    boolean checkUsernameExists(String username);
-
-    /**
-     * Verifica si existe algún usuario con el email especificado,
-     * independientemente de su estado.
-     *
-     * @param email Dirección de correo electrónico.
-     * @return true si existe, false en caso contrario.
-     */
-    boolean checkEmailExists(String email);
-
-    /**
-     * Obtiene usuarios filtrados por estado.
+     * Busca usuarios por múltiples criterios opcionales, incluyendo estado.
+     * La búsqueda es parcial (contiene) y todos los parámetros son opcionales.
      * Solo para uso administrativo.
      *
-     * @param status Estado de los usuarios a filtrar (active, inactive, deleted). Si es null, devuelve todos.
-     * @return Lista de usuarios filtrados.
+     * @param criteria DTO con los criterios de búsqueda (email, username, firstName, lastName, status)
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de usuarios que coinciden con los criterios especificados
      */
-    List<UserResponseDto> findUsersByStatus(String status);
+    Page<UserResponseDto> searchUsers(UserSearchCriteriaDto criteria, Pageable pageable);
 }
