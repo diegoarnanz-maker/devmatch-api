@@ -7,6 +7,7 @@ import com.devmatch.api.shared.domain.model.BaseDomainEntity;
 import com.devmatch.api.user.domain.model.valueobject.user.Email;
 import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import com.devmatch.api.user.domain.model.valueobject.user.Username;
+import com.devmatch.api.role.domain.model.Role;
 
 public class User extends BaseDomainEntity {
 
@@ -236,7 +237,7 @@ public class User extends BaseDomainEntity {
     }
 
     public boolean isAdmin() {
-        return role != null && "ADMIN".equals(role.getName().getValue());
+        return role != null && "ADMIN".equals(role.getName());
     }
 
     public void setRole(Role role) {
