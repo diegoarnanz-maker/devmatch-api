@@ -10,11 +10,10 @@ import com.devmatch.api.user.application.port.in.AuthUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.security.application.port.out.AuthTokenRepositoryPort;
 import com.devmatch.api.user.domain.model.User;
-import com.devmatch.api.user.domain.model.Role;
+import com.devmatch.api.role.domain.model.Role;
 import com.devmatch.api.user.domain.model.valueobject.user.Email;
 import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import com.devmatch.api.user.domain.model.valueobject.user.Username;
-import com.devmatch.api.user.domain.model.valueobject.role.RoleName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,7 @@ public class AuthUseCaseImpl implements AuthUseCase {
             throw new UserAlreadyExistsException("El email ya está registrado");
         }
 
-        Role userRole = new Role(new RoleName("USER"), "Usuario regular de la plataforma");
+        Role userRole = new Role("USER", "Usuario regular de la plataforma");
         User user = new User(
             new Username(dto.getUsername()),
             new Email(dto.getEmail()),

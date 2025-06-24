@@ -7,8 +7,7 @@ import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.exception.UserOperationNotAllowedException;
-import com.devmatch.api.user.domain.model.Role;
-import com.devmatch.api.user.domain.model.valueobject.role.RoleName;
+import com.devmatch.api.role.domain.model.Role;
 import com.devmatch.api.user.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,7 @@ public class AdminUserManagementUseCaseImpl implements AdminUserManagementUseCas
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         // Crear el nuevo rol con el nombre proporcionado
-        Role newRole = new Role(new RoleName(request.getRoleName()), "Rol asignado por administrador");
+        Role newRole = new Role(request.getRoleName(), "Rol asignado por administrador");
         user.setRole(newRole);
         
         User updatedUser = userRepositoryPort.save(user);
