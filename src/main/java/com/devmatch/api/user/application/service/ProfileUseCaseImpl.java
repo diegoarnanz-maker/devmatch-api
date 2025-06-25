@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Implementación del caso de uso de gestión del perfil de usuario.
  */
@@ -33,7 +35,7 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
     public UserResponseDto getMyProfile(String username) {
         User user = userRepositoryPort.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        return userMapper.toDto(user);
+        return userMapper.toDto(user, getProfileTypesForUser(user.getId()));
     }
 
     @Override
@@ -75,7 +77,7 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
         }
 
         User updatedUser = userRepositoryPort.save(user);
-        return userMapper.toDto(updatedUser);
+        return userMapper.toDto(updatedUser, getProfileTypesForUser(userId));
     }
 
     @Override
@@ -117,7 +119,7 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
         // Cambiar el email
         user.changeEmail(new Email(dto.getNewEmail()));
         User updatedUser = userRepositoryPort.save(user);
-        return userMapper.toDto(updatedUser);
+        return userMapper.toDto(updatedUser, getProfileTypesForUser(userId));
     }
 
     @Override
@@ -128,7 +130,7 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
 
         user.setAvatarUrl(dto.getAvatarUrl());
         User updatedUser = userRepositoryPort.save(user);
-        return userMapper.toDto(updatedUser);
+        return userMapper.toDto(updatedUser, getProfileTypesForUser(userId));
     }
 
     @Override
@@ -136,6 +138,20 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
     public UserResponseDto getProfile(Long userId) {
         User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        return userMapper.toDto(user);
+        return userMapper.toDto(user, getProfileTypesForUser(userId));
+    }
+
+    /**
+     * Método auxiliar para obtener los profile types de un usuario
+     * TODO: Implementar consulta real a la base de datos
+     */
+    private List<String> getProfileTypesForUser(Long userId) {
+        // Por ahora, hardcodeamos para el usuario 1 (BACKEND) y 2 (FULLSTACK)
+        if (userId == 1L) {
+            return List.of("BACKEND");
+        } else if (userId == 2L) {
+            return List.of("FULLSTACK");
+        }
+        return null;
     }
 } 

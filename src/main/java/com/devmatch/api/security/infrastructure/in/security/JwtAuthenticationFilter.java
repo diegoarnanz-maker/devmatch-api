@@ -54,11 +54,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authTokenRepositoryPort.extractToken(authHeader);
-            final String username = authTokenRepositoryPort.validateTokenAndGetUsername(jwt);
-            System.out.println("Token validated for username: " + username);
+            final Long userId = authTokenRepositoryPort.validateTokenAndGetUserId(jwt);
+            System.out.println("Token validated for userId: " + userId);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserById(userId);
                 System.out.println("User details loaded, authorities: " + userDetails.getAuthorities());
                 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -70,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 System.out.println("Authentication set in context successfully");
             } else {
-                System.out.println("Username is null or authentication already exists");
+                System.out.println("UserId is null or authentication already exists");
             }
         } catch (Exception e) {
             logger.error("No se pudo establecer la autenticación del usuario", e);
