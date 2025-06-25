@@ -1,8 +1,5 @@
 package com.devmatch.api.role.domain.model;
 
-import lombok.Getter;
-
-@Getter
 public class Role {
     private final Long id;
     private final String name;

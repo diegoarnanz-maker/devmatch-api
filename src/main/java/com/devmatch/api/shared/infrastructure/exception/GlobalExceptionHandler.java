@@ -1,5 +1,8 @@
 package com.devmatch.api.shared.infrastructure.exception;
 
+import com.devmatch.api.project.domain.exception.ProjectNotFoundException;
+import com.devmatch.api.project.domain.exception.ProjectOperationNotAllowedException;
+import com.devmatch.api.project.domain.exception.ProjectLimitExceededException;
 import com.devmatch.api.role.domain.exception.RoleAlreadyExistsException;
 import com.devmatch.api.role.domain.exception.RoleInUseException;
 import com.devmatch.api.role.domain.exception.RoleNotFoundException;
@@ -196,6 +199,54 @@ public class GlobalExceptionHandler {
         
         log.error("Error interno del servidor", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de proyectos no encontrados
+     */
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProjectNotFoundException(ProjectNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.NOT_FOUND.value(),
+            "Proyecto no encontrado",
+            ex.getMessage()
+        );
+        
+        log.warn("Proyecto no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de operaciones no permitidas en proyectos
+     */
+    @ExceptionHandler(ProjectOperationNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleProjectOperationNotAllowedException(ProjectOperationNotAllowedException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.FORBIDDEN.value(),
+            "Operación no permitida",
+            ex.getMessage()
+        );
+        
+        log.warn("Operación no permitida en proyecto: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de límite de proyectos excedido
+     */
+    @ExceptionHandler(ProjectLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleProjectLimitExceededException(ProjectLimitExceededException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.BAD_REQUEST.value(),
+            "Límite de proyectos excedido",
+            ex.getMessage()
+        );
+        
+        log.warn("Límite de proyectos excedido: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     /**

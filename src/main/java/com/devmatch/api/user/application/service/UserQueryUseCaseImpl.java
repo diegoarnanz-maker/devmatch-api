@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Implementación del caso de uso UserQueryUseCase.
  * Este servicio maneja todas las operaciones de consulta relacionadas con usuarios.
@@ -27,8 +29,22 @@ public class UserQueryUseCaseImpl implements UserQueryUseCase {
     @Transactional(readOnly = true)
     public UserResponseDto findUserById(Long userId) {
         return userRepositoryPort.findById(userId)
-                .map(userMapper::toDto)
+                .map(user -> userMapper.toDto(user, getProfileTypesForUser(userId)))
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+    }
+
+    /**
+     * Método auxiliar para obtener los profile types de un usuario
+     * TODO: Implementar consulta real a la base de datos
+     */
+    private List<String> getProfileTypesForUser(Long userId) {
+        // Por ahora, hardcodeamos para el usuario 1 (BACKEND) y 2 (FULLSTACK)
+        if (userId == 1L) {
+            return List.of("BACKEND");
+        } else if (userId == 2L) {
+            return List.of("FULLSTACK");
+        }
+        return null;
     }
 
     @Override
