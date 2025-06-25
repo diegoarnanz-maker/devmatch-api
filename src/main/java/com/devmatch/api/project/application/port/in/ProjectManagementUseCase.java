@@ -69,9 +69,9 @@ public interface ProjectManagementUseCase {
 
     /**
      * Obtiene un proyecto público específico por su ID
-     * Solo devuelve proyectos que sean públicos y activos
-     * @param projectId ID del proyecto público
-     * @return DTO con los datos del proyecto público
+     * Solo proyectos públicos y activos
+     * @param projectId ID del proyecto
+     * @return Proyecto público
      */
     ProjectResponseDto getPublicProjectById(Long projectId);
 }

@@ -6,11 +6,11 @@ import com.devmatch.api.user.application.dto.profile.UserChangeEmailRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserChangeAvatarRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.port.in.ProfileUseCase;
+import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,10 +29,9 @@ public class ProfileController {
      * @return Perfil del usuario autenticado
      */
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getMyProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        return ResponseEntity.ok(profileUseCase.getMyProfile(username));
+    public ResponseEntity<UserResponseDto> getMyProfile(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        return ResponseEntity.ok(profileUseCase.getMyProfile(userPrincipal.getUsername()));
     }
 
     /**

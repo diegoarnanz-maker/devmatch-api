@@ -24,19 +24,19 @@ import lombok.RequiredArgsConstructor;
 public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
     private final ProjectRepositoryPort projectRepositoryPort;
-    private final ProjectMapper projectMapper;
     private final ProjectDomainService projectDomainService;
+    private final ProjectMapper projectMapper;
 
     @Override
     public ProjectResponseDto createProject(ProjectRequestDto request, Long ownerId) {
 
         long userProjectCount = projectRepositoryPort.countByOwnerId(ownerId);
         projectDomainService.validateProjectCreation(ownerId, userProjectCount);
-        
+
         Project project = projectMapper.toDomain(request, ownerId);
-        
+
         Project savedProject = projectRepositoryPort.save(project);
-        
+
         return projectMapper.toResponseDto(savedProject);
     }
 
@@ -44,15 +44,15 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto request, Long userId) {
         Project existingProject = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
-        
+
         if (!existingProject.canBeEditedBy(userId)) {
             throw new ProjectOperationNotAllowedException(projectId, userId, "editar");
         }
-        
+
         Project updatedProject = projectMapper.updateProjectFromDto(existingProject, request);
-        
+
         Project savedProject = projectRepositoryPort.save(updatedProject);
-        
+
         return projectMapper.toResponseDto(savedProject);
     }
 
@@ -61,15 +61,15 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project existingProject = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
-        
+
         if (!existingProject.canBeEditedBy(userId)) {
             throw new ProjectOperationNotAllowedException(projectId, userId, "cambiar estado");
         }
-        
+
         Project updatedProject = existingProject.updateStatus(newStatus);
-        
+
         Project savedProject = projectRepositoryPort.save(updatedProject);
-        
+
         return projectMapper.toResponseDto(savedProject);
     }
 
@@ -78,13 +78,13 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project existingProject = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
-        
+
         if (!existingProject.canBeEditedBy(userId)) {
             throw new ProjectOperationNotAllowedException(projectId, userId, "desactivar");
         }
-        
+
         Project deactivatedProject = existingProject.deactivate();
-        
+
         projectRepositoryPort.save(deactivatedProject);
     }
 
@@ -93,13 +93,13 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project existingProject = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
-        
+
         if (!existingProject.canBeEditedBy(userId)) {
             throw new ProjectOperationNotAllowedException(projectId, userId, "eliminar");
         }
-        
+
         Project deletedProject = existingProject.softDelete();
-        
+
         projectRepositoryPort.save(deletedProject);
     }
 
@@ -108,7 +108,7 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     public List<ProjectResponseDto> getProjectsByOwner(Long ownerId) {
 
         List<Project> projects = projectRepositoryPort.findByOwnerId(ownerId);
-        
+
         return projectMapper.toResponseDtoList(projects);
     }
 
@@ -118,11 +118,11 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project project = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
-        
+
         if (!project.isVisibleTo(userId)) {
             throw new ProjectOperationNotAllowedException(projectId, userId, "ver");
         }
-        
+
         return projectMapper.toResponseDto(project);
     }
 
@@ -132,14 +132,13 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project project = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
-        
+
         // Verificar que el proyecto sea público y activo
         if (!project.isPublic() || !project.isActive()) {
             throw new ProjectOperationNotAllowedException(
-                "El proyecto con ID " + projectId + " no está disponible públicamente"
-            );
+                    "El proyecto con ID " + projectId + " no está disponible públicamente");
         }
-        
+
         return projectMapper.toResponseDto(project);
     }
 }

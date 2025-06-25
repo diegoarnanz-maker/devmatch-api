@@ -132,6 +132,14 @@ public class Project {
         return this.status == ProjectStatus.OPEN && this.isActive && !this.isDeleted;
     }
 
+    public boolean isFull(Integer currentTeamSize) {
+        return currentTeamSize >= maxTeamSize;
+    }
+
+    public boolean isOwner(Long userId) {
+        return this.ownerId.equals(userId);
+    }
+
     public Project updateStatus(ProjectStatus newStatus) {
         return new Project(
             this.id, this.title, this.description, newStatus, this.ownerId,

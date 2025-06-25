@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +18,7 @@ import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
+import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -64,25 +64,10 @@ public class ProjectController {
     @GetMapping("/{projectId}")
     public ResponseEntity<ProjectResponseDto> getProject(
             @PathVariable Long projectId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
-        ProjectResponseDto response = projectManagementUseCase.getProjectById(projectId, userId);
+        ProjectResponseDto response = projectManagementUseCase.getProjectById(projectId, userPrincipal.getUserId());
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Aplica a un proyecto (solo usuarios logeados, no propietarios)
-     */
-    @PostMapping("/apply/{projectId}")
-    public ResponseEntity<Void> applyToProject(
-            @PathVariable Long projectId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        
-        Long userId = Long.parseLong(userDetails.getUsername());
-        // TODO: Implementar lógica de aplicación a proyectos
-        // projectManagementUseCase.applyToProject(projectId, userId);
-        return ResponseEntity.ok().build();
     }
 
     /**
@@ -90,10 +75,9 @@ public class ProjectController {
      */
     @GetMapping("/my-projects")
     public ResponseEntity<List<ProjectResponseDto>> getMyProjects(
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long ownerId = Long.parseLong(userDetails.getUsername());
-        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(ownerId);
+        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(userPrincipal.getUserId());
         return ResponseEntity.ok(projects);
     }
 
@@ -106,10 +90,9 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<ProjectResponseDto> createProject(
             @RequestBody @Valid ProjectRequestDto request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long ownerId = Long.parseLong(userDetails.getUsername());
-        ProjectResponseDto response = projectManagementUseCase.createProject(request, ownerId);
+        ProjectResponseDto response = projectManagementUseCase.createProject(request, userPrincipal.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -121,10 +104,9 @@ public class ProjectController {
     public ResponseEntity<ProjectResponseDto> updateProject(
             @PathVariable Long projectId,
             @RequestBody @Valid ProjectRequestDto request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
-        ProjectResponseDto response = projectManagementUseCase.updateProject(projectId, request, userId);
+        ProjectResponseDto response = projectManagementUseCase.updateProject(projectId, request, userPrincipal.getUserId());
         return ResponseEntity.ok(response);
     }
 
@@ -136,10 +118,9 @@ public class ProjectController {
     public ResponseEntity<ProjectResponseDto> changeProjectStatus(
             @PathVariable Long projectId,
             @RequestBody ProjectStatus newStatus,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
-        ProjectResponseDto response = projectManagementUseCase.changeProjectStatus(projectId, newStatus, userId);
+        ProjectResponseDto response = projectManagementUseCase.changeProjectStatus(projectId, newStatus, userPrincipal.getUserId());
         return ResponseEntity.ok(response);
     }
 
@@ -150,10 +131,9 @@ public class ProjectController {
     @PutMapping("/deactivate/{projectId}")
     public ResponseEntity<Void> deactivateProject(
             @PathVariable Long projectId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
-        projectManagementUseCase.deactivateProject(projectId, userId);
+        projectManagementUseCase.deactivateProject(projectId, userPrincipal.getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -164,10 +144,9 @@ public class ProjectController {
     @DeleteMapping("/{projectId}")
     public ResponseEntity<Void> deleteProject(
             @PathVariable Long projectId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
-        projectManagementUseCase.deleteProject(projectId, userId);
+        projectManagementUseCase.deleteProject(projectId, userPrincipal.getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -178,9 +157,8 @@ public class ProjectController {
     @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<ProjectResponseDto>> getProjectsByOwner(
             @PathVariable Long ownerId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
         // TODO: Implementar lógica para mostrar solo proyectos públicos
         // o proyectos del usuario autenticado
         List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(ownerId);

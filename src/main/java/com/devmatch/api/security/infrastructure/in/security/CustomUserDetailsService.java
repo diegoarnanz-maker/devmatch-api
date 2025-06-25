@@ -2,6 +2,7 @@ package com.devmatch.api.security.infrastructure.in.security;
 
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.model.User;
+import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
 
-        return new org.springframework.security.core.userdetails.User(
+        return new UserPrincipalAdapter(
+            user.getId(),
             user.getUsername().getValue(),
             user.getPasswordHash().getValue(),
             authorities
@@ -37,7 +39,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
 
-        return new org.springframework.security.core.userdetails.User(
+        return new UserPrincipalAdapter(
+            user.getId(),
             user.getUsername().getValue(),
             user.getPasswordHash().getValue(),
             authorities
