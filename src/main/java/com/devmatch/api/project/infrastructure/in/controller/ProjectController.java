@@ -114,7 +114,7 @@ public class ProjectController {
      * Cambia el estado de un proyecto
      * Solo propietario del proyecto
      */
-    @PutMapping("/status/{projectId}")
+    @PutMapping("/{projectId}/status")
     public ResponseEntity<ProjectResponseDto> changeProjectStatus(
             @PathVariable Long projectId,
             @RequestBody ProjectStatus newStatus,
@@ -128,7 +128,7 @@ public class ProjectController {
      * Desactiva un proyecto (soft deactivate)
      * Solo propietario del proyecto
      */
-    @PutMapping("/deactivate/{projectId}")
+    @PutMapping("/{projectId}/deactivate")
     public ResponseEntity<Void> deactivateProject(
             @PathVariable Long projectId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
