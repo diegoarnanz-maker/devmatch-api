@@ -40,12 +40,12 @@ public class RoleController {
     /**
      * Obtiene los detalles de un rol específico por su ID.
      * 
-     * @param id ID del rol a consultar
+     * @param roleId ID del rol a consultar
      * @return Detalles del rol solicitado
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<RoleResponseDto> getRoleById(@PathVariable Long id) {
-        RoleResponseDto role = roleManagementUseCase.getRoleById(id);
+    @GetMapping("/{roleId}")
+    public ResponseEntity<RoleResponseDto> getRoleById(@PathVariable Long roleId) {
+        RoleResponseDto role = roleManagementUseCase.getRoleById(roleId);
         return ResponseEntity.ok(role);
     }
 
@@ -64,15 +64,15 @@ public class RoleController {
     /**
      * Actualiza los datos de un rol existente.
      * 
-     * @param id      ID del rol a actualizar
+     * @param roleId  ID del rol a actualizar
      * @param request DTO con los nuevos datos del rol (name, description)
      * @return Rol actualizado con los nuevos datos
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{roleId}")
     public ResponseEntity<RoleResponseDto> updateRole(
-            @PathVariable Long id,
+            @PathVariable Long roleId,
             @Valid @RequestBody RoleRequestDto request) {
-        RoleResponseDto updatedRole = roleManagementUseCase.updateRole(id, request);
+        RoleResponseDto updatedRole = roleManagementUseCase.updateRole(roleId, request);
         return ResponseEntity.ok(updatedRole);
     }
 
@@ -80,12 +80,12 @@ public class RoleController {
      * Elimina un rol del sistema.
      * Solo se puede eliminar si no está siendo utilizado por ningún usuario.
      * 
-     * @param id ID del rol a eliminar
+     * @param roleId ID del rol a eliminar
      * @return Respuesta vacía indicando que la operación fue exitosa
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
-        roleManagementUseCase.deleteRole(id);
+    @DeleteMapping("/{roleId}")
+    public ResponseEntity<Void> deleteRole(@PathVariable Long roleId) {
+        roleManagementUseCase.deleteRole(roleId);
         return ResponseEntity.noContent().build();
     }
 }

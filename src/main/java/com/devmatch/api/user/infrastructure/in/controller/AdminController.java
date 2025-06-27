@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
  * para gestionar usuarios del sistema.
  */
 @RestController
-@RequestMapping("/api/v1/users/admin")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
@@ -37,7 +37,7 @@ public class AdminController {
      * @param pageable Parámetros de paginación y ordenación
      * @return Página de usuarios que coinciden con los criterios especificados
      */
-    @PostMapping("/search")
+    @PostMapping("/admin/search")
     public ResponseEntity<Page<UserResponseDto>> searchUsers(@RequestBody UserSearchCriteriaDto criteria, Pageable pageable) {
         return ResponseEntity.ok(userQueryUseCase.searchUsers(criteria, pageable));
     }
@@ -48,7 +48,7 @@ public class AdminController {
      * @param userId ID del usuario
      * @return Detalles del usuario
      */
-    @GetMapping("/{userId}")
+    @GetMapping("/{userId}/admin")
     public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable Long userId) {
         return ResponseEntity.ok(adminUserManagementUseCase.getUserDetailsForAdmin(userId));
     }
@@ -60,7 +60,7 @@ public class AdminController {
      * @param request DTO con el nuevo rol a asignar
      * @return Usuario actualizado con el nuevo rol
      */
-    @PutMapping("/role/{userId}")
+    @PutMapping("/{userId}/admin/role")
     public ResponseEntity<UserResponseDto> updateUserRole(
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRoleRequestDto request) {
@@ -74,7 +74,7 @@ public class AdminController {
      * @param active true para activar, false para desactivar
      * @return Usuario actualizado
      */
-    @PutMapping("/status/{userId}")
+    @PutMapping("/{userId}/admin/status")
     public ResponseEntity<UserResponseDto> updateUserStatus(
             @PathVariable Long userId,
             @RequestParam boolean active) {
@@ -87,7 +87,7 @@ public class AdminController {
      * @param userId ID del usuario a eliminar
      * @return Usuario eliminado (con isDeleted = true e isActive = false)
      */
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{userId}/admin")
     public ResponseEntity<UserResponseDto> deleteUser(@PathVariable Long userId) {
         adminUserManagementUseCase.deleteUser(userId);
         // Obtener el usuario actualizado para devolverlo

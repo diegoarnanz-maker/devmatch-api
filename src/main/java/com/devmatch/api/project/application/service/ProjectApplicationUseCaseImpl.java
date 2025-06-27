@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devmatch.api.project.application.dto.ProjectApplicationResponseDto;
+import com.devmatch.api.project.application.mapper.ProjectApplicationMapper;
 import com.devmatch.api.project.application.port.in.ProjectApplicationUseCase;
 import com.devmatch.api.project.application.port.out.ProjectRepositoryPort;
 import com.devmatch.api.project.application.port.out.ProjectMemberRepositoryPort;
@@ -29,6 +30,7 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
     private final UserRepositoryPort userRepositoryPort;
     private final ProjectMemberRepositoryPort projectMemberRepositoryPort;
     private final ProjectApplicationRepositoryPort projectApplicationRepositoryPort;
+    private final ProjectApplicationMapper projectApplicationMapper;
 
     @Override
     public void applyToProject(Long projectId, Long userId, String motivationMessage) {
@@ -73,21 +75,103 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProjectApplicationResponseDto> getProjectApplications(Long projectId, Long ownerId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getProjectApplications'");
+        // 1. Validar que el proyecto existe
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        // 2. Validar que el usuario es el propietario del proyecto
+        if (!project.isOwner(ownerId)) {
+            throw new ProjectOperationNotAllowedException(
+                    "El usuario con ID " + ownerId + " no es el propietario del proyecto con ID " + projectId);
+        }
+        
+        // 3. Obtener todas las aplicaciones del proyecto
+        List<ProjectApplication> applications = projectApplicationRepositoryPort.findByProjectId(projectId);
+        
+        // 4. Convertir a DTOs y retornar
+        return projectApplicationMapper.toResponseDtoList(applications);
     }
 
     @Override
     public void acceptApplication(Long projectId, Long applicationId, Long ownerId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'acceptApplication'");
+        // 1. Validar que el proyecto existe
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        // 2. Validar que el usuario es el propietario del proyecto
+        if (!project.isOwner(ownerId)) {
+            throw new ProjectOperationNotAllowedException(
+                    "El usuario con ID " + ownerId + " no es el propietario del proyecto con ID " + projectId);
+        }
+        
+        // 3. Validar que la aplicación existe y pertenece al proyecto
+        ProjectApplication application = projectApplicationRepositoryPort.findById(applicationId)
+                .orElseThrow(() -> new ProjectOperationNotAllowedException(
+                        "Aplicación con ID " + applicationId + " no encontrada"));
+        
+        if (!application.getProjectId().equals(projectId)) {
+            throw new ProjectOperationNotAllowedException(
+                    "La aplicación con ID " + applicationId + " no pertenece al proyecto con ID " + projectId);
+        }
+        
+        // 4. Validar que la aplicación está pendiente
+        if (!application.isPending()) {
+            throw new ProjectOperationNotAllowedException(
+                    "La aplicación con ID " + applicationId + " ya no está pendiente");
+        }
+        
+        // 5. Validar que el proyecto no está lleno
+        int currentTeamSize = projectMemberRepositoryPort.countActiveMembersByProjectId(projectId);
+        if (project.isFull(currentTeamSize)) {
+            throw new ProjectOperationNotAllowedException(
+                    "El proyecto con ID " + projectId + " ya está lleno");
+        }
+        
+        // 6. Aceptar la aplicación
+        application.accept();
+        
+        // 7. Guardar la aplicación actualizada
+        projectApplicationRepositoryPort.save(application);
+        
+        // TODO: Agregar al usuario como miembro del proyecto
+        // projectMemberRepositoryPort.addMember(projectId, application.getUserId());
     }
 
     @Override
     public void rejectApplication(Long projectId, Long applicationId, Long ownerId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rejectApplication'");
+        // 1. Validar que el proyecto existe
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        // 2. Validar que el usuario es el propietario del proyecto
+        if (!project.isOwner(ownerId)) {
+            throw new ProjectOperationNotAllowedException(
+                    "El usuario con ID " + ownerId + " no es el propietario del proyecto con ID " + projectId);
+        }
+        
+        // 3. Validar que la aplicación existe y pertenece al proyecto
+        ProjectApplication application = projectApplicationRepositoryPort.findById(applicationId)
+                .orElseThrow(() -> new ProjectOperationNotAllowedException(
+                        "Aplicación con ID " + applicationId + " no encontrada"));
+        
+        if (!application.getProjectId().equals(projectId)) {
+            throw new ProjectOperationNotAllowedException(
+                    "La aplicación con ID " + applicationId + " no pertenece al proyecto con ID " + projectId);
+        }
+        
+        // 4. Validar que la aplicación está pendiente
+        if (!application.isPending()) {
+            throw new ProjectOperationNotAllowedException(
+                    "La aplicación con ID " + applicationId + " ya no está pendiente");
+        }
+        
+        // 5. Rechazar la aplicación
+        application.reject();
+        
+        // 6. Guardar la aplicación actualizada
+        projectApplicationRepositoryPort.save(application);
     }
 
 }

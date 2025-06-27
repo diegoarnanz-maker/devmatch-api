@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * Controlador REST para la gestión del perfil de usuario.
  */
 @RestController
-@RequestMapping("/api/v1/users/profile")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class ProfileController {
 
@@ -28,7 +28,7 @@ public class ProfileController {
      *
      * @return Perfil del usuario autenticado
      */
-    @GetMapping("/me")
+    @GetMapping("/profile/me")
     public ResponseEntity<UserResponseDto> getMyProfile(
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         return ResponseEntity.ok(profileUseCase.getMyProfile(userPrincipal.getUsername()));
@@ -40,7 +40,7 @@ public class ProfileController {
      * @param userId ID del usuario
      * @return Perfil del usuario
      */
-    @GetMapping("/{userId}")
+    @GetMapping("/{userId}/profile")
     public ResponseEntity<UserResponseDto> getProfile(@PathVariable Long userId) {
         return ResponseEntity.ok(profileUseCase.getProfile(userId));
     }
@@ -52,7 +52,7 @@ public class ProfileController {
      * @param dto Datos de actualización del perfil
      * @return Usuario actualizado
      */
-    @PutMapping("/{userId}")
+    @PutMapping("/{userId}/profile")
     public ResponseEntity<UserResponseDto> updateProfile(
             @PathVariable Long userId,
             @Valid @RequestBody UserUpdateProfileRequestDto dto) {
@@ -66,7 +66,7 @@ public class ProfileController {
      * @param dto Datos para el cambio de contraseña
      * @return Respuesta vacía con código 204
      */
-    @PutMapping("/password/{userId}")
+    @PutMapping("/{userId}/profile/password")
     public ResponseEntity<Void> changePassword(
             @PathVariable Long userId,
             @Valid @RequestBody UserChangePasswordRequestDto dto) {
@@ -81,7 +81,7 @@ public class ProfileController {
      * @param dto Datos para el cambio de email
      * @return Usuario actualizado
      */
-    @PutMapping("/email/{userId}")
+    @PutMapping("/{userId}/profile/email")
     public ResponseEntity<UserResponseDto> changeEmail(
             @PathVariable Long userId,
             @Valid @RequestBody UserChangeEmailRequestDto dto) {
@@ -95,7 +95,7 @@ public class ProfileController {
      * @param dto Datos para el cambio de avatar
      * @return Usuario actualizado
      */
-    @PutMapping("/avatar/{userId}")
+    @PutMapping("/{userId}/profile/avatar")
     public ResponseEntity<UserResponseDto> changeAvatar(
             @PathVariable Long userId,
             @Valid @RequestBody UserChangeAvatarRequestDto dto) {
