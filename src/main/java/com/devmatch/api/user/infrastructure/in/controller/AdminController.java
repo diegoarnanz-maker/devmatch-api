@@ -3,8 +3,13 @@ package com.devmatch.api.user.infrastructure.in.controller;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.dto.admin.UpdateUserRoleRequestDto;
 import com.devmatch.api.user.application.dto.admin.UserSearchCriteriaDto;
+import com.devmatch.api.user.application.dto.admin.AdminProfileTypeRequestDto;
+import com.devmatch.api.user.application.dto.admin.AdminProfileTypeResponseDto;
+import com.devmatch.api.user.application.dto.profile.ProfileTypeResponseDto;
+import com.devmatch.api.user.application.dto.profile.UserProfileTypeRequestDto;
 import com.devmatch.api.user.application.port.in.AdminUserManagementUseCase;
 import com.devmatch.api.user.application.port.in.UserQueryUseCase;
+import com.devmatch.api.user.application.port.in.AdminProfileTypeUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
 
 /**
  * Controlador para operaciones administrativas de usuarios.
@@ -28,6 +34,7 @@ public class AdminController {
 
     private final AdminUserManagementUseCase adminUserManagementUseCase;
     private final UserQueryUseCase userQueryUseCase;
+    private final AdminProfileTypeUseCase adminProfileTypeUseCase;
 
     /**
      * Busca usuarios por múltiples criterios opcionales, incluyendo estado.
@@ -93,5 +100,96 @@ public class AdminController {
         // Obtener el usuario actualizado para devolverlo
         UserResponseDto deletedUser = userQueryUseCase.findUserById(userId);
         return ResponseEntity.ok(deletedUser);
+    }
+
+    // ==============================================================================
+    // ENDPOINTS PARA GESTIÓN DE TIPOS DE PERFIL
+    // ==============================================================================
+
+    /**
+     * Obtiene todos los tipos de perfil disponibles en el sistema.
+     *
+     * @return Lista de todos los tipos de perfil
+     */
+    @GetMapping("/admin/profile-types")
+    public ResponseEntity<List<AdminProfileTypeResponseDto>> getAllProfileTypes() {
+        return ResponseEntity.ok(adminProfileTypeUseCase.getAllProfileTypes());
+    }
+
+    /**
+     * Crea un nuevo tipo de perfil en el sistema.
+     *
+     * @param request DTO con los datos del nuevo tipo de perfil
+     * @return Tipo de perfil creado
+     */
+    @PostMapping("/admin/profile-types")
+    public ResponseEntity<AdminProfileTypeResponseDto> createProfileType(
+            @Valid @RequestBody AdminProfileTypeRequestDto request) {
+        return ResponseEntity.ok(adminProfileTypeUseCase.createProfileType(request));
+    }
+
+    /**
+     * Modifica un tipo de perfil existente.
+     *
+     * @param id ID del tipo de perfil a modificar
+     * @param request DTO con los nuevos datos
+     * @return Tipo de perfil modificado
+     */
+    @PutMapping("/admin/profile-types/{id}")
+    public ResponseEntity<AdminProfileTypeResponseDto> updateProfileType(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminProfileTypeRequestDto request) {
+        return ResponseEntity.ok(adminProfileTypeUseCase.updateProfileType(id, request));
+    }
+
+    /**
+     * Elimina un tipo de perfil del sistema (soft delete).
+     *
+     * @param id ID del tipo de perfil a eliminar
+     * @return Respuesta vacía con código 204
+     */
+    @DeleteMapping("/admin/profile-types/{id}")
+    public ResponseEntity<Void> deleteProfileType(@PathVariable Long id) {
+        adminProfileTypeUseCase.deleteProfileType(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Obtiene los tipos de perfil de un usuario específico.
+     *
+     * @param userId ID del usuario
+     * @return Lista de tipos de perfil del usuario
+     */
+    @GetMapping("/admin/users/{userId}/profile-types")
+    public ResponseEntity<List<ProfileTypeResponseDto>> getUserProfileTypes(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminProfileTypeUseCase.getUserProfileTypes(userId));
+    }
+
+    /**
+     * Agrega un tipo de perfil a un usuario específico.
+     *
+     * @param userId ID del usuario
+     * @param request DTO con el ID del tipo de perfil a agregar
+     * @return Usuario actualizado
+     */
+    @PostMapping("/admin/users/{userId}/profile-types")
+    public ResponseEntity<UserResponseDto> addProfileTypeToUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody UserProfileTypeRequestDto request) {
+        return ResponseEntity.ok(adminProfileTypeUseCase.addProfileTypeToUser(userId, request));
+    }
+
+    /**
+     * Remueve un tipo de perfil de un usuario específico.
+     *
+     * @param userId ID del usuario
+     * @param profileTypeId ID del tipo de perfil a remover
+     * @return Usuario actualizado
+     */
+    @DeleteMapping("/admin/users/{userId}/profile-types/{profileTypeId}")
+    public ResponseEntity<UserResponseDto> removeProfileTypeFromUser(
+            @PathVariable Long userId,
+            @PathVariable Long profileTypeId) {
+        return ResponseEntity.ok(adminProfileTypeUseCase.removeProfileTypeFromUser(userId, profileTypeId));
     }
 } 

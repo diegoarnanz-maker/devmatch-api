@@ -164,4 +164,17 @@ public class ProjectController {
         List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(ownerId);
         return ResponseEntity.ok(projects);
     }
+
+    /**
+     * Obtiene los miembros de un proyecto
+     * Solo propietario del proyecto
+     */
+    @GetMapping("/{projectId}/members")
+    public ResponseEntity<List<ProjectResponseDto.ProjectMemberDto>> getProjectMembers(
+            @PathVariable Long projectId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        List<ProjectResponseDto.ProjectMemberDto> members = projectManagementUseCase.getProjectMembers(projectId, userPrincipal.getUserId());
+        return ResponseEntity.ok(members);
+    }
 }

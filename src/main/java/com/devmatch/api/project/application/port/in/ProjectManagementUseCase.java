@@ -74,4 +74,12 @@ public interface ProjectManagementUseCase {
      * @return Proyecto público
      */
     ProjectResponseDto getPublicProjectById(Long projectId);
+
+    /**
+     * Obtiene los miembros de un proyecto
+     * @param projectId ID del proyecto
+     * @param userId ID del usuario que solicita la información
+     * @return Lista de miembros del proyecto
+     */
+    List<ProjectResponseDto.ProjectMemberDto> getProjectMembers(Long projectId, Long userId);
 }

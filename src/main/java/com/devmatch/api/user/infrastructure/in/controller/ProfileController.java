@@ -4,14 +4,19 @@ import com.devmatch.api.user.application.dto.profile.UserUpdateProfileRequestDto
 import com.devmatch.api.user.application.dto.profile.UserChangePasswordRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserChangeEmailRequestDto;
 import com.devmatch.api.user.application.dto.profile.UserChangeAvatarRequestDto;
+import com.devmatch.api.user.application.dto.profile.ProfileTypeResponseDto;
+import com.devmatch.api.user.application.dto.profile.UserProfileTypeRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.port.in.ProfileUseCase;
+import com.devmatch.api.user.application.port.in.UserProfileTypeUseCase;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controlador REST para la gestión del perfil de usuario.
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
 
     private final ProfileUseCase profileUseCase;
+    private final UserProfileTypeUseCase userProfileTypeUseCase;
 
     /**
      * Obtiene el perfil del usuario autenticado.
@@ -100,5 +106,45 @@ public class ProfileController {
             @PathVariable Long userId,
             @Valid @RequestBody UserChangeAvatarRequestDto dto) {
         return ResponseEntity.ok(profileUseCase.changeAvatar(userId, dto));
+    }
+
+    /**
+     * Obtiene los tipos de perfil del usuario autenticado.
+     *
+     * @param userPrincipal Usuario autenticado
+     * @return Lista de tipos de perfil del usuario
+     */
+    @GetMapping("/profile/types")
+    public ResponseEntity<List<ProfileTypeResponseDto>> getMyProfileTypes(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        return ResponseEntity.ok(userProfileTypeUseCase.getUserProfileTypes(userPrincipal.getUsername()));
+    }
+
+    /**
+     * Agrega un tipo de perfil al usuario autenticado.
+     *
+     * @param userPrincipal Usuario autenticado
+     * @param request DTO con el ID del tipo de perfil a agregar
+     * @return Usuario actualizado
+     */
+    @PostMapping("/profile/types")
+    public ResponseEntity<UserResponseDto> addProfileType(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            @Valid @RequestBody UserProfileTypeRequestDto request) {
+        return ResponseEntity.ok(userProfileTypeUseCase.addProfileType(userPrincipal.getUsername(), request));
+    }
+
+    /**
+     * Remueve un tipo de perfil del usuario autenticado.
+     *
+     * @param userPrincipal Usuario autenticado
+     * @param profileTypeId ID del tipo de perfil a remover
+     * @return Usuario actualizado
+     */
+    @DeleteMapping("/profile/types/{profileTypeId}")
+    public ResponseEntity<UserResponseDto> removeProfileType(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            @PathVariable Long profileTypeId) {
+        return ResponseEntity.ok(userProfileTypeUseCase.removeProfileType(userPrincipal.getUsername(), profileTypeId));
     }
 } 
