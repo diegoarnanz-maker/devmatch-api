@@ -54,16 +54,8 @@ public interface AdminProfileTypeUseCase {
      *
      * @param userId ID del usuario
      * @param request DTO con el ID del tipo de perfil a agregar
-     * @return Usuario actualizado
+     * @return Usuario actualizado con el nuevo tipo de perfil
      */
     UserResponseDto addProfileTypeToUser(Long userId, UserProfileTypeRequestDto request);
     
-    /**
-     * Remueve un tipo de perfil de un usuario específico.
-     *
-     * @param userId ID del usuario
-     * @param profileTypeId ID del tipo de perfil a remover
-     * @return Usuario actualizado
-     */
-    UserResponseDto removeProfileTypeFromUser(Long userId, Long profileTypeId);
 } 
