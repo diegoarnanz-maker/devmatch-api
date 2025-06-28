@@ -10,11 +10,14 @@ import com.devmatch.api.project.application.dto.ProjectResponseDto;
 import com.devmatch.api.project.application.mapper.ProjectMapper;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.project.application.port.out.ProjectRepositoryPort;
+import com.devmatch.api.project.application.port.out.ProjectMemberRepositoryPort;
 import com.devmatch.api.project.domain.exception.ProjectNotFoundException;
 import com.devmatch.api.project.domain.exception.ProjectOperationNotAllowedException;
 import com.devmatch.api.project.domain.model.Project;
+import com.devmatch.api.project.domain.model.ProjectMember;
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 import com.devmatch.api.project.domain.service.ProjectDomainService;
+import com.devmatch.api.user.application.port.in.UserQueryUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +29,8 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     private final ProjectRepositoryPort projectRepositoryPort;
     private final ProjectDomainService projectDomainService;
     private final ProjectMapper projectMapper;
+    private final ProjectMemberRepositoryPort projectMemberRepositoryPort;
+    private final UserQueryUseCase userQueryUseCase;
 
     @Override
     public ProjectResponseDto createProject(ProjectRequestDto request, Long ownerId) {
@@ -140,5 +145,49 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
         }
 
         return projectMapper.toResponseDto(project);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectResponseDto.ProjectMemberDto> getProjectMembers(Long projectId, Long userId) {
+        // 1. Validar que el proyecto existe
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        // 2. Validar que el usuario puede ver el proyecto
+        if (!project.isVisibleTo(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "ver miembros");
+        }
+        
+        // 3. Obtener los miembros del proyecto
+        List<ProjectMember> members = projectMemberRepositoryPort.getActiveMembersByProjectId(projectId);
+        
+        // 4. Convertir a DTOs
+        return members.stream()
+                .map(member -> {
+                    try {
+                        var user = userQueryUseCase.findUserById(member.getUserId());
+                        String profileType = null;
+                        if (user.getProfileTypes() != null && !user.getProfileTypes().isEmpty()) {
+                            profileType = user.getProfileTypes().get(0);
+                        }
+                        
+                        return new ProjectResponseDto.ProjectMemberDto(
+                                member.getUserId(),
+                                user.getUsername(),
+                                member.getMemberRole(),
+                                profileType
+                        );
+                    } catch (Exception e) {
+                        // Si no se puede obtener la información del usuario, crear DTO con datos básicos
+                        return new ProjectResponseDto.ProjectMemberDto(
+                                member.getUserId(),
+                                "Usuario " + member.getUserId(),
+                                member.getMemberRole(),
+                                null
+                        );
+                    }
+                })
+                .toList();
     }
 }

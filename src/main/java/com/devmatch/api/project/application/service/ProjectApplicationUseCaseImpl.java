@@ -75,7 +75,6 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ProjectApplicationResponseDto> getProjectApplications(Long projectId, Long ownerId) {
         // 1. Validar que el proyecto existe
         Project project = projectRepositoryPort.findById(projectId)
@@ -90,7 +89,34 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         // 3. Obtener todas las aplicaciones del proyecto
         List<ProjectApplication> applications = projectApplicationRepositoryPort.findByProjectId(projectId);
         
-        // 4. Convertir a DTOs y retornar
+        // 4. Marcar las aplicaciones como vistas por el owner y guardarlas
+        List<ProjectApplication> updatedApplications = applications.stream()
+                .map(application -> {
+                    if (application.isSeenByOwner()) {
+                        // Si ya está marcada como vista, no la modificamos
+                        return application;
+                    }
+                    // Marcar como vista y guardar
+                    ProjectApplication markedApplication = application.markAsSeen();
+                    return projectApplicationRepositoryPort.save(markedApplication);
+                })
+                .toList();
+        
+        // 5. Convertir a DTOs y retornar
+        return projectApplicationMapper.toResponseDtoList(updatedApplications);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectApplicationResponseDto> getUserApplications(Long userId) {
+        // 1. Validar que el usuario existe
+        userRepositoryPort.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
+        
+        // 2. Obtener todas las aplicaciones del usuario
+        List<ProjectApplication> applications = projectApplicationRepositoryPort.findByUserId(userId);
+        
+        // 3. Convertir a DTOs y retornar
         return projectApplicationMapper.toResponseDtoList(applications);
     }
 
@@ -130,13 +156,13 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         }
         
         // 6. Aceptar la aplicación
-        application.accept();
+        ProjectApplication acceptedApplication = application.accept();
         
         // 7. Guardar la aplicación actualizada
-        projectApplicationRepositoryPort.save(application);
+        projectApplicationRepositoryPort.save(acceptedApplication);
         
-        // TODO: Agregar al usuario como miembro del proyecto
-        // projectMemberRepositoryPort.addMember(projectId, application.getUserId());
+        // 8. Agregar al usuario como miembro del proyecto
+        projectMemberRepositoryPort.addMember(projectId, acceptedApplication.getUserId(), "DEVELOPER");
     }
 
     @Override
@@ -168,10 +194,10 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         }
         
         // 5. Rechazar la aplicación
-        application.reject();
+        ProjectApplication rejectedApplication = application.reject();
         
         // 6. Guardar la aplicación actualizada
-        projectApplicationRepositoryPort.save(application);
+        projectApplicationRepositoryPort.save(rejectedApplication);
     }
 
 }

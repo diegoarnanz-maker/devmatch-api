@@ -7,6 +7,7 @@ public interface ProjectApplicationUseCase {
 
     void applyToProject(Long projectId, Long userId, String motivationMessage);
     List<ProjectApplicationResponseDto> getProjectApplications(Long projectId, Long ownerId);
+    List<ProjectApplicationResponseDto> getUserApplications(Long userId);
     void acceptApplication(Long projectId, Long applicationId, Long ownerId);
     void rejectApplication(Long projectId, Long applicationId, Long ownerId);
     

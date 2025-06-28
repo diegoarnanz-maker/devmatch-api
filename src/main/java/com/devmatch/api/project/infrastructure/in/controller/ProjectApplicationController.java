@@ -67,6 +67,22 @@ public class ProjectApplicationController {
     }
 
     /**
+     * Permite a un usuario ver todas sus candidaturas a proyectos.
+     * 
+     * @param userPrincipal Usuario autenticado
+     * @return Lista de candidaturas del usuario
+     */
+    @GetMapping("/applications/my")
+    public ResponseEntity<List<ProjectApplicationResponseDto>> getMyApplications(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        List<ProjectApplicationResponseDto> applications = 
+                projectApplicationUseCase.getUserApplications(userPrincipal.getUserId());
+        
+        return ResponseEntity.ok(applications);
+    }
+
+    /**
      * Permite al owner de un proyecto aceptar una aplicación específica.
      * 
      * @param projectId ID del proyecto
