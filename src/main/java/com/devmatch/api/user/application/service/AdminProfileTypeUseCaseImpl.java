@@ -10,6 +10,7 @@ import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.application.port.out.ProfileTypeRepositoryPort;
 import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
+import com.devmatch.api.user.domain.exception.ProfileTypeInUseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,23 +40,34 @@ public class AdminProfileTypeUseCaseImpl implements AdminProfileTypeUseCase {
 
     @Override
     public AdminProfileTypeResponseDto createProfileType(AdminProfileTypeRequestDto request) {
-        // Por ahora, como no tenemos métodos específicos para esto, 
-        // lanzamos una excepción
-        throw new UnsupportedOperationException("Funcionalidad no implementada aún");
+        // Crear el tipo de perfil usando el repositorio
+        ProfileTypeRepositoryPort.ProfileTypeDto createdProfileType = profileTypeRepositoryPort.create(
+            request.getName(), 
+            request.getDescription()
+        );
+        
+        // Convertir a DTO de respuesta
+        return toAdminProfileTypeResponseDto(createdProfileType);
     }
 
     @Override
     public AdminProfileTypeResponseDto updateProfileType(Long id, AdminProfileTypeRequestDto request) {
-        // Por ahora, como no tenemos métodos específicos para esto, 
-        // lanzamos una excepción
-        throw new UnsupportedOperationException("Funcionalidad no implementada aún");
+        // Actualizar el tipo de perfil usando el repositorio
+        ProfileTypeRepositoryPort.ProfileTypeDto updatedProfileType = profileTypeRepositoryPort.update(
+            id,
+            request.getName(), 
+            request.getDescription()
+        );
+        
+        // Convertir a DTO de respuesta
+        return toAdminProfileTypeResponseDto(updatedProfileType);
     }
 
     @Override
     public void deleteProfileType(Long id) {
-        // Por ahora, como no tenemos métodos específicos para esto, 
-        // lanzamos una excepción
-        throw new UnsupportedOperationException("Funcionalidad no implementada aún");
+        // Eliminar el tipo de perfil usando el repositorio
+        // La excepción ProfileTypeInUseException se propagará directamente
+        profileTypeRepositoryPort.delete(id);
     }
 
     @Override
@@ -93,22 +105,6 @@ public class AdminProfileTypeUseCaseImpl implements AdminProfileTypeUseCase {
         return userMapper.toDto(updatedUser, userRepositoryPort.findProfileTypesByUserId(userId));
     }
 
-    @Override
-    public UserResponseDto removeProfileTypeFromUser(Long userId, Long profileTypeId) {
-        // Verificar que el usuario existe
-        var user = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        
-        // Remover el tipo de perfil del usuario
-        profileTypeRepositoryPort.removeProfileTypeFromUser(userId, profileTypeId);
-        
-        // Obtener el usuario actualizado
-        var updatedUser = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        
-        return userMapper.toDto(updatedUser, userRepositoryPort.findProfileTypesByUserId(userId));
-    }
-
     private ProfileTypeResponseDto createProfileTypeResponseDto(String profileTypeName) {
         ProfileTypeResponseDto dto = new ProfileTypeResponseDto();
         dto.setName(profileTypeName);
@@ -121,10 +117,6 @@ public class AdminProfileTypeUseCaseImpl implements AdminProfileTypeUseCase {
         responseDto.setId(dto.getId());
         responseDto.setName(dto.getName());
         responseDto.setDescription(dto.getDescription());
-        responseDto.setActive(dto.isActive());
-        // Por ahora no tenemos timestamps en el DTO del repositorio
-        responseDto.setCreatedAt(null);
-        responseDto.setUpdatedAt(null);
         return responseDto;
     }
 } 

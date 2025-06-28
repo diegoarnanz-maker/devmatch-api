@@ -19,9 +19,9 @@ public interface UserProfileTypeUseCase {
     /**
      * Agrega un tipo de perfil al usuario autenticado.
      *
-     * @param username Nombre de usuario
+     * @param username Nombre de usuario del usuario autenticado
      * @param request DTO con el ID del tipo de perfil a agregar
-     * @return Usuario actualizado
+     * @return Usuario actualizado con el nuevo tipo de perfil
      */
     UserResponseDto addProfileType(String username, UserProfileTypeRequestDto request);
     

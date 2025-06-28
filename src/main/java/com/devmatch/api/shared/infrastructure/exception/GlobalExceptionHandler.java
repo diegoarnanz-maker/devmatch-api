@@ -10,6 +10,7 @@ import com.devmatch.api.user.application.exception.AuthenticationException;
 import com.devmatch.api.user.application.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.exception.UserOperationNotAllowedException;
+import com.devmatch.api.user.domain.exception.ProfileTypeInUseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -151,6 +152,22 @@ public class GlobalExceptionHandler {
         
         log.warn("Operación no permitida: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de tipos de perfil en uso
+     */
+    @ExceptionHandler(ProfileTypeInUseException.class)
+    public ResponseEntity<ErrorResponse> handleProfileTypeInUseException(ProfileTypeInUseException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            "Tipo de perfil en uso",
+            ex.getMessage()
+        );
+        
+        log.warn("Tipo de perfil en uso: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
     /**
