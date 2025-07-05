@@ -1,4 +1,4 @@
-package com.devmatch.api.user.domain.model;
+package com.devmatch.api.tag.domain.model;
 
 import com.devmatch.api.shared.domain.model.BaseDomainEntity;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * Modelo de dominio para Tag.
- * Representa una etiqueta que puede ser asignada a usuarios.
+ * Representa una etiqueta que puede ser asignada a usuarios y proyectos.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

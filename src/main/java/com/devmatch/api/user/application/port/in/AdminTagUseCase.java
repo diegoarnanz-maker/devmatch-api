@@ -1,9 +1,9 @@
 package com.devmatch.api.user.application.port.in;
 
-import com.devmatch.api.user.application.dto.tag.AdminTagRequestDto;
-import com.devmatch.api.user.application.dto.tag.AdminTagResponseDto;
-import com.devmatch.api.user.application.dto.tag.TagResponseDto;
-import com.devmatch.api.user.application.dto.tag.UserTagRequestDto;
+import com.devmatch.api.tag.application.dto.AdminTagRequestDto;
+import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
+import com.devmatch.api.tag.application.dto.TagResponseDto;
+import com.devmatch.api.tag.application.dto.UserTagRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
 import java.util.List;

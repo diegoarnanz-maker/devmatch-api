@@ -10,6 +10,7 @@ import com.devmatch.api.user.domain.model.valueobject.user.Email;
 import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import com.devmatch.api.user.domain.model.valueobject.user.Username;
 import com.devmatch.api.role.domain.model.Role;
+import com.devmatch.api.tag.domain.model.Tag;
 
 public class User extends BaseDomainEntity {
 

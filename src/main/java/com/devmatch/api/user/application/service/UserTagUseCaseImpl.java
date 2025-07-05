@@ -1,17 +1,17 @@
 package com.devmatch.api.user.application.service;
 
-import com.devmatch.api.user.application.dto.tag.TagResponseDto;
-import com.devmatch.api.user.application.dto.tag.UserTagRequestDto;
+import com.devmatch.api.tag.application.dto.TagResponseDto;
+import com.devmatch.api.tag.application.dto.UserTagRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.application.port.in.UserTagUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
-import com.devmatch.api.user.application.port.out.TagRepositoryPort;
+import com.devmatch.api.tag.application.port.out.TagRepositoryPort;
 import com.devmatch.api.user.application.mapper.UserMapper;
-import com.devmatch.api.user.application.mapper.TagMapper;
+import com.devmatch.api.tag.application.mapper.TagMapper;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
-import com.devmatch.api.user.domain.exception.TagNotFoundException;
+import com.devmatch.api.tag.domain.exception.TagNotFoundException;
 import com.devmatch.api.user.domain.model.User;
-import com.devmatch.api.user.domain.model.Tag;
+import com.devmatch.api.tag.domain.model.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

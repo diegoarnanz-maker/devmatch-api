@@ -1,4 +1,4 @@
-package com.devmatch.api.user.domain.exception;
+package com.devmatch.api.tag.domain.exception;
 
 /**
  * Excepción lanzada cuando un tag está en uso y no se puede eliminar.

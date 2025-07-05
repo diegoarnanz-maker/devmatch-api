@@ -1,4 +1,4 @@
-package com.devmatch.api.user.application.dto.tag;
+package com.devmatch.api.tag.application.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

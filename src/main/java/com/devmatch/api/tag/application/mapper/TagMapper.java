@@ -1,8 +1,8 @@
-package com.devmatch.api.user.application.mapper;
+package com.devmatch.api.tag.application.mapper;
 
-import com.devmatch.api.user.domain.model.Tag;
-import com.devmatch.api.user.application.dto.tag.AdminTagResponseDto;
-import com.devmatch.api.user.application.dto.tag.TagResponseDto;
+import com.devmatch.api.tag.domain.model.Tag;
+import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
+import com.devmatch.api.tag.application.dto.TagResponseDto;
 import org.springframework.stereotype.Component;
 
 /**

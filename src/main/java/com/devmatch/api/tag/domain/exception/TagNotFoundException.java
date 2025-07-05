@@ -1,4 +1,4 @@
-package com.devmatch.api.user.domain.exception;
+package com.devmatch.api.tag.domain.exception;
 
 /**
  * Excepción lanzada cuando no se encuentra un tag.
