@@ -3,8 +3,6 @@ package com.devmatch.api.tag.application.port.in;
 import com.devmatch.api.tag.application.dto.AdminTagRequestDto;
 import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
 import com.devmatch.api.tag.application.dto.TagResponseDto;
-import com.devmatch.api.tag.application.dto.UserTagRequestDto;
-import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
 import java.util.List;
 
@@ -17,11 +15,18 @@ public interface AdminTagUseCase {
     // ===== GESTIÓN DE TAGS (CRUD) =====
 
     /**
-     * Obtiene todos los tags disponibles en el sistema.
+     * Obtiene todos los tags disponibles en el sistema (incluyendo eliminados).
      *
      * @return Lista de todos los tags
      */
     List<AdminTagResponseDto> getAllTags();
+
+    /**
+     * Obtiene solo los tags activos (no eliminados).
+     *
+     * @return Lista de tags activos
+     */
+    List<AdminTagResponseDto> getActiveTags();
 
     /**
      * Crea un nuevo tag en el sistema.
@@ -47,6 +52,14 @@ public interface AdminTagUseCase {
      */
     void deleteTag(Long id);
 
+    /**
+     * Reactiva un tag eliminado.
+     *
+     * @param id ID del tag a reactivar
+     * @return Tag reactivado
+     */
+    AdminTagResponseDto reactivateTag(Long id);
+
     // ===== GESTIÓN DE RELACIÓN USUARIO-TAG =====
 
     /**
@@ -56,22 +69,4 @@ public interface AdminTagUseCase {
      * @return Lista de tags del usuario
      */
     List<TagResponseDto> getUserTags(Long userId);
-
-    /**
-     * Agrega un tag a un usuario específico.
-     *
-     * @param userId ID del usuario
-     * @param request DTO con el ID del tag a agregar
-     * @return Usuario actualizado con el nuevo tag
-     */
-    UserResponseDto addTagToUser(Long userId, UserTagRequestDto request);
-
-    /**
-     * Remueve un tag de un usuario específico.
-     *
-     * @param userId ID del usuario
-     * @param tagId ID del tag a remover
-     * @return Usuario actualizado
-     */
-    UserResponseDto removeTagFromUser(Long userId, Long tagId);
 } 

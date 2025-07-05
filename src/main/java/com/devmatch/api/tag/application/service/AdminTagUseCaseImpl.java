@@ -3,16 +3,12 @@ package com.devmatch.api.tag.application.service;
 import com.devmatch.api.tag.application.dto.AdminTagRequestDto;
 import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
 import com.devmatch.api.tag.application.dto.TagResponseDto;
-import com.devmatch.api.tag.application.dto.UserTagRequestDto;
-import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.tag.application.port.in.AdminTagUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.tag.application.port.out.TagRepositoryPort;
-import com.devmatch.api.user.application.mapper.UserMapper;
 import com.devmatch.api.tag.application.mapper.TagMapper;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.tag.domain.exception.TagNotFoundException;
-import com.devmatch.api.tag.domain.exception.TagInUseException;
 import com.devmatch.api.user.domain.model.User;
 import com.devmatch.api.tag.domain.model.Tag;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +28,20 @@ public class AdminTagUseCaseImpl implements AdminTagUseCase {
     private final TagRepositoryPort tagRepositoryPort;
     private final UserRepositoryPort userRepositoryPort;
     private final TagMapper tagMapper;
-    private final UserMapper userMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<AdminTagResponseDto> getAllTags() {
         List<Tag> tags = tagRepositoryPort.findAll();
+        return tags.stream()
+                .map(tagMapper::toAdminResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminTagResponseDto> getActiveTags() {
+        List<Tag> tags = tagRepositoryPort.findAllActive();
         return tags.stream()
                 .map(tagMapper::toAdminResponseDto)
                 .collect(Collectors.toList());
@@ -75,13 +79,35 @@ public class AdminTagUseCaseImpl implements AdminTagUseCase {
         Tag tag = tagRepositoryPort.findById(id)
                 .orElseThrow(() -> new TagNotFoundException("Tag no encontrado con ID: " + id));
         
-        // Verificar si el tag está en uso
-        if (tagRepositoryPort.isTagInUse(id)) {
-            throw new TagInUseException("No se puede eliminar el tag porque está siendo utilizado por usuarios");
+        // Verificar si el tag está en uso para mostrar advertencia
+        boolean isInUse = tagRepositoryPort.isTagInUse(id);
+        
+        if (isInUse) {
+            // Log de advertencia para el administrador
+            System.out.println("ADVERTENCIA: El tag '" + tag.getName() + "' está siendo utilizado por usuarios. Se procederá con la eliminación lógica.");
         }
         
+        // Siempre permitir la eliminación lógica
         tag.markDeleted();
         tagRepositoryPort.save(tag);
+    }
+
+    @Override
+    @Transactional
+    public AdminTagResponseDto reactivateTag(Long id) {
+        Tag tag = tagRepositoryPort.findById(id)
+                .orElseThrow(() -> new TagNotFoundException("Tag no encontrado con ID: " + id));
+        
+        if (!tag.isDeleted()) {
+            throw new IllegalArgumentException("El tag no está eliminado");
+        }
+        
+        tag.setDeleted(false);
+        tag.setActive(true);
+        tag.updateTimestamp();
+        
+        Tag reactivatedTag = tagRepositoryPort.save(tag);
+        return tagMapper.toAdminResponseDto(reactivatedTag);
     }
 
     @Override
@@ -93,37 +119,5 @@ public class AdminTagUseCaseImpl implements AdminTagUseCase {
         return user.getTags().stream()
                 .map(tagMapper::toResponseDto)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public UserResponseDto addTagToUser(Long userId, UserTagRequestDto request) {
-        User user = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        
-        Tag tag = tagRepositoryPort.findById(request.getTagId())
-                .orElseThrow(() -> new TagNotFoundException("Tag no encontrado"));
-        
-        if (!tag.isActive()) {
-            throw new TagNotFoundException("El tag no está activo");
-        }
-        
-        user.addTag(tag);
-        User updatedUser = userRepositoryPort.save(user);
-        return userMapper.toDto(updatedUser);
-    }
-
-    @Override
-    @Transactional
-    public UserResponseDto removeTagFromUser(Long userId, Long tagId) {
-        User user = userRepositoryPort.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-        
-        Tag tag = tagRepositoryPort.findById(tagId)
-                .orElseThrow(() -> new TagNotFoundException("Tag no encontrado"));
-        
-        user.removeTag(tag);
-        User updatedUser = userRepositoryPort.save(user);
-        return userMapper.toDto(updatedUser);
     }
 } 

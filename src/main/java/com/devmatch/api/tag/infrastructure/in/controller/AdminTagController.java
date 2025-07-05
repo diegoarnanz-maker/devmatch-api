@@ -3,9 +3,7 @@ package com.devmatch.api.tag.infrastructure.in.controller;
 import com.devmatch.api.tag.application.dto.AdminTagRequestDto;
 import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
 import com.devmatch.api.tag.application.dto.TagResponseDto;
-import com.devmatch.api.tag.application.dto.UserTagRequestDto;
 import com.devmatch.api.tag.application.port.in.AdminTagUseCase;
-import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,13 +27,23 @@ public class AdminTagController {
     private final AdminTagUseCase adminTagUseCase;
 
     /**
-     * Obtiene todos los tags disponibles en el sistema.
+     * Obtiene todos los tags disponibles en el sistema (incluyendo eliminados).
      *
      * @return Lista de todos los tags
      */
     @GetMapping("/admin")
     public ResponseEntity<List<AdminTagResponseDto>> getAllTags() {
         return ResponseEntity.ok(adminTagUseCase.getAllTags());
+    }
+
+    /**
+     * Obtiene solo los tags activos (no eliminados).
+     *
+     * @return Lista de tags activos
+     */
+    @GetMapping("/admin/active")
+    public ResponseEntity<List<AdminTagResponseDto>> getActiveTags() {
+        return ResponseEntity.ok(adminTagUseCase.getActiveTags());
     }
 
     /**
@@ -52,30 +60,39 @@ public class AdminTagController {
     /**
      * Actualiza un tag existente.
      *
-     * @param id ID del tag a actualizar
+     * @param tagId   ID del tag a actualizar
      * @param request DTO con los nuevos datos del tag
      * @return Tag actualizado
      */
-    @PutMapping("/admin/{id}")
+    @PutMapping("/admin/{tagId}")
     public ResponseEntity<AdminTagResponseDto> updateTag(
-            @PathVariable Long id,
+            @PathVariable("tagId") Long tagId,
             @Valid @RequestBody AdminTagRequestDto request) {
-        return ResponseEntity.ok(adminTagUseCase.updateTag(id, request));
+        return ResponseEntity.ok(adminTagUseCase.updateTag(tagId, request));
     }
 
     /**
      * Elimina un tag del sistema.
      *
-     * @param id ID del tag a eliminar
+     * @param tagId ID del tag a eliminar
      * @return Respuesta vacía
      */
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
-        adminTagUseCase.deleteTag(id);
+    @DeleteMapping("/admin/{tagId}")
+    public ResponseEntity<Void> deleteTag(@PathVariable("tagId") Long tagId) {
+        adminTagUseCase.deleteTag(tagId);
         return ResponseEntity.noContent().build();
     }
 
-    // ===== GESTIÓN DE RELACIÓN USUARIO-TAG =====
+    /**
+     * Reactiva un tag eliminado.
+     *
+     * @param tagId ID del tag a reactivar
+     * @return Tag reactivado
+     */
+    @PutMapping("/admin/{tagId}/reactivate")
+    public ResponseEntity<AdminTagResponseDto> reactivateTag(@PathVariable("tagId") Long tagId) {
+        return ResponseEntity.ok(adminTagUseCase.reactivateTag(tagId));
+    }
 
     /**
      * Obtiene los tags de un usuario específico.
@@ -88,31 +105,4 @@ public class AdminTagController {
         return ResponseEntity.ok(adminTagUseCase.getUserTags(userId));
     }
 
-    /**
-     * Agrega un tag a un usuario específico.
-     *
-     * @param userId ID del usuario
-     * @param request DTO con el ID del tag a agregar
-     * @return Usuario actualizado con el nuevo tag
-     */
-    @PostMapping("/admin/users/{userId}")
-    public ResponseEntity<UserResponseDto> addTagToUser(
-            @PathVariable Long userId,
-            @Valid @RequestBody UserTagRequestDto request) {
-        return ResponseEntity.ok(adminTagUseCase.addTagToUser(userId, request));
-    }
-
-    /**
-     * Remueve un tag de un usuario específico.
-     *
-     * @param userId ID del usuario
-     * @param tagId ID del tag a remover
-     * @return Usuario actualizado
-     */
-    @DeleteMapping("/admin/users/{userId}/tags/{tagId}")
-    public ResponseEntity<UserResponseDto> removeTagFromUser(
-            @PathVariable Long userId,
-            @PathVariable Long tagId) {
-        return ResponseEntity.ok(adminTagUseCase.removeTagFromUser(userId, tagId));
-    }
-} 
+}
