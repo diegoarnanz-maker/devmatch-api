@@ -2,12 +2,15 @@ package com.devmatch.api.user.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.devmatch.api.shared.domain.model.BaseDomainEntity;
 import com.devmatch.api.user.domain.model.valueobject.user.Email;
 import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import com.devmatch.api.user.domain.model.valueobject.user.Username;
 import com.devmatch.api.role.domain.model.Role;
+import com.devmatch.api.tag.domain.model.Tag;
 
 public class User extends BaseDomainEntity {
 
@@ -34,6 +37,9 @@ public class User extends BaseDomainEntity {
 
     // Descripción
     private String bio;
+    
+    // Tags del usuario
+    private Set<Tag> tags = new HashSet<>();
 
     // Constructor completo
     public User(Long id, Username username, Email email, Password passwordHash,
@@ -243,6 +249,34 @@ public class User extends BaseDomainEntity {
     public void setRole(Role role) {
         this.role = role;
         updateTimestamp();
+    }
+    
+    // Métodos para gestión de tags
+    public Set<Tag> getTags() {
+        return new HashSet<>(tags);
+    }
+    
+    public void setTags(Set<Tag> tags) {
+        this.tags = new HashSet<>(tags);
+        updateTimestamp();
+    }
+    
+    public void addTag(Tag tag) {
+        if (tag != null) {
+            this.tags.add(tag);
+            updateTimestamp();
+        }
+    }
+    
+    public void removeTag(Tag tag) {
+        if (tag != null) {
+            this.tags.remove(tag);
+            updateTimestamp();
+        }
+    }
+    
+    public boolean hasTag(Tag tag) {
+        return tag != null && this.tags.contains(tag);
     }
 
     @Override
