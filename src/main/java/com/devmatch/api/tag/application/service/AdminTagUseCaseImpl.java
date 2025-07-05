@@ -1,11 +1,11 @@
-package com.devmatch.api.user.application.service;
+package com.devmatch.api.tag.application.service;
 
 import com.devmatch.api.tag.application.dto.AdminTagRequestDto;
 import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
 import com.devmatch.api.tag.application.dto.TagResponseDto;
 import com.devmatch.api.tag.application.dto.UserTagRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
-import com.devmatch.api.user.application.port.in.AdminTagUseCase;
+import com.devmatch.api.tag.application.port.in.AdminTagUseCase;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.tag.application.port.out.TagRepositoryPort;
 import com.devmatch.api.user.application.mapper.UserMapper;

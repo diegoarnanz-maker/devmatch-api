@@ -1,4 +1,4 @@
-package com.devmatch.api.user.application.port.in;
+package com.devmatch.api.tag.application.port.in;
 
 import com.devmatch.api.tag.application.dto.TagResponseDto;
 import com.devmatch.api.tag.application.dto.UserTagRequestDto;
