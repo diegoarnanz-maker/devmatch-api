@@ -88,7 +88,12 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
         }
         
         user.addTag(tag);
-        User updatedUser = userRepositoryPort.save(user);
+        userRepositoryPort.save(user);
+        
+        // Recargar el usuario para obtener los tags actualizados
+        User updatedUser = userRepositoryPort.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        
         return userMapper.toDto(updatedUser);
     }
 
@@ -107,7 +112,12 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
         }
         
         user.removeTag(tag);
-        User updatedUser = userRepositoryPort.save(user);
+        userRepositoryPort.save(user);
+        
+        // Recargar el usuario para obtener los tags actualizados
+        User updatedUser = userRepositoryPort.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        
         return userMapper.toDto(updatedUser);
     }
 } 
