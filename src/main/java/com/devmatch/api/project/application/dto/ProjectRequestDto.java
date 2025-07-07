@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 /**
  * DTO para solicitudes de creación y actualización de proyectos
@@ -49,4 +50,10 @@ public class ProjectRequestDto {
     private Integer maxTeamSize;
     
     private boolean isPublic = true;
+    
+    /**
+     * Lista de nombres de tags/tecnologías para el proyecto
+     * Ej: ["Java", "Spring Boot", "React"]
+     */
+    private List<String> tags;
 } 

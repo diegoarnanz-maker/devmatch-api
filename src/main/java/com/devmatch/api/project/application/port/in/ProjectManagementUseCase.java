@@ -2,6 +2,8 @@ package com.devmatch.api.project.application.port.in;
 
 import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
+import com.devmatch.api.project.application.dto.ProjectPublicSearchRequestDto;
+import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 
 import java.util.List;
@@ -74,6 +76,38 @@ public interface ProjectManagementUseCase {
      * @return Proyecto público
      */
     ProjectResponseDto getPublicProjectById(Long projectId);
+
+    /**
+     * Obtiene todos los proyectos públicos
+     * Solo proyectos públicos y activos
+     * @return Lista de todos los proyectos públicos
+     */
+    List<ProjectResponseDto> getAllPublicProjects();
+
+    /**
+     * Busca y filtra proyectos públicos con criterios múltiples
+     * @param filter DTO con los criterios de búsqueda y filtrado
+     * @return Lista de proyectos públicos que coinciden con los filtros
+     */
+    List<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter);
+
+    /**
+     * Agrega tags a un proyecto
+     * @param projectId ID del proyecto
+     * @param request DTO con los tags a agregar
+     * @param userId ID del usuario que realiza la operación
+     * @return DTO del proyecto actualizado
+     */
+    ProjectResponseDto addTagsToProject(Long projectId, ProjectTagsRequestDto request, Long userId);
+
+    /**
+     * Remueve un tag específico de un proyecto
+     * @param projectId ID del proyecto
+     * @param tagName Nombre del tag a remover
+     * @param userId ID del usuario que realiza la operación
+     * @return DTO del proyecto actualizado
+     */
+    ProjectResponseDto removeTagFromProject(Long projectId, String tagName, Long userId);
 
     /**
      * Obtiene los miembros de un proyecto

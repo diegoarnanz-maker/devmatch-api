@@ -3,6 +3,8 @@ package com.devmatch.api.project.application.mapper;
 import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
 import com.devmatch.api.project.domain.model.Project;
+import com.devmatch.api.project.infrastructure.out.persistence.entity.ProjectEntity;
+import com.devmatch.api.project.infrastructure.out.persistence.mapper.ProjectPersistenceMapper;
 import com.devmatch.api.user.application.port.in.UserQueryUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class ProjectMapper {
     
     private final UserQueryUseCase userQueryUseCase;
+    private final ProjectPersistenceMapper projectPersistenceMapper;
     
     /**
      * Convierte un DTO de solicitud a una entidad de dominio
@@ -90,6 +93,7 @@ public class ProjectMapper {
             project.getMaxTeamSize(),
             ownerUsername,
             teamMembers,
+            new ArrayList<>(), // tags - se manejarán en método sobrecargado
             project.isPublic(),
             project.isActive(),
             project.getCreatedAt(),
@@ -98,12 +102,39 @@ public class ProjectMapper {
     }
     
     /**
+     * Convierte una entidad JPA a un DTO de respuesta (incluye tags)
+     * @param projectEntity Entidad JPA del proyecto
+     * @return DTO de respuesta con tags
+     */
+    public ProjectResponseDto toResponseDto(ProjectEntity projectEntity) {
+        Project project = projectPersistenceMapper.toDomain(projectEntity);
+        ProjectResponseDto responseDto = toResponseDto(project);
+        
+        // Agregar tags
+        List<String> tags = projectPersistenceMapper.extractTagNames(projectEntity);
+        responseDto.setTags(tags);
+        
+        return responseDto;
+    }
+
+    /**
      * Convierte una lista de entidades de dominio a una lista de DTOs de respuesta
      * @param projects Lista de entidades de dominio
      * @return Lista de DTOs de respuesta
      */
     public List<ProjectResponseDto> toResponseDtoList(List<Project> projects) {
         return projects.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convierte una lista de entidades JPA a una lista de DTOs de respuesta (incluye tags)
+     * @param projectEntities Lista de entidades JPA
+     * @return Lista de DTOs de respuesta con tags
+     */
+    public List<ProjectResponseDto> toResponseDtoListWithTags(List<ProjectEntity> projectEntities) {
+        return projectEntities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
