@@ -33,6 +33,9 @@ public class ProjectResponseDto {
     // Información de miembros del equipo
     private List<ProjectMemberDto> teamMembers;
     
+    // Tecnologías asociadas al proyecto
+    private List<String> tags;
+    
     private boolean isPublic;
     private boolean isActive;
     private LocalDateTime createdAt;

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
+import com.devmatch.api.project.application.dto.ProjectPublicSearchRequestDto;
+import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
@@ -43,17 +45,32 @@ public class ProjectController {
     }
 
     /**
-     * Obtiene lista de proyectos públicos
+     * Obtiene todos los proyectos públicos
      * Accesible sin autenticación
      */
-    // @GetMapping("/public")
-    // public ResponseEntity<List<ProjectResponseDto>> getPublicProjects(
-    //         @RequestParam(defaultValue = "0") int page,
-    //         @RequestParam(defaultValue = "20") int size) {
-    //     // TODO: Implementar ProjectQueryUseCase para búsquedas públicas
-    //     // Por ahora retorna lista vacía
-    //     return ResponseEntity.ok(List.of());
-    // }
+    @GetMapping("/public")
+    public ResponseEntity<List<ProjectResponseDto>> getPublicProjects() {
+        List<ProjectResponseDto> projects = projectManagementUseCase.getAllPublicProjects();
+        return ResponseEntity.ok(projects);
+    }
+
+    /**
+     * Busca y filtra proyectos públicos con criterios múltiples
+     * Accesible sin autenticación
+     * Permite filtrar por título, estado, tags, propietario, etc.
+     */
+    @PostMapping("/public/search")
+    public ResponseEntity<List<ProjectResponseDto>> searchPublicProjects(
+            @RequestBody(required = false) ProjectPublicSearchRequestDto filter) {
+        
+        // Si no se envía filtro, usar uno vacío para obtener todos los proyectos públicos
+        if (filter == null) {
+            filter = new ProjectPublicSearchRequestDto();
+        }
+        
+        List<ProjectResponseDto> projects = projectManagementUseCase.searchPublicProjects(filter);
+        return ResponseEntity.ok(projects);
+    }
 
     // ===== ENDPOINTS PRIVADOS (con autenticación) =====
 
@@ -176,5 +193,35 @@ public class ProjectController {
         
         List<ProjectResponseDto.ProjectMemberDto> members = projectManagementUseCase.getProjectMembers(projectId, userPrincipal.getUserId());
         return ResponseEntity.ok(members);
+    }
+
+    // ===== ENDPOINTS DE GESTIÓN DE TAGS =====
+
+    /**
+     * Agrega tags a un proyecto
+     * Solo propietario del proyecto
+     */
+    @PostMapping("/{projectId}/tags")
+    public ResponseEntity<ProjectResponseDto> addTagsToProject(
+            @PathVariable Long projectId,
+            @RequestBody @Valid ProjectTagsRequestDto request,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        ProjectResponseDto response = projectManagementUseCase.addTagsToProject(projectId, request, userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Remueve un tag específico de un proyecto
+     * Solo propietario del proyecto
+     */
+    @DeleteMapping("/{projectId}/tags/{tagName}")
+    public ResponseEntity<ProjectResponseDto> removeTagFromProject(
+            @PathVariable Long projectId,
+            @PathVariable String tagName,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        ProjectResponseDto response = projectManagementUseCase.removeTagFromProject(projectId, tagName, userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
     }
 }

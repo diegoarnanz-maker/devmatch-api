@@ -105,4 +105,5 @@ public class UserTagController {
         String username = authentication.getName();
         return ResponseEntity.ok(userTagUseCase.removeTag(username, tagId));
     }
+
 } 

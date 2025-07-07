@@ -1,13 +1,19 @@
 package com.devmatch.api.project.application.service;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
+import com.devmatch.api.project.application.dto.ProjectPublicSearchRequestDto;
+import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
 import com.devmatch.api.project.application.mapper.ProjectMapper;
+import com.devmatch.api.project.infrastructure.out.persistence.entity.ProjectEntity;
+import com.devmatch.api.project.infrastructure.out.persistence.repository.ProjectJpaRepository;
+import com.devmatch.api.project.application.port.out.TagRepositoryPort;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.project.application.port.out.ProjectRepositoryPort;
 import com.devmatch.api.project.application.port.out.ProjectMemberRepositoryPort;
@@ -31,8 +37,11 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     private final ProjectMapper projectMapper;
     private final ProjectMemberRepositoryPort projectMemberRepositoryPort;
     private final UserQueryUseCase userQueryUseCase;
+    private final ProjectJpaRepository projectJpaRepository;
+    private final TagRepositoryPort tagRepositoryPort;
 
     @Override
+    @Transactional
     public ProjectResponseDto createProject(ProjectRequestDto request, Long ownerId) {
 
         long userProjectCount = projectRepositoryPort.countByOwnerId(ownerId);
@@ -42,7 +51,45 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project savedProject = projectRepositoryPort.save(project);
 
-        return projectMapper.toResponseDto(savedProject);
+        // Procesar tags si se proporcionaron
+        if (request.getTags() != null && !request.getTags().isEmpty()) {
+            System.out.println("Procesando tags: " + request.getTags());
+            try {
+                List<Long> tagIds = new ArrayList<>();
+                for (String tagName : request.getTags()) {
+                    System.out.println("Procesando tag: " + tagName);
+                    // Buscar o crear el tag
+                    TagRepositoryPort.TagDto tag = tagRepositoryPort.findByName(tagName)
+                            .orElseGet(() -> {
+                                System.out.println("Creando nuevo tag: " + tagName);
+                                return tagRepositoryPort.createTag(tagName, "TECHNOLOGY");
+                            });
+                    tagIds.add(tag.id());
+                    System.out.println("Tag procesado: " + tagName + " con ID: " + tag.id());
+                }
+                
+                System.out.println("Agregando tags al proyecto: " + tagIds);
+                // Agregar tags al proyecto
+                projectRepositoryPort.addTagsToProject(savedProject.getId(), tagIds);
+                System.out.println("Tags agregados exitosamente");
+            } catch (Exception e) {
+                // Si hay error con tags, continuar sin tags
+                System.err.println("Error procesando tags: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // Retornar proyecto con tags incluidos
+        try {
+            ProjectEntity projectWithTags = projectJpaRepository.findByIdWithTags(savedProject.getId())
+                    .orElseThrow(() -> new ProjectNotFoundException(savedProject.getId()));
+            return projectMapper.toResponseDto(projectWithTags);
+        } catch (Exception e) {
+            // Si hay error cargando tags, retornar sin tags
+            System.err.println("Error cargando proyecto con tags: " + e.getMessage());
+            e.printStackTrace();
+            return projectMapper.toResponseDto(savedProject);
+        }
     }
 
     @Override
@@ -189,5 +236,94 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
                     }
                 })
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectResponseDto> getAllPublicProjects() {
+        // Obtener entidades JPA con tags cargados
+        List<ProjectEntity> projectEntities = projectJpaRepository.findPublicActiveProjectsWithTags();
+        
+        // Convertir a DTOs con tags incluidos
+        return projectMapper.toResponseDtoListWithTags(projectEntities);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter) {
+        // Obtener entidades JPA con tags cargados
+        List<ProjectEntity> projectEntities = projectJpaRepository.searchPublicProjectsWithTags(
+                filter.getTitle(),
+                filter.getStatus(),
+                filter.getIsActive(),
+                filter.getMinTeamSize(),
+                filter.getMaxTeamSize(),
+                filter.getMinDurationWeeks(),
+                filter.getMaxDurationWeeks()
+        );
+        
+        // Convertir a DTOs con tags incluidos
+        return projectMapper.toResponseDtoListWithTags(projectEntities);
+    }
+
+    @Override
+    @Transactional
+    public ProjectResponseDto addTagsToProject(Long projectId, ProjectTagsRequestDto request, Long userId) {
+        // Verificar que el proyecto existe y el usuario puede editarlo
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        if (!project.canBeEditedBy(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "agregar tags");
+        }
+
+        // Procesar cada tag
+        List<Long> tagIds = new ArrayList<>();
+        for (String tagName : request.getTagNames()) {
+            // Buscar o crear el tag
+            TagRepositoryPort.TagDto tag = tagRepositoryPort.findByName(tagName)
+                    .orElseGet(() -> tagRepositoryPort.createTag(tagName, "TECHNOLOGY"));
+            tagIds.add(tag.id());
+        }
+
+        // Agregar tags al proyecto
+        projectRepositoryPort.addTagsToProject(projectId, tagIds);
+
+        // Retornar proyecto actualizado
+        ProjectEntity updatedProject = projectJpaRepository.findPublicActiveProjectsWithTags()
+                .stream()
+                .filter(p -> p.getId().equals(projectId))
+                .findFirst()
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+
+        return projectMapper.toResponseDto(updatedProject);
+    }
+
+    @Override
+    @Transactional
+    public ProjectResponseDto removeTagFromProject(Long projectId, String tagName, Long userId) {
+        // Verificar que el proyecto existe y el usuario puede editarlo
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        if (!project.canBeEditedBy(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "remover tags");
+        }
+
+        // Buscar el tag por nombre
+        TagRepositoryPort.TagDto tag = tagRepositoryPort.findByName(tagName)
+                .orElseThrow(() -> new RuntimeException("Tag no encontrado: " + tagName));
+
+        // Remover el tag del proyecto
+        projectRepositoryPort.removeTagFromProject(projectId, tag.id());
+
+        // Retornar proyecto actualizado
+        ProjectEntity updatedProject = projectJpaRepository.findPublicActiveProjectsWithTags()
+                .stream()
+                .filter(p -> p.getId().equals(projectId))
+                .findFirst()
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+
+        return projectMapper.toResponseDto(updatedProject);
     }
 }
