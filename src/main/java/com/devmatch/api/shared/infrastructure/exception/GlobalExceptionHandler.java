@@ -6,6 +6,8 @@ import com.devmatch.api.project.domain.exception.ProjectLimitExceededException;
 import com.devmatch.api.role.domain.exception.RoleAlreadyExistsException;
 import com.devmatch.api.role.domain.exception.RoleInUseException;
 import com.devmatch.api.role.domain.exception.RoleNotFoundException;
+import com.devmatch.api.tag.domain.exception.TagNotFoundException;
+import com.devmatch.api.tag.domain.exception.TagInUseException;
 import com.devmatch.api.user.application.exception.AuthenticationException;
 import com.devmatch.api.user.application.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
@@ -200,6 +202,38 @@ public class GlobalExceptionHandler {
         
         log.warn("Acceso denegado: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de tags no encontrados
+     */
+    @ExceptionHandler(TagNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTagNotFoundException(TagNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.NOT_FOUND.value(),
+            "Tag no encontrado",
+            ex.getMessage()
+        );
+        
+        log.warn("Tag no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de tags en uso
+     */
+    @ExceptionHandler(TagInUseException.class)
+    public ResponseEntity<ErrorResponse> handleTagInUseException(TagInUseException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            "Tag en uso",
+            ex.getMessage()
+        );
+        
+        log.warn("Tag en uso: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
     /**

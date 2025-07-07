@@ -2,9 +2,12 @@ package com.devmatch.api.user.application.mapper;
 
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 import com.devmatch.api.user.domain.model.User;
+import com.devmatch.api.tag.application.mapper.TagMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Mapper para convertir entre entidades de dominio y DTOs de usuario.
@@ -12,6 +15,9 @@ import java.util.List;
  */
 @Component
 public class UserMapper {
+
+    @Autowired
+    private TagMapper tagMapper;
 
     /**
      * Convierte una entidad User a UserResponseDto
@@ -53,6 +59,14 @@ public class UserMapper {
         dto.setActive(user.isActive());
         dto.setDeleted(user.isDeleted());
         dto.setProfileTypes(profileTypes);
+        
+        // Mapear los tags del usuario
+        if (user.getTags() != null) {
+            dto.setTags(user.getTags().stream()
+                    .map(tagMapper::toResponseDto)
+                    .collect(Collectors.toList()));
+        }
+        
         return dto;
     }
 }

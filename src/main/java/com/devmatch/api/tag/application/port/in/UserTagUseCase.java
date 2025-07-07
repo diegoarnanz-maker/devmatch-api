@@ -21,6 +21,24 @@ public interface UserTagUseCase {
     List<TagResponseDto> getAllTags();
 
     /**
+     * Busca tags por nombre que contengan el texto especificado.
+     * Este método puede ser usado por usuarios no autenticados.
+     *
+     * @param name Texto a buscar en el nombre del tag
+     * @return Lista de tags que contengan el texto en su nombre
+     */
+    List<TagResponseDto> searchTagsByName(String name);
+
+    /**
+     * Obtiene tags por tipo específico.
+     * Este método puede ser usado por usuarios no autenticados.
+     *
+     * @param tagType Tipo de tag a buscar
+     * @return Lista de tags del tipo especificado
+     */
+    List<TagResponseDto> getTagsByType(String tagType);
+
+    /**
      * Obtiene todos los tags asignados al usuario autenticado.
      *
      * @param username Nombre de usuario del usuario autenticado
