@@ -94,7 +94,7 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
         User updatedUser = userRepositoryPort.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
-        return userMapper.toDto(updatedUser);
+        return userMapper.toDto(updatedUser, getProfileTypesForUser(updatedUser.getId()));
     }
 
     @Override
@@ -118,6 +118,13 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
         User updatedUser = userRepositoryPort.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
-        return userMapper.toDto(updatedUser);
+        return userMapper.toDto(updatedUser, getProfileTypesForUser(updatedUser.getId()));
+    }
+    
+    /**
+     * Método auxiliar para obtener los profile types de un usuario
+     */
+    private List<String> getProfileTypesForUser(Long userId) {
+        return userRepositoryPort.findProfileTypesByUserId(userId);
     }
 } 
