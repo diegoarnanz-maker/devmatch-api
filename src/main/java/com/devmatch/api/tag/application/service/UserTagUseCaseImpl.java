@@ -42,6 +42,24 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
 
     @Override
     @Transactional(readOnly = true)
+    public List<TagResponseDto> searchTagsByName(String name) {
+        List<Tag> tags = tagRepositoryPort.findByNameContaining(name);
+        return tags.stream()
+                .map(tagMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TagResponseDto> getTagsByType(String tagType) {
+        List<Tag> tags = tagRepositoryPort.findByTagType(tagType);
+        return tags.stream()
+                .map(tagMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<TagResponseDto> getUserTags(String username) {
         User user = userRepositoryPort.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));

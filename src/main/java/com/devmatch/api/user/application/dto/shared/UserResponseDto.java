@@ -1,5 +1,6 @@
 package com.devmatch.api.user.application.dto.shared;
 
+import com.devmatch.api.tag.application.dto.TagResponseDto;
 import lombok.Data;
 import java.util.List;
 
@@ -22,4 +23,5 @@ public class UserResponseDto {
     private boolean active;
     private boolean deleted;
     private List<String> profileTypes;
+    private List<TagResponseDto> tags;
 }
