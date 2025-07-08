@@ -181,17 +181,16 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     @Override
     @Transactional(readOnly = true)
     public ProjectResponseDto getPublicProjectById(Long projectId) {
-
-        Project project = projectRepositoryPort.findById(projectId)
+        ProjectEntity projectEntity = projectJpaRepository.findByIdWithTags(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
         // Verificar que el proyecto sea público y activo
-        if (!project.isPublic() || !project.isActive()) {
+        if (!projectEntity.isPublic() || !projectEntity.isActive()) {
             throw new ProjectOperationNotAllowedException(
                     "El proyecto con ID " + projectId + " no está disponible públicamente");
         }
 
-        return projectMapper.toResponseDto(project);
+        return projectMapper.toResponseDto(projectEntity);
     }
 
     @Override
@@ -251,10 +250,21 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter) {
+        // Convertir el status de String a ProjectStatus si no es null
+        ProjectStatus status = null;
+        if (filter.getStatus() != null && !filter.getStatus().trim().isEmpty()) {
+            try {
+                status = ProjectStatus.valueOf(filter.getStatus().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Si el status no es válido, retornar lista vacía o lanzar excepción
+                throw new IllegalArgumentException("Estado de proyecto inválido: " + filter.getStatus());
+            }
+        }
+        
         // Obtener entidades JPA con tags cargados
         List<ProjectEntity> projectEntities = projectJpaRepository.searchPublicProjectsWithTags(
                 filter.getTitle(),
-                filter.getStatus(),
+                status,
                 filter.getIsActive(),
                 filter.getMinTeamSize(),
                 filter.getMaxTeamSize(),
