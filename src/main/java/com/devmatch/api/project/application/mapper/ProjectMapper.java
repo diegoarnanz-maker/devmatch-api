@@ -96,6 +96,7 @@ public class ProjectMapper {
             new ArrayList<>(), // tags - se manejarán en método sobrecargado
             project.isPublic(),
             project.isActive(),
+            project.isDeleted(),
             project.getCreatedAt(),
             project.getUpdatedAt()
         );
@@ -157,6 +158,7 @@ public class ProjectMapper {
             tags,
             projectEntity.isPublic(),
             projectEntity.isActive(),
+            projectEntity.isDeleted(),
             projectEntity.getCreatedAt(),
             projectEntity.getUpdatedAt()
         );

@@ -214,6 +214,35 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     }
 
     @Override
+    public ProjectResponseDto restoreProject(Long projectId, Long userId) {
+
+        Project existingProject = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+
+        if (!existingProject.isOwner(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "restaurar");
+        }
+
+        // Usar el dominio para restaurar el proyecto
+        Project restoredProject = existingProject.restore();
+
+        // Guardar usando el repositorio del dominio
+        Project savedProject = projectRepositoryPort.save(restoredProject);
+
+        // Obtener el proyecto actualizado con tags
+        try {
+            ProjectEntity projectWithTags = projectJpaRepository.findByIdWithTags(savedProject.getId())
+                    .orElseThrow(() -> new ProjectNotFoundException(savedProject.getId()));
+            return projectMapper.toResponseDto(projectWithTags);
+        } catch (Exception e) {
+            // Si hay error cargando tags, retornar sin tags
+            System.err.println("Error cargando proyecto con tags: " + e.getMessage());
+            e.printStackTrace();
+            return projectMapper.toResponseDto(savedProject);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<ProjectResponseDto> getProjectsByOwner(Long ownerId) {
 

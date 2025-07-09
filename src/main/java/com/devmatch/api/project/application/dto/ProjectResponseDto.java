@@ -38,6 +38,7 @@ public class ProjectResponseDto {
     
     private boolean isPublic;
     private boolean isActive;
+    private boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     

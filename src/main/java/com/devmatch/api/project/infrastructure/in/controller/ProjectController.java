@@ -183,6 +183,19 @@ public class ProjectController {
     }
 
     /**
+     * Restaura un proyecto (desactivado o eliminado)
+     * Solo propietario del proyecto
+     */
+    @PutMapping("/{projectId}/restore")
+    public ResponseEntity<ProjectResponseDto> restoreProject(
+            @PathVariable Long projectId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        ProjectResponseDto response = projectManagementUseCase.restoreProject(projectId, userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Obtiene todos los proyectos de un usuario específico
      * Solo proyectos públicos o propios del usuario autenticado
      */

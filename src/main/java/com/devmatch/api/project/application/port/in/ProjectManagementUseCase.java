@@ -64,6 +64,14 @@ public interface ProjectManagementUseCase {
     void deleteProject(Long projectId, Long userId);
 
     /**
+     * Restaura un proyecto (desactivado o eliminado)
+     * @param projectId ID del proyecto a restaurar
+     * @param userId ID del usuario que realiza la restauración
+     * @return DTO con los datos del proyecto restaurado
+     */
+    ProjectResponseDto restoreProject(Long projectId, Long userId);
+
+    /**
      * Obtiene todos los proyectos de un usuario
      * @param ownerId ID del propietario de los proyectos
      * @return Lista de proyectos del usuario
