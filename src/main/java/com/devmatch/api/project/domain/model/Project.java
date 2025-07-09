@@ -149,6 +149,15 @@ public class Project {
         );
     }
 
+    public Project updateVisibility(boolean isPublic) {
+        return new Project(
+            this.id, this.title, this.description, this.status, this.ownerId,
+            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.maxTeamSize, isPublic, this.isActive, this.isDeleted,
+            this.createdAt, LocalDateTime.now()
+        );
+    }
+
     public Project deactivate() {
         return new Project(
             this.id, this.title, this.description, this.status, this.ownerId,

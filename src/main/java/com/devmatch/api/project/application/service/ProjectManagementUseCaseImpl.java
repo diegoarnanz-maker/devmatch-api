@@ -2,6 +2,7 @@ package com.devmatch.api.project.application.service;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,7 +106,31 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project savedProject = projectRepositoryPort.save(updatedProject);
 
-        return projectMapper.toResponseDto(savedProject);
+        // Procesar tags si se proporcionaron
+        if (request.getTags() != null && !request.getTags().isEmpty()) {
+            List<Long> tagIds = new ArrayList<>();
+            for (String tagName : request.getTags()) {
+                // Buscar o crear el tag
+                TagRepositoryPort.TagDto tag = tagRepositoryPort.findByName(tagName)
+                        .orElseGet(() -> tagRepositoryPort.createTag(tagName, "TECHNOLOGY"));
+                tagIds.add(tag.id());
+            }
+
+            // Agregar tags al proyecto
+            projectRepositoryPort.addTagsToProject(projectId, tagIds);
+        }
+
+        // Obtener el proyecto actualizado con tags
+        try {
+            ProjectEntity projectWithTags = projectJpaRepository.findByIdWithTags(savedProject.getId())
+                    .orElseThrow(() -> new ProjectNotFoundException(savedProject.getId()));
+            return projectMapper.toResponseDto(projectWithTags);
+        } catch (Exception e) {
+            // Si hay error cargando tags, retornar sin tags
+            System.err.println("Error cargando proyecto con tags: " + e.getMessage());
+            e.printStackTrace();
+            return projectMapper.toResponseDto(savedProject);
+        }
     }
 
     @Override
@@ -118,11 +143,44 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
             throw new ProjectOperationNotAllowedException(projectId, userId, "cambiar estado");
         }
 
-        Project updatedProject = existingProject.updateStatus(newStatus);
+        // Cargar la entidad JPA con tags para preservar las relaciones
+        ProjectEntity projectEntity = projectJpaRepository.findByIdWithTags(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
-        Project savedProject = projectRepositoryPort.save(updatedProject);
+        // Actualizar solo el estado en la entidad JPA (preserva tags)
+        projectEntity.setStatus(newStatus);
+        projectEntity.setUpdatedAt(LocalDateTime.now());
 
-        return projectMapper.toResponseDto(savedProject);
+        // Guardar la entidad actualizada (preserva las relaciones con tags)
+        ProjectEntity savedEntity = projectJpaRepository.save(projectEntity);
+
+        // Retornar el DTO con tags
+        return projectMapper.toResponseDto(savedEntity);
+    }
+
+    @Override
+    public ProjectResponseDto changeProjectVisibility(Long projectId, boolean isPublic, Long userId) {
+
+        Project existingProject = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+
+        if (!existingProject.canBeEditedBy(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "cambiar visibilidad");
+        }
+
+        // Cargar la entidad JPA con tags para preservar las relaciones
+        ProjectEntity projectEntity = projectJpaRepository.findByIdWithTags(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+
+        // Actualizar solo la visibilidad en la entidad JPA (preserva tags)
+        projectEntity.setPublic(isPublic);
+        projectEntity.setUpdatedAt(LocalDateTime.now());
+
+        // Guardar la entidad actualizada (preserva las relaciones con tags)
+        ProjectEntity savedEntity = projectJpaRepository.save(projectEntity);
+
+        // Retornar el DTO con tags
+        return projectMapper.toResponseDto(savedEntity);
     }
 
     @Override

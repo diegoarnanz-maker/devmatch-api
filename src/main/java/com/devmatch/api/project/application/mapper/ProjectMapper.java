@@ -107,14 +107,59 @@ public class ProjectMapper {
      * @return DTO de respuesta con tags
      */
     public ProjectResponseDto toResponseDto(ProjectEntity projectEntity) {
-        Project project = projectPersistenceMapper.toDomain(projectEntity);
-        ProjectResponseDto responseDto = toResponseDto(project);
+        String ownerUsername = null;
+        List<ProjectResponseDto.ProjectMemberDto> teamMembers = new ArrayList<>();
         
-        // Agregar tags
+        try {
+            // Obtener información del owner
+            var owner = userQueryUseCase.findUserById(projectEntity.getOwnerId());
+            ownerUsername = owner.getUsername();
+            
+            // Obtener el primer profile type del usuario (por ahora solo el primero)
+            String profileType = null;
+            if (owner.getProfileTypes() != null && !owner.getProfileTypes().isEmpty()) {
+                profileType = owner.getProfileTypes().get(0); // Tomar el primero
+            }
+            
+            // Agregar el owner como miembro del equipo (líder)
+            teamMembers.add(new ProjectResponseDto.ProjectMemberDto(
+                owner.getId(),
+                owner.getUsername(),
+                "LEADER", // Posición en el proyecto
+                profileType // Profile type del usuario
+            ));
+            
+            // TODO: Agregar otros miembros del equipo cuando se implemente la funcionalidad
+            // Por ahora solo está el owner
+            
+        } catch (Exception e) {
+            // Si no se puede obtener la información del owner, continuar sin ella
+            // Esto puede pasar si el usuario fue eliminado
+            System.err.println("Error obteniendo información del owner para proyecto " + projectEntity.getId() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        // Extraer tags
         List<String> tags = projectPersistenceMapper.extractTagNames(projectEntity);
-        responseDto.setTags(tags);
         
-        return responseDto;
+        return new ProjectResponseDto(
+            projectEntity.getId(),
+            projectEntity.getTitle(),
+            projectEntity.getDescription(),
+            projectEntity.getStatus(),
+            projectEntity.getOwnerId(),
+            projectEntity.getRepoUrl(),
+            projectEntity.getCoverImageUrl(),
+            projectEntity.getEstimatedDurationWeeks(),
+            projectEntity.getMaxTeamSize(),
+            ownerUsername,
+            teamMembers,
+            tags,
+            projectEntity.isPublic(),
+            projectEntity.isActive(),
+            projectEntity.getCreatedAt(),
+            projectEntity.getUpdatedAt()
+        );
     }
 
     /**
