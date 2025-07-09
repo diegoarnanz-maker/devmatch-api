@@ -175,4 +175,13 @@ public class Project {
             this.createdAt, LocalDateTime.now()
         );
     }
+
+    public Project restore() {
+        return new Project(
+            this.id, this.title, this.description, this.status, this.ownerId,
+            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.maxTeamSize, this.isPublic, true, false,
+            this.createdAt, LocalDateTime.now()
+        );
+    }
 }
