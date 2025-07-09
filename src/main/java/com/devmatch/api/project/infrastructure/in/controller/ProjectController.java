@@ -18,8 +18,9 @@ import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
 import com.devmatch.api.project.application.dto.ProjectPublicSearchRequestDto;
 import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
+import com.devmatch.api.project.application.dto.ProjectStatusRequestDto;
+import com.devmatch.api.project.application.dto.ProjectVisibilityRequestDto;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
-import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 
 import jakarta.validation.Valid;
@@ -134,10 +135,24 @@ public class ProjectController {
     @PutMapping("/{projectId}/status")
     public ResponseEntity<ProjectResponseDto> changeProjectStatus(
             @PathVariable Long projectId,
-            @RequestBody ProjectStatus newStatus,
+            @RequestBody @Valid ProjectStatusRequestDto request,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        ProjectResponseDto response = projectManagementUseCase.changeProjectStatus(projectId, newStatus, userPrincipal.getUserId());
+        ProjectResponseDto response = projectManagementUseCase.changeProjectStatus(projectId, request.getStatus(), userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Cambia la visibilidad pública de un proyecto
+     * Solo propietario del proyecto
+     */
+    @PutMapping("/{projectId}/visibility")
+    public ResponseEntity<ProjectResponseDto> changeProjectVisibility(
+            @PathVariable Long projectId,
+            @RequestBody @Valid ProjectVisibilityRequestDto request,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        ProjectResponseDto response = projectManagementUseCase.changeProjectVisibility(projectId, request.isPublic(), userPrincipal.getUserId());
         return ResponseEntity.ok(response);
     }
 

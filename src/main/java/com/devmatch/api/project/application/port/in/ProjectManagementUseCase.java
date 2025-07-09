@@ -41,6 +41,15 @@ public interface ProjectManagementUseCase {
     ProjectResponseDto changeProjectStatus(Long projectId, ProjectStatus newStatus, Long userId);
 
     /**
+     * Cambia la visibilidad pública de un proyecto
+     * @param projectId ID del proyecto
+     * @param isPublic Nueva visibilidad pública del proyecto
+     * @param userId ID del usuario que realiza el cambio
+     * @return DTO con los datos del proyecto actualizado
+     */
+    ProjectResponseDto changeProjectVisibility(Long projectId, boolean isPublic, Long userId);
+
+    /**
      * Desactiva un proyecto (soft deactivate)
      * @param projectId ID del proyecto a desactivar
      * @param userId ID del usuario que realiza la desactivación
