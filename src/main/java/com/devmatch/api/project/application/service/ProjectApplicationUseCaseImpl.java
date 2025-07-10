@@ -200,4 +200,30 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         projectApplicationRepositoryPort.save(rejectedApplication);
     }
 
+    @Override
+    public void cancelApplication(Long applicationId, Long userId) {
+        // 1. Validar que la aplicación existe
+        ProjectApplication application = projectApplicationRepositoryPort.findById(applicationId)
+                .orElseThrow(() -> new ProjectOperationNotAllowedException(
+                        "Aplicación con ID " + applicationId + " no encontrada"));
+        
+        // 2. Validar que el usuario es el que aplicó
+        if (!application.getUserId().equals(userId)) {
+            throw new ProjectOperationNotAllowedException(
+                    "El usuario con ID " + userId + " no puede cancelar la aplicación con ID " + applicationId);
+        }
+        
+        // 3. Validar que la aplicación puede ser cancelada
+        if (!application.canBeCancelled()) {
+            throw new ProjectOperationNotAllowedException(
+                    "La aplicación con ID " + applicationId + " no puede ser cancelada");
+        }
+        
+        // 4. Cancelar la aplicación
+        ProjectApplication cancelledApplication = application.cancel();
+        
+        // 5. Guardar la aplicación actualizada
+        projectApplicationRepositoryPort.save(cancelledApplication);
+    }
+
 }

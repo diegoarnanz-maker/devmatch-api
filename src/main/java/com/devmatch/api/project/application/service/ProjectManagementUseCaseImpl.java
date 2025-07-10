@@ -184,7 +184,7 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     }
 
     @Override
-    public void deactivateProject(Long projectId, Long userId) {
+    public ProjectResponseDto deactivateProject(Long projectId, Long userId) {
 
         Project existingProject = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
@@ -202,11 +202,14 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
         projectEntity.setUpdatedAt(LocalDateTime.now());
 
         // Guardar la entidad actualizada (preserva las relaciones con tags)
-        projectJpaRepository.save(projectEntity);
+        ProjectEntity savedEntity = projectJpaRepository.save(projectEntity);
+
+        // Retornar el DTO con tags
+        return projectMapper.toResponseDto(savedEntity);
     }
 
     @Override
-    public void deleteProject(Long projectId, Long userId) {
+    public ProjectResponseDto deleteProject(Long projectId, Long userId) {
 
         Project existingProject = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
@@ -225,7 +228,10 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
         projectEntity.setUpdatedAt(LocalDateTime.now());
 
         // Guardar la entidad actualizada (preserva las relaciones con tags)
-        projectJpaRepository.save(projectEntity);
+        ProjectEntity savedEntity = projectJpaRepository.save(projectEntity);
+
+        // Retornar el DTO con tags
+        return projectMapper.toResponseDto(savedEntity);
     }
 
     @Override

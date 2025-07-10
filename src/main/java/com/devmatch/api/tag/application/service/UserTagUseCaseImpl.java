@@ -40,6 +40,8 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
                 .collect(Collectors.toList());
     }
 
+
+
     @Override
     @Transactional(readOnly = true)
     public List<TagResponseDto> searchTagsByName(String name) {
