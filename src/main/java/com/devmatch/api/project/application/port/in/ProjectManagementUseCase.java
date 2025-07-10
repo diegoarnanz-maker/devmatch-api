@@ -53,15 +53,17 @@ public interface ProjectManagementUseCase {
      * Desactiva un proyecto (soft deactivate)
      * @param projectId ID del proyecto a desactivar
      * @param userId ID del usuario que realiza la desactivación
+     * @return DTO con los datos del proyecto desactivado
      */
-    void deactivateProject(Long projectId, Long userId);
+    ProjectResponseDto deactivateProject(Long projectId, Long userId);
 
     /**
      * Elimina un proyecto (soft delete)
      * @param projectId ID del proyecto a eliminar
      * @param userId ID del usuario que realiza la eliminación
+     * @return DTO con los datos del proyecto eliminado
      */
-    void deleteProject(Long projectId, Long userId);
+    ProjectResponseDto deleteProject(Long projectId, Long userId);
 
     /**
      * Restaura un proyecto (desactivado o eliminado)

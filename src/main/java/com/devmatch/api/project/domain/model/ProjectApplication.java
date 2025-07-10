@@ -161,4 +161,19 @@ public class ProjectApplication {
             isActive, isDeleted, createdAt, LocalDateTime.now()
         );
     }
+
+    public boolean canBeCancelled() {
+        return isPending() && isActive && !isDeleted;
+    }
+
+    public ProjectApplication cancel() {
+        if (!canBeCancelled()) {
+            throw new IllegalStateException("La aplicación no puede ser cancelada");
+        }
+        return new ProjectApplication(
+            id, projectId, userId, motivationMessage,
+            status, seenByOwner, submittedAt, resolvedAt,
+            false, isDeleted, createdAt, LocalDateTime.now()
+        );
+    }
 } 

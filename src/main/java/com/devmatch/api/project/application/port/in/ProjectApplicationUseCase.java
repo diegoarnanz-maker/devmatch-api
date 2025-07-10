@@ -10,5 +10,6 @@ public interface ProjectApplicationUseCase {
     List<ProjectApplicationResponseDto> getUserApplications(Long userId);
     void acceptApplication(Long projectId, Long applicationId, Long ownerId);
     void rejectApplication(Long projectId, Long applicationId, Long ownerId);
+    void cancelApplication(Long applicationId, Long userId);
     
 }

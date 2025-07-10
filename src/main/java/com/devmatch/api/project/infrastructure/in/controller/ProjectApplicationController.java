@@ -119,4 +119,22 @@ public class ProjectApplicationController {
         
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Permite a un usuario cancelar su propia aplicación a un proyecto.
+     * Solo se puede cancelar si la aplicación está pendiente.
+     * 
+     * @param applicationId ID de la aplicación a cancelar
+     * @param userPrincipal Usuario autenticado (debe ser el que aplicó)
+     * @return Respuesta HTTP 200 si la aplicación se canceló exitosamente
+     */
+    @DeleteMapping("/applications/{applicationId}/cancel")
+    public ResponseEntity<Void> cancelApplication(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        projectApplicationUseCase.cancelApplication(applicationId, userPrincipal.getUserId());
+        
+        return ResponseEntity.ok().build();
+    }
 } 

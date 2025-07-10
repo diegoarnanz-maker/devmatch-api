@@ -37,6 +37,8 @@ public class UserTagController {
         return ResponseEntity.ok(userTagUseCase.getAllTags());
     }
 
+
+
     /**
      * Busca tags por nombre que contengan el texto especificado.
      * Endpoint público - no requiere autenticación.

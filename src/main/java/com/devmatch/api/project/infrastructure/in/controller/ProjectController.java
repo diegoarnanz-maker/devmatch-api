@@ -161,12 +161,12 @@ public class ProjectController {
      * Solo propietario del proyecto
      */
     @PutMapping("/{projectId}/deactivate")
-    public ResponseEntity<Void> deactivateProject(
+    public ResponseEntity<ProjectResponseDto> deactivateProject(
             @PathVariable Long projectId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        projectManagementUseCase.deactivateProject(projectId, userPrincipal.getUserId());
-        return ResponseEntity.noContent().build();
+        ProjectResponseDto response = projectManagementUseCase.deactivateProject(projectId, userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -174,12 +174,12 @@ public class ProjectController {
      * Solo propietario del proyecto
      */
     @DeleteMapping("/{projectId}")
-    public ResponseEntity<Void> deleteProject(
+    public ResponseEntity<ProjectResponseDto> deleteProject(
             @PathVariable Long projectId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        projectManagementUseCase.deleteProject(projectId, userPrincipal.getUserId());
-        return ResponseEntity.noContent().build();
+        ProjectResponseDto response = projectManagementUseCase.deleteProject(projectId, userPrincipal.getUserId());
+        return ResponseEntity.ok(response);
     }
 
     /**
