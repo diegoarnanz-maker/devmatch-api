@@ -193,9 +193,16 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
             throw new ProjectOperationNotAllowedException(projectId, userId, "desactivar");
         }
 
-        Project deactivatedProject = existingProject.deactivate();
+        // Cargar la entidad JPA con tags para preservar las relaciones
+        ProjectEntity projectEntity = projectJpaRepository.findByIdWithTags(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
-        projectRepositoryPort.save(deactivatedProject);
+        // Actualizar solo el estado activo en la entidad JPA (preserva tags)
+        projectEntity.setActive(false);
+        projectEntity.setUpdatedAt(LocalDateTime.now());
+
+        // Guardar la entidad actualizada (preserva las relaciones con tags)
+        projectJpaRepository.save(projectEntity);
     }
 
     @Override
@@ -208,38 +215,45 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
             throw new ProjectOperationNotAllowedException(projectId, userId, "eliminar");
         }
 
-        Project deletedProject = existingProject.softDelete();
+        // Cargar la entidad JPA con tags para preservar las relaciones
+        ProjectEntity projectEntity = projectJpaRepository.findByIdWithTags(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
-        projectRepositoryPort.save(deletedProject);
+        // Actualizar solo los campos de estado en la entidad JPA (preserva tags)
+        projectEntity.setActive(false);
+        projectEntity.setDeleted(true);
+        projectEntity.setUpdatedAt(LocalDateTime.now());
+
+        // Guardar la entidad actualizada (preserva las relaciones con tags)
+        projectJpaRepository.save(projectEntity);
     }
 
     @Override
     public ProjectResponseDto restoreProject(Long projectId, Long userId) {
 
-        Project existingProject = projectRepositoryPort.findById(projectId)
+        // Buscar directamente en la entidad JPA (incluye proyectos eliminados)
+        ProjectEntity projectEntity = projectJpaRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
-        if (!existingProject.isOwner(userId)) {
+        // Verificar que el usuario es el propietario
+        if (!projectEntity.getOwnerId().equals(userId)) {
             throw new ProjectOperationNotAllowedException(projectId, userId, "restaurar");
         }
 
-        // Usar el dominio para restaurar el proyecto
-        Project restoredProject = existingProject.restore();
+        // Cargar la entidad JPA con tags para preservar las relaciones
+        ProjectEntity projectWithTags = projectJpaRepository.findByIdWithTags(projectId)
+                .orElse(projectEntity); // Si no encuentra con tags, usar la entidad básica
 
-        // Guardar usando el repositorio del dominio
-        Project savedProject = projectRepositoryPort.save(restoredProject);
+        // Actualizar solo los campos de estado en la entidad JPA (preserva tags)
+        projectWithTags.setActive(true);
+        projectWithTags.setDeleted(false);
+        projectWithTags.setUpdatedAt(LocalDateTime.now());
 
-        // Obtener el proyecto actualizado con tags
-        try {
-            ProjectEntity projectWithTags = projectJpaRepository.findByIdWithTags(savedProject.getId())
-                    .orElseThrow(() -> new ProjectNotFoundException(savedProject.getId()));
-            return projectMapper.toResponseDto(projectWithTags);
-        } catch (Exception e) {
-            // Si hay error cargando tags, retornar sin tags
-            System.err.println("Error cargando proyecto con tags: " + e.getMessage());
-            e.printStackTrace();
-            return projectMapper.toResponseDto(savedProject);
-        }
+        // Guardar la entidad actualizada (preserva las relaciones con tags)
+        ProjectEntity savedEntity = projectJpaRepository.save(projectWithTags);
+
+        // Retornar el DTO con tags
+        return projectMapper.toResponseDto(savedEntity);
     }
 
     @Override
@@ -249,6 +263,103 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
         List<Project> projects = projectRepositoryPort.findByOwnerId(ownerId);
 
         return projectMapper.toResponseDtoList(projects);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectResponseDto> getProjectsByOwnerWithSecurity(Long ownerId, Long authenticatedUserId, ProjectPublicSearchRequestDto filter) {
+        // Obtener todos los proyectos del propietario con tags cargados
+        List<ProjectEntity> allProjectEntities = projectJpaRepository.findByOwnerIdWithTags(ownerId);
+        
+        // Filtrar proyectos según la lógica de seguridad
+        List<ProjectEntity> visibleProjectEntities = allProjectEntities.stream()
+                .filter(projectEntity -> {
+                    // Crear objeto de dominio para verificar visibilidad
+                    Project project = new Project(
+                        projectEntity.getId(),
+                        projectEntity.getTitle(),
+                        projectEntity.getDescription(),
+                        projectEntity.getStatus(),
+                        projectEntity.getOwnerId(),
+                        projectEntity.getRepoUrl(),
+                        projectEntity.getCoverImageUrl(),
+                        projectEntity.getEstimatedDurationWeeks(),
+                        projectEntity.getMaxTeamSize(),
+                        projectEntity.isPublic(),
+                        projectEntity.isActive(),
+                        projectEntity.isDeleted(),
+                        projectEntity.getCreatedAt(),
+                        projectEntity.getUpdatedAt()
+                    );
+                    return project.isVisibleTo(authenticatedUserId);
+                })
+                .toList();
+        
+        // Si no hay filtro, devolver todos los proyectos visibles con tags
+        if (filter == null) {
+            return projectMapper.toResponseDtoListWithTags(visibleProjectEntities);
+        }
+        
+        // Aplicar filtros adicionales
+        List<ProjectEntity> filteredProjectEntities = visibleProjectEntities.stream()
+                .filter(projectEntity -> {
+                    // Filtrar por título (búsqueda parcial)
+                    if (filter.getTitle() != null && !filter.getTitle().trim().isEmpty()) {
+                        if (!projectEntity.getTitle().toLowerCase().contains(filter.getTitle().toLowerCase())) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtrar por estado
+                    if (filter.getStatus() != null && !filter.getStatus().trim().isEmpty()) {
+                        try {
+                            ProjectStatus filterStatus = ProjectStatus.valueOf(filter.getStatus().toUpperCase());
+                            if (!projectEntity.getStatus().equals(filterStatus)) {
+                                return false;
+                            }
+                        } catch (IllegalArgumentException e) {
+                            // Si el status no es válido, no filtrar por él
+                        }
+                    }
+                    
+                    // Filtrar por estado activo
+                    if (filter.getIsActive() != null) {
+                        if (projectEntity.isActive() != filter.getIsActive()) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtrar por tamaño del equipo
+                    if (filter.getMinTeamSize() != null) {
+                        if (projectEntity.getMaxTeamSize() < filter.getMinTeamSize()) {
+                            return false;
+                        }
+                    }
+                    
+                    if (filter.getMaxTeamSize() != null) {
+                        if (projectEntity.getMaxTeamSize() > filter.getMaxTeamSize()) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtrar por duración estimada
+                    if (filter.getMinDurationWeeks() != null) {
+                        if (projectEntity.getEstimatedDurationWeeks() < filter.getMinDurationWeeks()) {
+                            return false;
+                        }
+                    }
+                    
+                    if (filter.getMaxDurationWeeks() != null) {
+                        if (projectEntity.getEstimatedDurationWeeks() > filter.getMaxDurationWeeks()) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                })
+                .toList();
+        
+        return projectMapper.toResponseDtoListWithTags(filteredProjectEntities);
     }
 
     @Override

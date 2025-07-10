@@ -79,6 +79,16 @@ public interface ProjectManagementUseCase {
     List<ProjectResponseDto> getProjectsByOwner(Long ownerId);
 
     /**
+     * Obtiene proyectos de un usuario específico con filtros y lógica de seguridad
+     * Solo devuelve proyectos públicos o propios del usuario autenticado
+     * @param ownerId ID del propietario de los proyectos
+     * @param authenticatedUserId ID del usuario autenticado que solicita los proyectos
+     * @param filter DTO con los criterios de búsqueda y filtrado (opcional)
+     * @return Lista de proyectos que el usuario autenticado puede ver
+     */
+    List<ProjectResponseDto> getProjectsByOwnerWithSecurity(Long ownerId, Long authenticatedUserId, ProjectPublicSearchRequestDto filter);
+
+    /**
      * Obtiene un proyecto específico por su ID
      * @param projectId ID del proyecto
      * @param userId ID del usuario que solicita el proyecto
