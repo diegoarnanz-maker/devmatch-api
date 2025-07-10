@@ -196,17 +196,22 @@ public class ProjectController {
     }
 
     /**
-     * Obtiene todos los proyectos de un usuario específico
-     * Solo proyectos públicos o propios del usuario autenticado
+     * Obtiene proyectos de un usuario específico con filtros y lógica de seguridad
+     * Solo devuelve proyectos públicos o propios del usuario autenticado
+     * Si no se envía cuerpo, se muestran todos los proyectos visibles
+     * Si se envía cuerpo, se aplican los filtros especificados
      */
-    @GetMapping("/owner/{ownerId}")
+    @PostMapping("/owner/{ownerId}")
     public ResponseEntity<List<ProjectResponseDto>> getProjectsByOwner(
             @PathVariable Long ownerId,
+            @RequestBody(required = false) ProjectPublicSearchRequestDto filter,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        // TODO: Implementar lógica para mostrar solo proyectos públicos
-        // o proyectos del usuario autenticado
-        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(ownerId);
+        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwnerWithSecurity(
+                ownerId, 
+                userPrincipal.getUserId(), 
+                filter
+        );
         return ResponseEntity.ok(projects);
     }
 
