@@ -145,4 +145,22 @@ public interface ProjectManagementUseCase {
      * @return Lista de miembros del proyecto
      */
     List<ProjectResponseDto.ProjectMemberDto> getProjectMembers(Long projectId, Long userId);
+
+    /**
+     * Remueve un miembro del proyecto
+     * @param projectId ID del proyecto
+     * @param memberUserId ID del usuario miembro a remover
+     * @param ownerUserId ID del propietario del proyecto que realiza la operación
+     */
+    void removeProjectMember(Long projectId, Long memberUserId, Long ownerUserId);
+
+    /**
+     * Cambia el rol de un miembro del proyecto
+     * @param projectId ID del proyecto
+     * @param memberUserId ID del usuario miembro
+     * @param newRole Nuevo rol del miembro
+     * @param ownerUserId ID del propietario del proyecto que realiza la operación
+     * @return DTO con los datos del miembro actualizado
+     */
+    ProjectResponseDto.ProjectMemberDto changeMemberRole(Long projectId, Long memberUserId, String newRole, Long ownerUserId);
 }

@@ -62,12 +62,12 @@ public class ProjectDescription {
             throw new IllegalArgumentException("La descripción no puede contener solo espacios o caracteres especiales");
         }
         
-        // Validar contenido inapropiado
+        // Validar contenido inapropiado - solo rechazar descripciones que sean exactamente palabras de prueba
         String lowerDescription = trimmedDescription.toLowerCase();
-        if (lowerDescription.contains("spam") || 
-            lowerDescription.contains("test") ||
-            lowerDescription.contains("prueba") ||
-            lowerDescription.contains("lorem ipsum")) {
+        if (lowerDescription.equals("spam") || 
+            lowerDescription.equals("test") ||
+            lowerDescription.equals("prueba") ||
+            lowerDescription.equals("lorem ipsum")) {
             throw new IllegalArgumentException("La descripción contiene contenido no permitido");
         }
     }

@@ -48,10 +48,12 @@ public class ProjectTitle {
             );
         }
         
-        // Validaciones específicas de negocio
-        if (trimmedTitle.toLowerCase().contains("spam") || 
-            trimmedTitle.toLowerCase().contains("test") ||
-            trimmedTitle.toLowerCase().contains("prueba")) {
+        // Validaciones específicas de negocio - solo rechazar títulos que sean exactamente palabras de prueba
+        String lowerTitle = trimmedTitle.toLowerCase();
+        if (lowerTitle.equals("spam") || 
+            lowerTitle.equals("test") ||
+            lowerTitle.equals("prueba") ||
+            lowerTitle.equals("lorem ipsum")) {
             throw new IllegalArgumentException("El título contiene palabras no permitidas");
         }
     }

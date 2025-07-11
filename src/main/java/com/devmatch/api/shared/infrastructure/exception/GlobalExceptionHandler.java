@@ -237,6 +237,22 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Maneja excepciones de validación de argumentos ilegales
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.BAD_REQUEST.value(),
+            "Error de validación",
+            ex.getMessage()
+        );
+        
+        log.warn("Error de validación: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
      * Maneja excepciones genéricas no esperadas
      */
     @ExceptionHandler(Exception.class)
@@ -292,11 +308,11 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
             LocalDateTime.now(),
             HttpStatus.BAD_REQUEST.value(),
-            "Límite de proyectos excedido",
+            "Límite de proyectos activos excedido",
             ex.getMessage()
         );
         
-        log.warn("Límite de proyectos excedido: {}", ex.getMessage());
+        log.warn("Límite de proyectos activos excedido: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 

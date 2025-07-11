@@ -14,6 +14,7 @@ import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
 import com.devmatch.api.project.application.mapper.ProjectMapper;
 import com.devmatch.api.project.infrastructure.out.persistence.entity.ProjectEntity;
 import com.devmatch.api.project.infrastructure.out.persistence.repository.ProjectJpaRepository;
+import com.devmatch.api.project.infrastructure.out.persistence.mapper.ProjectPersistenceMapper;
 import com.devmatch.api.project.application.port.out.TagRepositoryPort;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.project.application.port.out.ProjectRepositoryPort;
@@ -40,6 +41,7 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     private final UserQueryUseCase userQueryUseCase;
     private final ProjectJpaRepository projectJpaRepository;
     private final TagRepositoryPort tagRepositoryPort;
+    private final ProjectPersistenceMapper projectPersistenceMapper;
 
     @Override
     @Transactional
@@ -281,22 +283,7 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
         List<ProjectEntity> visibleProjectEntities = allProjectEntities.stream()
                 .filter(projectEntity -> {
                     // Crear objeto de dominio para verificar visibilidad
-                    Project project = new Project(
-                        projectEntity.getId(),
-                        projectEntity.getTitle(),
-                        projectEntity.getDescription(),
-                        projectEntity.getStatus(),
-                        projectEntity.getOwnerId(),
-                        projectEntity.getRepoUrl(),
-                        projectEntity.getCoverImageUrl(),
-                        projectEntity.getEstimatedDurationWeeks(),
-                        projectEntity.getMaxTeamSize(),
-                        projectEntity.isPublic(),
-                        projectEntity.isActive(),
-                        projectEntity.isDeleted(),
-                        projectEntity.getCreatedAt(),
-                        projectEntity.getUpdatedAt()
-                    );
+                    Project project = projectPersistenceMapper.toDomain(projectEntity);
                     return project.isVisibleTo(authenticatedUserId);
                 })
                 .toList();
@@ -539,5 +526,66 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
         return projectMapper.toResponseDto(updatedProject);
+    }
+
+    @Override
+    @Transactional
+    public void removeProjectMember(Long projectId, Long memberId, Long userId) {
+        // Verificar que el proyecto existe y el usuario puede editarlo
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        if (!project.canBeEditedBy(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "remover miembros");
+        }
+
+        // Remover el miembro del proyecto
+        projectMemberRepositoryPort.removeMemberFromProject(projectId, memberId);
+    }
+
+    @Override
+    @Transactional
+    public ProjectResponseDto.ProjectMemberDto changeMemberRole(Long projectId, Long memberId, String newRole, Long userId) {
+        // Verificar que el proyecto existe y el usuario puede editarlo
+        Project project = projectRepositoryPort.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+        
+        if (!project.canBeEditedBy(userId)) {
+            throw new ProjectOperationNotAllowedException(projectId, userId, "cambiar roles");
+        }
+
+        // Cambiar el rol del miembro
+        projectMemberRepositoryPort.updateMemberRole(projectId, memberId, newRole);
+
+        // Obtener el miembro actualizado
+        List<ProjectMember> members = projectMemberRepositoryPort.getActiveMembersByProjectId(projectId);
+        ProjectMember updatedMember = members.stream()
+                .filter(member -> member.getUserId().equals(memberId))
+                .findFirst()
+                .orElseThrow(() -> new ProjectOperationNotAllowedException(projectId, memberId, "miembro no encontrado"));
+
+        // Obtener información del usuario
+        try {
+            var user = userQueryUseCase.findUserById(updatedMember.getUserId());
+            String profileType = null;
+            if (user.getProfileTypes() != null && !user.getProfileTypes().isEmpty()) {
+                profileType = user.getProfileTypes().get(0);
+            }
+            
+            return new ProjectResponseDto.ProjectMemberDto(
+                    updatedMember.getUserId(),
+                    user.getUsername(),
+                    updatedMember.getMemberRole(),
+                    profileType
+            );
+        } catch (Exception e) {
+            // Si no se puede obtener la información del usuario, crear DTO con datos básicos
+            return new ProjectResponseDto.ProjectMemberDto(
+                    updatedMember.getUserId(),
+                    "Usuario " + updatedMember.getUserId(),
+                    updatedMember.getMemberRole(),
+                    null
+            );
+        }
     }
 }

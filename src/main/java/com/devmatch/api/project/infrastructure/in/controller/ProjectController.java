@@ -20,6 +20,7 @@ import com.devmatch.api.project.application.dto.ProjectPublicSearchRequestDto;
 import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
 import com.devmatch.api.project.application.dto.ProjectStatusRequestDto;
 import com.devmatch.api.project.application.dto.ProjectVisibilityRequestDto;
+import com.devmatch.api.project.application.dto.ProjectMemberRoleRequestDto;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 
@@ -73,7 +74,7 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
-    // ===== ENDPOINTS PRIVADOS (con autenticación) =====
+    // ===== ENDPOINTS DE CONSULTA (con autenticación) =====
 
     /**
      * Obtiene un proyecto específico por su ID
@@ -99,7 +100,25 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
-    // ===== ENDPOINTS DE PROPIETARIO =====
+    /**
+     * Obtiene proyectos de un usuario específico con filtros y lógica de seguridad
+     * Solo devuelve proyectos públicos o propios del usuario autenticado
+     */
+    @PostMapping("/owner/{ownerId}")
+    public ResponseEntity<List<ProjectResponseDto>> getProjectsByOwner(
+            @PathVariable Long ownerId,
+            @RequestBody(required = false) ProjectPublicSearchRequestDto filter,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwnerWithSecurity(
+                ownerId, 
+                userPrincipal.getUserId(), 
+                filter
+        );
+        return ResponseEntity.ok(projects);
+    }
+
+    // ===== ENDPOINTS DE GESTIÓN DE PROYECTOS =====
 
     /**
      * Crea un nuevo proyecto
@@ -195,25 +214,7 @@ public class ProjectController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Obtiene proyectos de un usuario específico con filtros y lógica de seguridad
-     * Solo devuelve proyectos públicos o propios del usuario autenticado
-     * Si no se envía cuerpo, se muestran todos los proyectos visibles
-     * Si se envía cuerpo, se aplican los filtros especificados
-     */
-    @PostMapping("/owner/{ownerId}")
-    public ResponseEntity<List<ProjectResponseDto>> getProjectsByOwner(
-            @PathVariable Long ownerId,
-            @RequestBody(required = false) ProjectPublicSearchRequestDto filter,
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
-        
-        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwnerWithSecurity(
-                ownerId, 
-                userPrincipal.getUserId(), 
-                filter
-        );
-        return ResponseEntity.ok(projects);
-    }
+    // ===== ENDPOINTS DE GESTIÓN DE MIEMBROS =====
 
     /**
      * Obtiene los miembros de un proyecto
@@ -226,6 +227,36 @@ public class ProjectController {
         
         List<ProjectResponseDto.ProjectMemberDto> members = projectManagementUseCase.getProjectMembers(projectId, userPrincipal.getUserId());
         return ResponseEntity.ok(members);
+    }
+
+    /**
+     * Remueve un miembro del proyecto
+     * Solo propietario del proyecto
+     */
+    @DeleteMapping("/{projectId}/members/{userId}")
+    public ResponseEntity<Void> removeProjectMember(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        projectManagementUseCase.removeProjectMember(projectId, userId, userPrincipal.getUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Cambia el rol de un miembro del proyecto
+     * Solo propietario del proyecto
+     */
+    @PutMapping("/{projectId}/members/{userId}/role")
+    public ResponseEntity<ProjectResponseDto.ProjectMemberDto> changeMemberRole(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            @RequestBody @Valid ProjectMemberRoleRequestDto request,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        ProjectResponseDto.ProjectMemberDto updatedMember = projectManagementUseCase.changeMemberRole(
+                projectId, userId, request.getRole(), userPrincipal.getUserId());
+        return ResponseEntity.ok(updatedMember);
     }
 
     // ===== ENDPOINTS DE GESTIÓN DE TAGS =====

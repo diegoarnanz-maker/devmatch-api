@@ -16,8 +16,9 @@ public class ProjectDomainService {
     
     /**
      * Valida si un usuario puede crear un nuevo proyecto
+     * Solo cuenta proyectos activos en desarrollo (OPEN, IN_PROGRESS, UNDER_REVIEW)
      * @param ownerId ID del usuario propietario
-     * @param currentProjectCount Número actual de proyectos del usuario
+     * @param currentProjectCount Número actual de proyectos activos en desarrollo del usuario
      * @throws ProjectLimitExceededException si el usuario ha alcanzado el límite
      */
     public void validateProjectCreation(Long ownerId, long currentProjectCount) {

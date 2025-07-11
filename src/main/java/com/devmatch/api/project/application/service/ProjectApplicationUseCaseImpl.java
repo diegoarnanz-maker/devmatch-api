@@ -15,6 +15,7 @@ import com.devmatch.api.project.domain.exception.ProjectNotFoundException;
 import com.devmatch.api.project.domain.exception.ProjectOperationNotAllowedException;
 import com.devmatch.api.project.domain.model.Project;
 import com.devmatch.api.project.domain.model.ProjectApplication;
+import com.devmatch.api.project.domain.model.valueobject.MotivationMessage;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.model.User;
@@ -67,8 +68,9 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
                     "El usuario con ID " + userId + " ya ha aplicado al proyecto con ID " + projectId);
         }
 
-        // 7. Crear la aplicación
-        ProjectApplication application = new ProjectApplication(projectId, userId, motivationMessage);
+        // 7. Crear la aplicación con validación del mensaje
+        MotivationMessage validatedMessage = new MotivationMessage(motivationMessage);
+        ProjectApplication application = new ProjectApplication(projectId, userId, validatedMessage);
         
         // 8. Guardar la aplicación
         projectApplicationRepositoryPort.save(application);
