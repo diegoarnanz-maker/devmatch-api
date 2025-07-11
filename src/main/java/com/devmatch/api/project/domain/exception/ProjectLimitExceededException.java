@@ -7,7 +7,7 @@ public class ProjectLimitExceededException extends RuntimeException {
     
     public ProjectLimitExceededException(Long userId, int currentCount, int maxAllowed) {
         super("El usuario " + userId + " ya tiene " + currentCount + 
-              " proyectos y no puede crear más. Límite máximo: " + maxAllowed + " proyectos");
+              " proyectos activos en desarrollo y no puede crear más. Límite máximo: " + maxAllowed + " proyectos activos");
     }
     
     public ProjectLimitExceededException(String message) {

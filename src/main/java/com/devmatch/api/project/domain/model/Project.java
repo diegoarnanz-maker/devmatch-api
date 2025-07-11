@@ -3,17 +3,23 @@ package com.devmatch.api.project.domain.model;
 import java.time.LocalDateTime;
 
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
+import com.devmatch.api.project.domain.model.valueobject.ProjectTitle;
+import com.devmatch.api.project.domain.model.valueobject.ProjectDescription;
+import com.devmatch.api.project.domain.model.valueobject.RepositoryUrl;
+import com.devmatch.api.project.domain.model.valueobject.CoverImageUrl;
+import com.devmatch.api.project.domain.model.valueobject.ProjectDuration;
+import com.devmatch.api.project.domain.model.valueobject.TeamSize;
 
 public class Project {
     private final Long id;
-    private final String title;
-    private final String description;
+    private final ProjectTitle title;
+    private final ProjectDescription description;
     private final ProjectStatus status;
     private final Long ownerId;
-    private final String repoUrl;
-    private final String coverImageUrl;
-    private final Integer estimatedDurationWeeks;
-    private final Integer maxTeamSize;
+    private final RepositoryUrl repoUrl;
+    private final CoverImageUrl coverImageUrl;
+    private final ProjectDuration estimatedDuration;
+    private final TeamSize maxTeamSize;
     private final boolean isPublic;
     private final boolean isActive;
     private final boolean isDeleted;
@@ -21,9 +27,9 @@ public class Project {
     private final LocalDateTime updatedAt;
 
     // Constructor para crear nuevo proyecto
-    public Project(String title, String description, ProjectStatus status, Long ownerId, 
-                   String repoUrl, String coverImageUrl, Integer estimatedDurationWeeks, 
-                   Integer maxTeamSize, boolean isPublic) {
+    public Project(ProjectTitle title, ProjectDescription description, ProjectStatus status, Long ownerId, 
+                   RepositoryUrl repoUrl, CoverImageUrl coverImageUrl, ProjectDuration estimatedDuration, 
+                   TeamSize maxTeamSize, boolean isPublic) {
         this.id = null;
         this.title = title;
         this.description = description;
@@ -31,7 +37,7 @@ public class Project {
         this.ownerId = ownerId;
         this.repoUrl = repoUrl;
         this.coverImageUrl = coverImageUrl;
-        this.estimatedDurationWeeks = estimatedDurationWeeks;
+        this.estimatedDuration = estimatedDuration;
         this.maxTeamSize = maxTeamSize;
         this.isPublic = isPublic;
         this.isActive = true;
@@ -41,9 +47,9 @@ public class Project {
     }
 
     // Constructor para cargar proyecto existente
-    public Project(Long id, String title, String description, ProjectStatus status, 
-                   Long ownerId, String repoUrl, String coverImageUrl, 
-                   Integer estimatedDurationWeeks, Integer maxTeamSize, 
+    public Project(Long id, ProjectTitle title, ProjectDescription description, ProjectStatus status, 
+                   Long ownerId, RepositoryUrl repoUrl, CoverImageUrl coverImageUrl, 
+                   ProjectDuration estimatedDuration, TeamSize maxTeamSize, 
                    boolean isPublic, boolean isActive, boolean isDeleted, 
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
@@ -53,7 +59,7 @@ public class Project {
         this.ownerId = ownerId;
         this.repoUrl = repoUrl;
         this.coverImageUrl = coverImageUrl;
-        this.estimatedDurationWeeks = estimatedDurationWeeks;
+        this.estimatedDuration = estimatedDuration;
         this.maxTeamSize = maxTeamSize;
         this.isPublic = isPublic;
         this.isActive = isActive;
@@ -67,11 +73,11 @@ public class Project {
         return id;
     }
 
-    public String getTitle() {
+    public ProjectTitle getTitle() {
         return title;
     }
 
-    public String getDescription() {
+    public ProjectDescription getDescription() {
         return description;
     }
 
@@ -83,19 +89,19 @@ public class Project {
         return ownerId;
     }
 
-    public String getRepoUrl() {
+    public RepositoryUrl getRepoUrl() {
         return repoUrl;
     }
 
-    public String getCoverImageUrl() {
+    public CoverImageUrl getCoverImageUrl() {
         return coverImageUrl;
     }
 
-    public Integer getEstimatedDurationWeeks() {
-        return estimatedDurationWeeks;
+    public ProjectDuration getEstimatedDuration() {
+        return estimatedDuration;
     }
 
-    public Integer getMaxTeamSize() {
+    public TeamSize getMaxTeamSize() {
         return maxTeamSize;
     }
 
@@ -133,17 +139,30 @@ public class Project {
     }
 
     public boolean isFull(Integer currentTeamSize) {
-        return currentTeamSize >= maxTeamSize;
+        if (maxTeamSize == null || currentTeamSize == null) {
+            return false;
+        }
+        return maxTeamSize.isFull(currentTeamSize);
     }
 
     public boolean isOwner(Long userId) {
         return this.ownerId.equals(userId);
     }
 
+    /**
+     * Verifica si el proyecto está en desarrollo activo
+     * @return true si el proyecto está en estado OPEN, IN_PROGRESS o UNDER_REVIEW
+     */
+    public boolean isInActiveDevelopment() {
+        return this.status == ProjectStatus.OPEN || 
+               this.status == ProjectStatus.IN_PROGRESS || 
+               this.status == ProjectStatus.UNDER_REVIEW;
+    }
+
     public Project updateStatus(ProjectStatus newStatus) {
         return new Project(
             this.id, this.title, this.description, newStatus, this.ownerId,
-            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.repoUrl, this.coverImageUrl, this.estimatedDuration,
             this.maxTeamSize, this.isPublic, this.isActive, this.isDeleted,
             this.createdAt, LocalDateTime.now()
         );
@@ -152,7 +171,7 @@ public class Project {
     public Project updateVisibility(boolean isPublic) {
         return new Project(
             this.id, this.title, this.description, this.status, this.ownerId,
-            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.repoUrl, this.coverImageUrl, this.estimatedDuration,
             this.maxTeamSize, isPublic, this.isActive, this.isDeleted,
             this.createdAt, LocalDateTime.now()
         );
@@ -161,7 +180,7 @@ public class Project {
     public Project deactivate() {
         return new Project(
             this.id, this.title, this.description, this.status, this.ownerId,
-            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.repoUrl, this.coverImageUrl, this.estimatedDuration,
             this.maxTeamSize, this.isPublic, false, this.isDeleted,
             this.createdAt, LocalDateTime.now()
         );
@@ -170,7 +189,7 @@ public class Project {
     public Project softDelete() {
         return new Project(
             this.id, this.title, this.description, this.status, this.ownerId,
-            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.repoUrl, this.coverImageUrl, this.estimatedDuration,
             this.maxTeamSize, this.isPublic, false, true,
             this.createdAt, LocalDateTime.now()
         );
@@ -179,7 +198,7 @@ public class Project {
     public Project restore() {
         return new Project(
             this.id, this.title, this.description, this.status, this.ownerId,
-            this.repoUrl, this.coverImageUrl, this.estimatedDurationWeeks,
+            this.repoUrl, this.coverImageUrl, this.estimatedDuration,
             this.maxTeamSize, this.isPublic, true, false,
             this.createdAt, LocalDateTime.now()
         );

@@ -19,7 +19,7 @@ import java.util.List;
  * y para que los owners puedan gestionar las aplicaciones.
  */
 @RestController
-@RequestMapping("/api/v1/projects")
+@RequestMapping("/api/v1/project-applications")
 @RequiredArgsConstructor
 public class ProjectApplicationController {
 
@@ -55,7 +55,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el owner)
      * @return Lista de aplicaciones al proyecto
      */
-    @GetMapping("/{projectId}/applications")
+    @GetMapping("/project/{projectId}")
     public ResponseEntity<List<ProjectApplicationResponseDto>> getProjectApplications(
             @PathVariable Long projectId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
@@ -90,7 +90,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el owner)
      * @return Respuesta HTTP 200 si la aplicación se aceptó exitosamente
      */
-    @PutMapping("/{projectId}/applications/{applicationId}/accept")
+    @PutMapping("/project/{projectId}/application/{applicationId}/accept")
     public ResponseEntity<Void> acceptApplication(
             @PathVariable Long projectId,
             @PathVariable Long applicationId,
@@ -109,7 +109,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el owner)
      * @return Respuesta HTTP 200 si la aplicación se rechazó exitosamente
      */
-    @PutMapping("/{projectId}/applications/{applicationId}/reject")
+    @PutMapping("/project/{projectId}/application/{applicationId}/reject")
     public ResponseEntity<Void> rejectApplication(
             @PathVariable Long projectId,
             @PathVariable Long applicationId,
@@ -128,7 +128,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el que aplicó)
      * @return Respuesta HTTP 200 si la aplicación se canceló exitosamente
      */
-    @DeleteMapping("/applications/{applicationId}/cancel")
+    @DeleteMapping("/application/{applicationId}/cancel")
     public ResponseEntity<Void> cancelApplication(
             @PathVariable Long applicationId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {

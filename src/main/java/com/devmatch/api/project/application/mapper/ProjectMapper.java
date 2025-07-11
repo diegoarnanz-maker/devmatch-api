@@ -3,6 +3,12 @@ package com.devmatch.api.project.application.mapper;
 import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
 import com.devmatch.api.project.domain.model.Project;
+import com.devmatch.api.project.domain.model.valueobject.ProjectTitle;
+import com.devmatch.api.project.domain.model.valueobject.ProjectDescription;
+import com.devmatch.api.project.domain.model.valueobject.RepositoryUrl;
+import com.devmatch.api.project.domain.model.valueobject.CoverImageUrl;
+import com.devmatch.api.project.domain.model.valueobject.ProjectDuration;
+import com.devmatch.api.project.domain.model.valueobject.TeamSize;
 import com.devmatch.api.project.infrastructure.out.persistence.entity.ProjectEntity;
 import com.devmatch.api.project.infrastructure.out.persistence.mapper.ProjectPersistenceMapper;
 import com.devmatch.api.user.application.port.in.UserQueryUseCase;
@@ -31,14 +37,14 @@ public class ProjectMapper {
      */
     public Project toDomain(ProjectRequestDto requestDto, Long ownerId) {
         return new Project(
-            requestDto.getTitle(),
-            requestDto.getDescription(),
+            new ProjectTitle(requestDto.getTitle()),
+            new ProjectDescription(requestDto.getDescription()),
             requestDto.getStatus(),
             ownerId,
-            requestDto.getRepoUrl(),
-            requestDto.getCoverImageUrl(),
-            requestDto.getEstimatedDurationWeeks(),
-            requestDto.getMaxTeamSize(),
+            requestDto.getRepoUrl() != null ? new RepositoryUrl(requestDto.getRepoUrl()) : null,
+            requestDto.getCoverImageUrl() != null ? new CoverImageUrl(requestDto.getCoverImageUrl()) : null,
+            requestDto.getEstimatedDurationWeeks() != null ? new ProjectDuration(requestDto.getEstimatedDurationWeeks()) : null,
+            requestDto.getMaxTeamSize() != null ? new TeamSize(requestDto.getMaxTeamSize()) : null,
             requestDto.isPublic()
         );
     }
@@ -83,14 +89,14 @@ public class ProjectMapper {
         
         return new ProjectResponseDto(
             project.getId(),
-            project.getTitle(),
-            project.getDescription(),
+            project.getTitle().getValue(),
+            project.getDescription().getValue(),
             project.getStatus(),
             project.getOwnerId(),
-            project.getRepoUrl(),
-            project.getCoverImageUrl(),
-            project.getEstimatedDurationWeeks(),
-            project.getMaxTeamSize(),
+            project.getRepoUrl() != null ? project.getRepoUrl().getNormalizedValue() : null,
+            project.getCoverImageUrl() != null ? project.getCoverImageUrl().getNormalizedValue() : null,
+            project.getEstimatedDuration() != null ? project.getEstimatedDuration().getWeeks() : null,
+            project.getMaxTeamSize() != null ? project.getMaxTeamSize().getValue() : null,
             ownerUsername,
             teamMembers,
             new ArrayList<>(), // tags - se manejarán en método sobrecargado
@@ -195,14 +201,14 @@ public class ProjectMapper {
     public Project updateProjectFromDto(Project existingProject, ProjectRequestDto requestDto) {
         return new Project(
             existingProject.getId(),
-            requestDto.getTitle(),
-            requestDto.getDescription(),
+            new ProjectTitle(requestDto.getTitle()),
+            new ProjectDescription(requestDto.getDescription()),
             requestDto.getStatus(),
             existingProject.getOwnerId(),
-            requestDto.getRepoUrl(),
-            requestDto.getCoverImageUrl(),
-            requestDto.getEstimatedDurationWeeks(),
-            requestDto.getMaxTeamSize(),
+            requestDto.getRepoUrl() != null ? new RepositoryUrl(requestDto.getRepoUrl()) : null,
+            requestDto.getCoverImageUrl() != null ? new CoverImageUrl(requestDto.getCoverImageUrl()) : null,
+            requestDto.getEstimatedDurationWeeks() != null ? new ProjectDuration(requestDto.getEstimatedDurationWeeks()) : null,
+            requestDto.getMaxTeamSize() != null ? new TeamSize(requestDto.getMaxTeamSize()) : null,
             requestDto.isPublic(),
             existingProject.isActive(),
             existingProject.isDeleted(),

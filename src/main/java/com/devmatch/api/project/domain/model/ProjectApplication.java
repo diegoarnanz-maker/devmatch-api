@@ -3,6 +3,7 @@ package com.devmatch.api.project.domain.model;
 import java.time.LocalDateTime;
 
 import com.devmatch.api.project.domain.model.valueobject.ApplicationStatus;
+import com.devmatch.api.project.domain.model.valueobject.MotivationMessage;
 
 /**
  * Entidad de dominio que representa una aplicación a un proyecto.
@@ -12,7 +13,7 @@ public class ProjectApplication {
     private final Long id;
     private final Long projectId;
     private final Long userId;
-    private final String motivationMessage;
+    private final MotivationMessage motivationMessage;
     private final ApplicationStatus status;
     private final boolean seenByOwner;
     private final LocalDateTime submittedAt;
@@ -23,7 +24,7 @@ public class ProjectApplication {
     private final LocalDateTime updatedAt;
 
     // Constructor para crear nueva aplicación
-    public ProjectApplication(Long projectId, Long userId, String motivationMessage) {
+    public ProjectApplication(Long projectId, Long userId, MotivationMessage motivationMessage) {
         this.id = null;
         this.projectId = projectId;
         this.userId = userId;
@@ -39,7 +40,7 @@ public class ProjectApplication {
     }
 
     // Constructor para cargar aplicación existente
-    public ProjectApplication(Long id, Long projectId, Long userId, String motivationMessage,
+    public ProjectApplication(Long id, Long projectId, Long userId, MotivationMessage motivationMessage,
                             ApplicationStatus status, boolean seenByOwner, LocalDateTime submittedAt,
                             LocalDateTime resolvedAt, boolean isActive, boolean isDeleted,
                             LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -70,7 +71,7 @@ public class ProjectApplication {
         return userId;
     }
 
-    public String getMotivationMessage() {
+    public MotivationMessage getMotivationMessage() {
         return motivationMessage;
     }
 
