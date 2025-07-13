@@ -15,6 +15,9 @@ public class Password {
         if (value.length() < 8) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
         }
+        if (value.length() > 255) {
+            throw new IllegalArgumentException("La contraseña no puede exceder los 255 caracteres");
+        }
         if (!value.matches(".*[A-Z].*")) {
             throw new IllegalArgumentException("La contraseña debe contener al menos una mayúscula");
         }
@@ -23,6 +26,12 @@ public class Password {
         }
         if (!value.matches(".*\\d.*")) {
             throw new IllegalArgumentException("La contraseña debe contener al menos un número");
+        }
+        if (!value.matches(".*[@#$%^&+=!].*")) {
+            throw new IllegalArgumentException("La contraseña debe contener al menos un símbolo especial (@#$%^&+=!)");
+        }
+        if (value.contains(" ")) {
+            throw new IllegalArgumentException("La contraseña no puede contener espacios");
         }
     }
 

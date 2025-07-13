@@ -31,10 +31,10 @@ public class UserProfileTypeUseCaseImpl implements UserProfileTypeUseCase {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
         // Obtener los tipos de perfil del usuario
-        List<String> profileTypeNames = userRepositoryPort.findProfileTypesByUserId(user.getId());
+        List<UserRepositoryPort.ProfileTypeData> profileTypeData = userRepositoryPort.findProfileTypesByUserId(user.getId());
         
         // Convertir a DTOs
-        return profileTypeNames.stream()
+        return profileTypeData.stream()
                 .map(this::createProfileTypeResponseDto)
                 .collect(Collectors.toList());
     }
@@ -57,7 +57,10 @@ public class UserProfileTypeUseCaseImpl implements UserProfileTypeUseCase {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
         // Obtener los tipos de perfil actualizados
-        List<String> profileTypes = userRepositoryPort.findProfileTypesByUserId(user.getId());
+        List<String> profileTypes = userRepositoryPort.findProfileTypesByUserId(user.getId())
+                .stream()
+                .map(UserRepositoryPort.ProfileTypeData::getName)
+                .collect(Collectors.toList());
         
         return userMapper.toDto(updatedUser, profileTypes);
     }
@@ -76,16 +79,19 @@ public class UserProfileTypeUseCaseImpl implements UserProfileTypeUseCase {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
         // Obtener los tipos de perfil actualizados
-        List<String> profileTypes = userRepositoryPort.findProfileTypesByUserId(user.getId());
+        List<String> profileTypes = userRepositoryPort.findProfileTypesByUserId(user.getId())
+                .stream()
+                .map(UserRepositoryPort.ProfileTypeData::getName)
+                .collect(Collectors.toList());
         
         return userMapper.toDto(updatedUser, profileTypes);
     }
 
-    private ProfileTypeResponseDto createProfileTypeResponseDto(String profileTypeName) {
+    private ProfileTypeResponseDto createProfileTypeResponseDto(UserRepositoryPort.ProfileTypeData profileTypeData) {
         ProfileTypeResponseDto dto = new ProfileTypeResponseDto();
-        // Por ahora solo tenemos el nombre, necesitaríamos obtener más datos del repositorio
-        dto.setName(profileTypeName);
-        dto.setDescription("Descripción de " + profileTypeName);
+        dto.setId(profileTypeData.getId());
+        dto.setName(profileTypeData.getName());
+        dto.setDescription("Descripción de " + profileTypeData.getName());
         return dto;
     }
 } 

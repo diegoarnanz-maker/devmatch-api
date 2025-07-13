@@ -77,10 +77,10 @@ public class AdminProfileTypeUseCaseImpl implements AdminProfileTypeUseCase {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
         // Obtener los tipos de perfil del usuario
-        List<String> profileTypeNames = userRepositoryPort.findProfileTypesByUserId(userId);
+        List<UserRepositoryPort.ProfileTypeData> profileTypeData = userRepositoryPort.findProfileTypesByUserId(userId);
         
         // Convertir a DTOs
-        return profileTypeNames.stream()
+        return profileTypeData.stream()
                 .map(this::createProfileTypeResponseDto)
                 .collect(Collectors.toList());
     }
@@ -102,13 +102,17 @@ public class AdminProfileTypeUseCaseImpl implements AdminProfileTypeUseCase {
         var updatedUser = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
         
-        return userMapper.toDto(updatedUser, userRepositoryPort.findProfileTypesByUserId(userId));
+        return userMapper.toDto(updatedUser, userRepositoryPort.findProfileTypesByUserId(userId)
+                .stream()
+                .map(UserRepositoryPort.ProfileTypeData::getName)
+                .collect(Collectors.toList()));
     }
 
-    private ProfileTypeResponseDto createProfileTypeResponseDto(String profileTypeName) {
+    private ProfileTypeResponseDto createProfileTypeResponseDto(UserRepositoryPort.ProfileTypeData profileTypeData) {
         ProfileTypeResponseDto dto = new ProfileTypeResponseDto();
-        dto.setName(profileTypeName);
-        // Los otros campos se pueden obtener del repositorio si es necesario
+        dto.setId(profileTypeData.getId());
+        dto.setName(profileTypeData.getName());
+        dto.setDescription("Descripción de " + profileTypeData.getName());
         return dto;
     }
 

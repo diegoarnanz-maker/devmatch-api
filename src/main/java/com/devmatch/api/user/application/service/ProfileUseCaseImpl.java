@@ -90,6 +90,11 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
             throw new IllegalArgumentException("La contraseña actual es incorrecta");
         }
 
+        // Verificar que la nueva contraseña sea diferente a la actual
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPasswordHash().getValue())) {
+            throw new IllegalArgumentException("La nueva contraseña no puede ser igual a la contraseña actual");
+        }
+
         user.changePassword(new Password(passwordEncoder.encode(dto.getNewPassword())));
         userRepositoryPort.save(user);
     }
@@ -145,6 +150,9 @@ public class ProfileUseCaseImpl implements ProfileUseCase {
      * Método auxiliar para obtener los profile types de un usuario
      */
     private List<String> getProfileTypesForUser(Long userId) {
-        return userRepositoryPort.findProfileTypesByUserId(userId);
+        return userRepositoryPort.findProfileTypesByUserId(userId)
+                .stream()
+                .map(UserRepositoryPort.ProfileTypeData::getName)
+                .toList();
     }
 } 
