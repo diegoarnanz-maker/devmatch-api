@@ -32,6 +32,7 @@ public class ProfileController {
     /**
      * Obtiene el perfil del usuario autenticado.
      *
+     * @param userPrincipal Usuario autenticado
      * @return Perfil del usuario autenticado
      */
     @GetMapping("/profile/me")
@@ -41,7 +42,7 @@ public class ProfileController {
     }
 
     /**
-     * Obtiene el perfil de un usuario específico por ID.
+     * Obtiene el perfil de un usuario específico por ID (público).
      *
      * @param userId ID del usuario
      * @return Perfil del usuario
@@ -52,60 +53,60 @@ public class ProfileController {
     }
 
     /**
-     * Actualiza el perfil del usuario.
+     * Actualiza el perfil del usuario autenticado.
      *
-     * @param userId ID del usuario
+     * @param userPrincipal Usuario autenticado
      * @param dto Datos de actualización del perfil
      * @return Usuario actualizado
      */
-    @PutMapping("/{userId}/profile")
-    public ResponseEntity<UserResponseDto> updateProfile(
-            @PathVariable Long userId,
+    @PutMapping("/profile")
+    public ResponseEntity<UserResponseDto> updateMyProfile(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
             @Valid @RequestBody UserUpdateProfileRequestDto dto) {
-        return ResponseEntity.ok(profileUseCase.updateProfile(userId, dto));
+        return ResponseEntity.ok(profileUseCase.updateProfile(userPrincipal.getUserId(), dto));
     }
 
     /**
-     * Cambia la contraseña del usuario.
+     * Cambia la contraseña del usuario autenticado.
      *
-     * @param userId ID del usuario
+     * @param userPrincipal Usuario autenticado
      * @param dto Datos para el cambio de contraseña
      * @return Respuesta vacía con código 204
      */
-    @PutMapping("/{userId}/profile/password")
-    public ResponseEntity<Void> changePassword(
-            @PathVariable Long userId,
+    @PutMapping("/profile/password")
+    public ResponseEntity<Void> changeMyPassword(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
             @Valid @RequestBody UserChangePasswordRequestDto dto) {
-        profileUseCase.changePassword(userId, dto);
+        profileUseCase.changePassword(userPrincipal.getUserId(), dto);
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Cambia el email del usuario.
+     * Cambia el email del usuario autenticado.
      *
-     * @param userId ID del usuario
+     * @param userPrincipal Usuario autenticado
      * @param dto Datos para el cambio de email
      * @return Usuario actualizado
      */
-    @PutMapping("/{userId}/profile/email")
-    public ResponseEntity<UserResponseDto> changeEmail(
-            @PathVariable Long userId,
+    @PutMapping("/profile/email")
+    public ResponseEntity<UserResponseDto> changeMyEmail(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
             @Valid @RequestBody UserChangeEmailRequestDto dto) {
-        return ResponseEntity.ok(profileUseCase.changeEmail(userId, dto));
+        return ResponseEntity.ok(profileUseCase.changeEmail(userPrincipal.getUserId(), dto));
     }
 
     /**
-     * Cambia el avatar del usuario.
+     * Cambia el avatar del usuario autenticado.
      *
-     * @param userId ID del usuario
+     * @param userPrincipal Usuario autenticado
      * @param dto Datos para el cambio de avatar
      * @return Usuario actualizado
      */
-    @PutMapping("/{userId}/profile/avatar")
-    public ResponseEntity<UserResponseDto> changeAvatar(
-            @PathVariable Long userId,
+    @PutMapping("/profile/avatar")
+    public ResponseEntity<UserResponseDto> changeMyAvatar(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
             @Valid @RequestBody UserChangeAvatarRequestDto dto) {
-        return ResponseEntity.ok(profileUseCase.changeAvatar(userId, dto));
+        return ResponseEntity.ok(profileUseCase.changeAvatar(userPrincipal.getUserId(), dto));
     }
 
     /**

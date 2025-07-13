@@ -127,6 +127,9 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
      * Método auxiliar para obtener los profile types de un usuario
      */
     private List<String> getProfileTypesForUser(Long userId) {
-        return userRepositoryPort.findProfileTypesByUserId(userId);
+        return userRepositoryPort.findProfileTypesByUserId(userId)
+                .stream()
+                .map(UserRepositoryPort.ProfileTypeData::getName)
+                .toList();
     }
 } 
