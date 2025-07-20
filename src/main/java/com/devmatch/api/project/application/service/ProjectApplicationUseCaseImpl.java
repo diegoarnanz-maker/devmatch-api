@@ -164,7 +164,7 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         projectApplicationRepositoryPort.save(acceptedApplication);
         
         // 8. Agregar al usuario como miembro del proyecto
-        projectMemberRepositoryPort.addMember(projectId, acceptedApplication.getUserId(), "DEVELOPER");
+        projectMemberRepositoryPort.addMember(projectId, acceptedApplication.getUserId(), "DEVELOPER", false);
     }
 
     @Override

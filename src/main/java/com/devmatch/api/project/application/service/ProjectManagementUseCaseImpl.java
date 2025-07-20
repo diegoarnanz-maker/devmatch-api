@@ -56,6 +56,9 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
         Project savedProject = projectRepositoryPort.save(project);
 
+        // Agregar automáticamente al propietario como miembro del proyecto
+        projectMemberRepositoryPort.addMember(savedProject.getId(), ownerId, "OWNER", true);
+
         // Procesar tags si se proporcionaron
         if (request.getTags() != null && !request.getTags().isEmpty()) {
             System.out.println("Procesando tags: " + request.getTags());
@@ -276,83 +279,98 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<ProjectResponseDto> getProjectsByOwnerWithSecurity(Long ownerId, Long authenticatedUserId, ProjectPublicSearchRequestDto filter) {
-        // Obtener todos los proyectos del propietario con tags cargados
-        List<ProjectEntity> allProjectEntities = projectJpaRepository.findByOwnerIdWithTags(ownerId);
-        
-        // Filtrar proyectos según la lógica de seguridad
-        List<ProjectEntity> visibleProjectEntities = allProjectEntities.stream()
-                .filter(projectEntity -> {
-                    // Crear objeto de dominio para verificar visibilidad
-                    Project project = projectPersistenceMapper.toDomain(projectEntity);
-                    return project.isVisibleTo(authenticatedUserId);
-                })
-                .toList();
-        
-        // Si no hay filtro, devolver todos los proyectos visibles con tags
-        if (filter == null) {
-            return projectMapper.toResponseDtoListWithTags(visibleProjectEntities);
+        // Si el usuario autenticado es el propietario, devolver todos sus proyectos
+        if (ownerId.equals(authenticatedUserId)) {
+            Page<ProjectEntity> allProjectsPage = projectJpaRepository.findByOwnerIdAndIsDeletedFalse(ownerId, Pageable.unpaged());
+            List<ProjectEntity> allProjectEntities = allProjectsPage.getContent();
+            
+            // Aplicar filtros si se proporcionan
+            if (filter != null) {
+                allProjectEntities = allProjectEntities.stream()
+                        .filter(projectEntity -> applyFilters(projectEntity, filter))
+                        .toList();
+            }
+            
+            return allProjectEntities.stream()
+                    .map(projectMapper::toResponseDto)
+                    .toList();
         }
         
-        // Aplicar filtros adicionales
-        List<ProjectEntity> filteredProjectEntities = visibleProjectEntities.stream()
-                .filter(projectEntity -> {
-                    // Filtrar por título (búsqueda parcial)
-                    if (filter.getTitle() != null && !filter.getTitle().trim().isEmpty()) {
-                        if (!projectEntity.getTitle().toLowerCase().contains(filter.getTitle().toLowerCase())) {
-                            return false;
-                        }
-                    }
-                    
-                    // Filtrar por estado
-                    if (filter.getStatus() != null && !filter.getStatus().trim().isEmpty()) {
-                        try {
-                            ProjectStatus filterStatus = ProjectStatus.valueOf(filter.getStatus().toUpperCase());
-                            if (!projectEntity.getStatus().equals(filterStatus)) {
-                                return false;
-                            }
-                        } catch (IllegalArgumentException e) {
-                            // Si el status no es válido, no filtrar por él
-                        }
-                    }
-                    
-                    // Filtrar por estado activo
-                    if (filter.getIsActive() != null) {
-                        if (projectEntity.isActive() != filter.getIsActive()) {
-                            return false;
-                        }
-                    }
-                    
-                    // Filtrar por tamaño del equipo
-                    if (filter.getMinTeamSize() != null) {
-                        if (projectEntity.getMaxTeamSize() < filter.getMinTeamSize()) {
-                            return false;
-                        }
-                    }
-                    
-                    if (filter.getMaxTeamSize() != null) {
-                        if (projectEntity.getMaxTeamSize() > filter.getMaxTeamSize()) {
-                            return false;
-                        }
-                    }
-                    
-                    // Filtrar por duración estimada
-                    if (filter.getMinDurationWeeks() != null) {
-                        if (projectEntity.getEstimatedDurationWeeks() < filter.getMinDurationWeeks()) {
-                            return false;
-                        }
-                    }
-                    
-                    if (filter.getMaxDurationWeeks() != null) {
-                        if (projectEntity.getEstimatedDurationWeeks() > filter.getMaxDurationWeeks()) {
-                            return false;
-                        }
-                    }
-                    
-                    return true;
-                })
+        // Si no es el propietario, solo devolver proyectos públicos
+        Page<ProjectEntity> publicProjectsPage = projectJpaRepository.findByIsPublicTrueAndIsActiveTrueAndIsDeletedFalse(Pageable.unpaged());
+        List<ProjectEntity> publicProjectEntities = publicProjectsPage.getContent().stream()
+                .filter(projectEntity -> projectEntity.getOwnerId().equals(ownerId))
                 .toList();
         
-        return projectMapper.toResponseDtoListWithTags(filteredProjectEntities);
+        // Aplicar filtros si se proporcionan
+        if (filter != null) {
+            publicProjectEntities = publicProjectEntities.stream()
+                    .filter(projectEntity -> applyFilters(projectEntity, filter))
+                    .toList();
+        }
+        
+        return publicProjectEntities.stream()
+                .map(projectMapper::toResponseDto)
+                .toList();
+    }
+    
+    /**
+     * Método auxiliar para aplicar filtros a un proyecto
+     */
+    private boolean applyFilters(ProjectEntity projectEntity, ProjectPublicSearchRequestDto filter) {
+        // Filtrar por título (búsqueda parcial)
+        if (filter.getTitle() != null && !filter.getTitle().trim().isEmpty()) {
+            if (!projectEntity.getTitle().toLowerCase().contains(filter.getTitle().toLowerCase())) {
+                return false;
+            }
+        }
+        
+        // Filtrar por estado
+        if (filter.getStatus() != null && !filter.getStatus().trim().isEmpty()) {
+            try {
+                ProjectStatus filterStatus = ProjectStatus.valueOf(filter.getStatus().toUpperCase());
+                if (!projectEntity.getStatus().equals(filterStatus)) {
+                    return false;
+                }
+            } catch (IllegalArgumentException e) {
+                // Si el status no es válido, no filtrar por él
+            }
+        }
+        
+        // Filtrar por estado activo
+        if (filter.getIsActive() != null) {
+            if (projectEntity.isActive() != filter.getIsActive()) {
+                return false;
+            }
+        }
+        
+        // Filtrar por tamaño del equipo
+        if (filter.getMinTeamSize() != null) {
+            if (projectEntity.getMaxTeamSize() < filter.getMinTeamSize()) {
+                return false;
+            }
+        }
+        
+        if (filter.getMaxTeamSize() != null) {
+            if (projectEntity.getMaxTeamSize() > filter.getMaxTeamSize()) {
+                return false;
+            }
+        }
+        
+        // Filtrar por duración estimada
+        if (filter.getMinDurationWeeks() != null) {
+            if (projectEntity.getEstimatedDurationWeeks() < filter.getMinDurationWeeks()) {
+                return false;
+            }
+        }
+        
+        if (filter.getMaxDurationWeeks() != null) {
+            if (projectEntity.getEstimatedDurationWeeks() > filter.getMaxDurationWeeks()) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     @Override
