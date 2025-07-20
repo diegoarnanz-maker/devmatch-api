@@ -14,6 +14,8 @@ import com.devmatch.api.tag.domain.model.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,11 +42,25 @@ public class AdminTagUseCaseImpl implements AdminTagUseCase {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<AdminTagResponseDto> getAllTags(Pageable pageable) {
+        return tagRepositoryPort.findAll(pageable)
+                .map(tagMapper::toAdminResponseDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<AdminTagResponseDto> getActiveTags() {
         List<Tag> tags = tagRepositoryPort.findAllActive();
         return tags.stream()
                 .map(tagMapper::toAdminResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AdminTagResponseDto> getActiveTags(Pageable pageable) {
+        return tagRepositoryPort.findAllActive(pageable)
+                .map(tagMapper::toAdminResponseDto);
     }
 
     @Override

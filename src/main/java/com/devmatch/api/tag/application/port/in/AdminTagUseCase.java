@@ -4,6 +4,9 @@ import com.devmatch.api.tag.application.dto.AdminTagRequestDto;
 import com.devmatch.api.tag.application.dto.AdminTagResponseDto;
 import com.devmatch.api.tag.application.dto.TagResponseDto;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 /**
@@ -13,6 +16,22 @@ import java.util.List;
 public interface AdminTagUseCase {
 
     // ===== GESTIÓN DE TAGS (CRUD) =====
+
+    /**
+     * Obtiene todos los tags disponibles en el sistema (incluyendo eliminados), paginados.
+     *
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de tags
+     */
+    Page<AdminTagResponseDto> getAllTags(Pageable pageable);
+
+    /**
+     * Obtiene solo los tags activos (no eliminados), paginados.
+     *
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de tags activos
+     */
+    Page<AdminTagResponseDto> getActiveTags(Pageable pageable);
 
     /**
      * Obtiene todos los tags disponibles en el sistema (incluyendo eliminados).

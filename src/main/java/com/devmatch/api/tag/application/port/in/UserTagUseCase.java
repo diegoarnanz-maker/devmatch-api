@@ -4,6 +4,9 @@ import com.devmatch.api.tag.application.dto.TagResponseDto;
 import com.devmatch.api.tag.application.dto.UserTagRequestDto;
 import com.devmatch.api.user.application.dto.shared.UserResponseDto;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 /**
@@ -19,6 +22,14 @@ public interface UserTagUseCase {
      * @return Lista de todos los tags disponibles
      */
     List<TagResponseDto> getAllTags();
+
+    /**
+     * Obtiene todos los tags activos paginados.
+     *
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de tags activos
+     */
+    Page<TagResponseDto> getAllTags(Pageable pageable);
 
     /**
      * Busca tags por nombre que contengan el texto especificado.
