@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Controlador para operaciones de tags de usuario.
@@ -30,11 +32,12 @@ public class UserTagController {
      * Obtiene todos los tags activos disponibles en el sistema.
      * Endpoint público - no requiere autenticación.
      *
-     * @return Lista de todos los tags activos
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de todos los tags activos
      */
     @GetMapping
-    public ResponseEntity<List<TagResponseDto>> getAllActiveTags() {
-        return ResponseEntity.ok(userTagUseCase.getAllTags());
+    public ResponseEntity<Page<TagResponseDto>> getAllActiveTags(Pageable pageable) {
+        return ResponseEntity.ok(userTagUseCase.getAllTags(pageable));
     }
 
 

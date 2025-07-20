@@ -26,6 +26,8 @@ import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -51,8 +53,8 @@ public class ProjectController {
      * Accesible sin autenticación
      */
     @GetMapping("/public")
-    public ResponseEntity<List<ProjectResponseDto>> getPublicProjects() {
-        List<ProjectResponseDto> projects = projectManagementUseCase.getAllPublicProjects();
+    public ResponseEntity<Page<ProjectResponseDto>> getPublicProjects(Pageable pageable) {
+        Page<ProjectResponseDto> projects = projectManagementUseCase.getAllPublicProjects(pageable);
         return ResponseEntity.ok(projects);
     }
 
@@ -62,15 +64,16 @@ public class ProjectController {
      * Permite filtrar por título, estado, tags, propietario, etc.
      */
     @PostMapping("/public/search")
-    public ResponseEntity<List<ProjectResponseDto>> searchPublicProjects(
-            @RequestBody(required = false) ProjectPublicSearchRequestDto filter) {
+    public ResponseEntity<Page<ProjectResponseDto>> searchPublicProjects(
+            @RequestBody(required = false) ProjectPublicSearchRequestDto filter,
+            Pageable pageable) {
         
         // Si no se envía filtro, usar uno vacío para obtener todos los proyectos públicos
         if (filter == null) {
             filter = new ProjectPublicSearchRequestDto();
         }
         
-        List<ProjectResponseDto> projects = projectManagementUseCase.searchPublicProjects(filter);
+        Page<ProjectResponseDto> projects = projectManagementUseCase.searchPublicProjects(filter, pageable);
         return ResponseEntity.ok(projects);
     }
 
@@ -93,10 +96,11 @@ public class ProjectController {
      * Obtiene todos los proyectos del usuario autenticado
      */
     @GetMapping("/my-projects")
-    public ResponseEntity<List<ProjectResponseDto>> getMyProjects(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+    public ResponseEntity<Page<ProjectResponseDto>> getMyProjects(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            Pageable pageable) {
         
-        List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(userPrincipal.getUserId());
+        Page<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwner(userPrincipal.getUserId(), pageable);
         return ResponseEntity.ok(projects);
     }
 

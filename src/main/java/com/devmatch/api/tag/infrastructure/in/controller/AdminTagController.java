@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Controlador para operaciones administrativas de tags.
@@ -29,21 +31,23 @@ public class AdminTagController {
     /**
      * Obtiene todos los tags disponibles en el sistema (incluyendo eliminados).
      *
-     * @return Lista de todos los tags
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de todos los tags
      */
     @GetMapping("/admin")
-    public ResponseEntity<List<AdminTagResponseDto>> getAllTags() {
-        return ResponseEntity.ok(adminTagUseCase.getAllTags());
+    public ResponseEntity<Page<AdminTagResponseDto>> getAllTags(Pageable pageable) {
+        return ResponseEntity.ok(adminTagUseCase.getAllTags(pageable));
     }
 
     /**
      * Obtiene solo los tags activos (no eliminados).
      *
-     * @return Lista de tags activos
+     * @param pageable Parámetros de paginación y ordenación
+     * @return Página de tags activos
      */
     @GetMapping("/admin/active")
-    public ResponseEntity<List<AdminTagResponseDto>> getActiveTags() {
-        return ResponseEntity.ok(adminTagUseCase.getActiveTags());
+    public ResponseEntity<Page<AdminTagResponseDto>> getActiveTags(Pageable pageable) {
+        return ResponseEntity.ok(adminTagUseCase.getActiveTags(pageable));
     }
 
     /**

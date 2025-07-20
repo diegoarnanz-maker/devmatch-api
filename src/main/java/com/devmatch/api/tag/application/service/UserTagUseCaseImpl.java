@@ -15,6 +15,8 @@ import com.devmatch.api.tag.domain.model.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +42,12 @@ public class UserTagUseCaseImpl implements UserTagUseCase {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TagResponseDto> getAllTags(Pageable pageable) {
+        return tagRepositoryPort.findAllActive(pageable)
+                .map(tagMapper::toResponseDto);
+    }
 
 
     @Override

@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.devmatch.api.project.application.dto.ProjectRequestDto;
 import com.devmatch.api.project.application.dto.ProjectResponseDto;
@@ -266,11 +268,9 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProjectResponseDto> getProjectsByOwner(Long ownerId) {
-
-        List<Project> projects = projectRepositoryPort.findByOwnerId(ownerId);
-
-        return projectMapper.toResponseDtoList(projects);
+    public Page<ProjectResponseDto> getProjectsByOwner(Long ownerId, Pageable pageable) {
+        return projectRepositoryPort.findByOwnerId(ownerId, pageable)
+            .map(projectMapper::toResponseDto);
     }
 
     @Override
@@ -430,41 +430,16 @@ public class ProjectManagementUseCaseImpl implements ProjectManagementUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProjectResponseDto> getAllPublicProjects() {
-        // Obtener entidades JPA con tags cargados
-        List<ProjectEntity> projectEntities = projectJpaRepository.findPublicActiveProjectsWithTags();
-        
-        // Convertir a DTOs con tags incluidos
-        return projectMapper.toResponseDtoListWithTags(projectEntities);
+    public Page<ProjectResponseDto> getAllPublicProjects(Pageable pageable) {
+        return projectRepositoryPort.findPublicActiveProjects(pageable)
+            .map(projectMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter) {
-        // Convertir el status de String a ProjectStatus si no es null
-        ProjectStatus status = null;
-        if (filter.getStatus() != null && !filter.getStatus().trim().isEmpty()) {
-            try {
-                status = ProjectStatus.valueOf(filter.getStatus().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                // Si el status no es válido, retornar lista vacía o lanzar excepción
-                throw new IllegalArgumentException("Estado de proyecto inválido: " + filter.getStatus());
-            }
-        }
-        
-        // Obtener entidades JPA con tags cargados
-        List<ProjectEntity> projectEntities = projectJpaRepository.searchPublicProjectsWithTags(
-                filter.getTitle(),
-                status,
-                filter.getIsActive(),
-                filter.getMinTeamSize(),
-                filter.getMaxTeamSize(),
-                filter.getMinDurationWeeks(),
-                filter.getMaxDurationWeeks()
-        );
-        
-        // Convertir a DTOs con tags incluidos
-        return projectMapper.toResponseDtoListWithTags(projectEntities);
+    public Page<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter, Pageable pageable) {
+        return projectRepositoryPort.searchPublicProjects(filter, pageable)
+            .map(projectMapper::toResponseDto);
     }
 
     @Override

@@ -6,6 +6,9 @@ import com.devmatch.api.project.application.dto.ProjectPublicSearchRequestDto;
 import com.devmatch.api.project.application.dto.ProjectTagsRequestDto;
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 /**
@@ -78,7 +81,7 @@ public interface ProjectManagementUseCase {
      * @param ownerId ID del propietario de los proyectos
      * @return Lista de proyectos del usuario
      */
-    List<ProjectResponseDto> getProjectsByOwner(Long ownerId);
+    Page<ProjectResponseDto> getProjectsByOwner(Long ownerId, Pageable pageable);
 
     /**
      * Obtiene proyectos de un usuario específico con filtros y lógica de seguridad
@@ -111,14 +114,14 @@ public interface ProjectManagementUseCase {
      * Solo proyectos públicos y activos
      * @return Lista de todos los proyectos públicos
      */
-    List<ProjectResponseDto> getAllPublicProjects();
+    Page<ProjectResponseDto> getAllPublicProjects(Pageable pageable);
 
     /**
      * Busca y filtra proyectos públicos con criterios múltiples
      * @param filter DTO con los criterios de búsqueda y filtrado
      * @return Lista de proyectos públicos que coinciden con los filtros
      */
-    List<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter);
+    Page<ProjectResponseDto> searchPublicProjects(ProjectPublicSearchRequestDto filter, Pageable pageable);
 
     /**
      * Agrega tags a un proyecto
