@@ -28,6 +28,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -111,8 +112,24 @@ public class ProjectController {
     @PostMapping("/owner/{ownerId}")
     public ResponseEntity<List<ProjectResponseDto>> getProjectsByOwner(
             @PathVariable Long ownerId,
-            @RequestBody(required = false) ProjectPublicSearchRequestDto filter,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Integer minTeamSize,
+            @RequestParam(required = false) Integer maxTeamSize,
+            @RequestParam(required = false) Integer minDurationWeeks,
+            @RequestParam(required = false) Integer maxDurationWeeks,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        // Crear DTO de filtros con los parámetros recibidos
+        ProjectPublicSearchRequestDto filter = new ProjectPublicSearchRequestDto();
+        filter.setTitle(title);
+        filter.setStatus(status);
+        filter.setIsActive(isActive);
+        filter.setMinTeamSize(minTeamSize);
+        filter.setMaxTeamSize(maxTeamSize);
+        filter.setMinDurationWeeks(minDurationWeeks);
+        filter.setMaxDurationWeeks(maxDurationWeeks);
         
         List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwnerWithSecurity(
                 ownerId, 

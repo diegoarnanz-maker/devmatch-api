@@ -131,7 +131,7 @@ public class Project {
     }
 
     public boolean isVisibleTo(Long userId) {
-        return this.isPublic || this.ownerId.equals(userId);
+        return (this.isPublic || this.ownerId.equals(userId)) && this.isActive && !this.isDeleted;
     }
 
     public boolean isOpenForApplications() {
