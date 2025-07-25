@@ -8,7 +8,7 @@ import com.devmatch.api.projectreview.application.port.out.ReviewRepositoryPort;
 import com.devmatch.api.projectreview.domain.exception.ReviewNotFoundException;
 import com.devmatch.api.projectreview.domain.model.Review;
 import com.devmatch.api.projectreview.domain.service.ReviewDomainService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,13 +16,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
 
     private final ReviewRepositoryPort reviewRepositoryPort;
     private final ReviewMapper reviewMapper;
     private final ReviewDomainService reviewDomainService;
+
+    public ReviewManagementUseCaseImpl(
+        @Qualifier("reviewRepositoryAdapter") ReviewRepositoryPort reviewRepositoryPort,
+        ReviewMapper reviewMapper,
+        ReviewDomainService reviewDomainService
+    ) {
+        this.reviewRepositoryPort = reviewRepositoryPort;
+        this.reviewMapper = reviewMapper;
+        this.reviewDomainService = reviewDomainService;
+    }
 
     @Override
     public ReviewResponseDto createReview(Long userId, ReviewRequestDto requestDto) {
