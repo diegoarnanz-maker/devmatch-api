@@ -2,6 +2,8 @@ package com.devmatch.api.projectreview.application.port.in;
 
 import com.devmatch.api.projectreview.application.dto.ReviewRequestDto;
 import com.devmatch.api.projectreview.application.dto.ReviewResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -27,9 +29,9 @@ public interface ReviewManagementUseCase {
     ReviewResponseDto getReviewById(Long reviewId);
 
     /**
-     * Listar reviews de un proyecto
+     * Listar reviews de un proyecto de forma paginada
      */
-    List<ReviewResponseDto> getReviewsByProject(Long projectId);
+    Page<ReviewResponseDto> getReviewsByProject(Long projectId, Pageable pageable);
 
     /**
      * Listar reviews de un usuario

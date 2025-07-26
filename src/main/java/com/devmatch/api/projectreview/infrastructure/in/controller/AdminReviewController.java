@@ -2,20 +2,23 @@ package com.devmatch.api.projectreview.infrastructure.in.controller;
 
 import com.devmatch.api.projectreview.application.dto.ReviewResponseDto;
 import com.devmatch.api.projectreview.application.port.in.AdminReviewManagementUseCase;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/reviews")
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/api/v1/admin/reviews")
 public class AdminReviewController {
 
     private final AdminReviewManagementUseCase reviewService;
 
-    public AdminReviewController(AdminReviewManagementUseCase reviewService) {
-        this.reviewService = reviewService;
-    }
 
     /**
      * Obtiene todas las reseñas del sistema, opcionalmente filtradas por proyecto, de forma paginada.

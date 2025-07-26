@@ -6,11 +6,13 @@ import com.devmatch.api.projectreview.domain.model.valueobject.Rating;
 import com.devmatch.api.projectreview.domain.model.valueobject.Comment;
 import com.devmatch.api.projectreview.application.dto.ReviewRequestDto;
 import com.devmatch.api.projectreview.application.dto.ReviewResponseDto;
+import java.time.LocalDateTime;
 
 @Component
 public class ReviewMapper {
 
     public Review toDomain(Long userId, ReviewRequestDto dto) {
+        LocalDateTime now = LocalDateTime.now();
         return new Review(
             null, // id (se asigna al guardar)
             dto.getProjectId(),
@@ -20,8 +22,8 @@ public class ReviewMapper {
             dto.getIsPublic() != null ? dto.getIsPublic() : true,
             true, // isActive por defecto
             false, // isDeleted por defecto
-            null, // createdAt
-            null  // updatedAt
+            now, // createdAt
+            now  // updatedAt
         );
     }
 
@@ -33,6 +35,8 @@ public class ReviewMapper {
             review.getRating() != null ? review.getRating().getValue() : null,
             review.getComment() != null ? review.getComment().getValue() : null,
             review.isPublic(),
+            review.isActive(),
+            review.isDeleted(),
             review.getCreatedAt(),
             review.getUpdatedAt()
         );
