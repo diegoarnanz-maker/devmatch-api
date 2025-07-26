@@ -6,9 +6,14 @@ import com.devmatch.api.projectreview.application.mapper.ReviewMapper;
 import com.devmatch.api.projectreview.application.port.in.ReviewManagementUseCase;
 import com.devmatch.api.projectreview.application.port.out.ReviewRepositoryPort;
 import com.devmatch.api.projectreview.domain.exception.ReviewNotFoundException;
+import com.devmatch.api.projectreview.domain.exception.ReviewOperationNotAllowedException;
 import com.devmatch.api.projectreview.domain.model.Review;
 import com.devmatch.api.projectreview.domain.service.ReviewDomainService;
+import com.devmatch.api.project.application.port.out.ProjectRepositoryPort;
+import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,26 +27,39 @@ public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
     private final ReviewRepositoryPort reviewRepositoryPort;
     private final ReviewMapper reviewMapper;
     private final ReviewDomainService reviewDomainService;
+    private final ProjectRepositoryPort projectRepositoryPort;
 
     public ReviewManagementUseCaseImpl(
         @Qualifier("reviewRepositoryAdapter") ReviewRepositoryPort reviewRepositoryPort,
         ReviewMapper reviewMapper,
-        ReviewDomainService reviewDomainService
+        ReviewDomainService reviewDomainService,
+        ProjectRepositoryPort projectRepositoryPort
     ) {
         this.reviewRepositoryPort = reviewRepositoryPort;
         this.reviewMapper = reviewMapper;
         this.reviewDomainService = reviewDomainService;
+        this.projectRepositoryPort = projectRepositoryPort;
     }
 
     @Override
     public ReviewResponseDto createReview(Long userId, ReviewRequestDto requestDto) {
+        // Validar que el proyecto existe y está en estado COMPLETED
+        var project = projectRepositoryPort.findById(requestDto.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + requestDto.getProjectId()));
+        
+        if (project.getStatus() != ProjectStatus.COMPLETED) {
+            throw ReviewOperationNotAllowedException.projectNotCompleted(requestDto.getProjectId());
+        }
+        
         // Validar que el usuario no haya dejado ya una review para este proyecto
         boolean alreadyReviewed = reviewRepositoryPort.existsByProjectIdAndUserId(requestDto.getProjectId(), userId);
         reviewDomainService.validateSingleReviewPerUserProject(userId, requestDto.getProjectId(), alreadyReviewed);
+        
         // Validar permisos (ejemplo: solo miembros pueden dejar review)
         // Aquí deberías consultar si el usuario es miembro del proyecto (isMember)
         // boolean isMember = ...
         // reviewDomainService.validateUserCanReview(userId, requestDto.getProjectId(), isMember);
+        
         // Mapear y guardar
         Review review = reviewMapper.toDomain(userId, requestDto);
         Review saved = reviewRepositoryPort.save(review);
@@ -58,9 +76,9 @@ public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ReviewResponseDto> getReviewsByProject(Long projectId) {
-        List<Review> reviews = reviewRepositoryPort.findByProjectId(projectId);
-        return reviews.stream().map(reviewMapper::toResponseDto).collect(Collectors.toList());
+    public Page<ReviewResponseDto> getReviewsByProject(Long projectId, Pageable pageable) {
+        Page<Review> reviews = reviewRepositoryPort.findByProjectId(projectId, pageable);
+        return reviews.map(reviewMapper::toResponseDto);
     }
 
     @Override
@@ -74,10 +92,20 @@ public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
     public ReviewResponseDto updateReview(Long userId, Long reviewId, ReviewRequestDto requestDto) {
         Review existing = reviewRepositoryPort.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
-        // Validar que el usuario es el autor (opcional)
+        
+        // Validar que el usuario es el autor
         if (!existing.getUserId().equals(userId)) {
-            throw new RuntimeException("No tienes permisos para actualizar esta review");
+            throw ReviewOperationNotAllowedException.insufficientPermissions(userId, reviewId);
         }
+        
+        // Validar que el proyecto sigue en estado COMPLETED
+        var project = projectRepositoryPort.findById(existing.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + existing.getProjectId()));
+        
+        if (project.getStatus() != ProjectStatus.COMPLETED) {
+            throw ReviewOperationNotAllowedException.projectNotCompleted(existing.getProjectId());
+        }
+        
         // Actualizar campos permitidos
         existing.setRating(new com.devmatch.api.projectreview.domain.model.valueobject.Rating(requestDto.getRating()));
         existing.setComment(new com.devmatch.api.projectreview.domain.model.valueobject.Comment(requestDto.getComment()));
@@ -90,10 +118,12 @@ public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
     public void deleteReview(Long userId, Long reviewId) {
         Review existing = reviewRepositoryPort.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
-        // Validar que el usuario es el autor (opcional)
+        
+        // Validar que el usuario es el autor
         if (!existing.getUserId().equals(userId)) {
-            throw new RuntimeException("No tienes permisos para eliminar esta review");
+            throw ReviewOperationNotAllowedException.insufficientPermissions(userId, reviewId);
         }
+        
         // Borrado lógico
         existing.setActive(false);
         existing.setDeleted(true);

@@ -18,6 +18,8 @@ public class ReviewResponseDto {
     private Integer rating;
     private String comment;
     private Boolean isPublic;
+    private Boolean isActive;
+    private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 } 

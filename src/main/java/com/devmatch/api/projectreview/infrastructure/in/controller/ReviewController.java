@@ -6,6 +6,8 @@ import com.devmatch.api.projectreview.application.port.in.ReviewManagementUseCas
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,14 +28,17 @@ public class ReviewController {
     private final ReviewManagementUseCase reviewManagementUseCase;
 
     /**
-     * Obtiene todas las reseñas de un proyecto específico.
+     * Obtiene todas las reseñas de un proyecto específico de forma paginada.
      * 
      * @param projectId ID del proyecto
-     * @return Lista de reseñas del proyecto
+     * @param pageable Parámetros de paginación
+     * @return Página de reseñas del proyecto
      */
-    @GetMapping
-    public ResponseEntity<List<ReviewResponseDto>> getReviewsByProject(@RequestParam Long projectId) {
-        List<ReviewResponseDto> reviews = reviewManagementUseCase.getReviewsByProject(projectId);
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByProject(
+            @PathVariable Long projectId,
+            Pageable pageable) {
+        Page<ReviewResponseDto> reviews = reviewManagementUseCase.getReviewsByProject(projectId, pageable);
         return ResponseEntity.ok(reviews);
     }
 
@@ -52,6 +57,9 @@ public class ReviewController {
     /**
      * Crea una nueva reseña para un proyecto.
      * 
+     * Solo se permiten reseñas en proyectos con estado COMPLETED.
+     * Si el proyecto no está completado, se lanzará una excepción.
+     * 
      * @param userPrincipal Usuario autenticado
      * @param request DTO con los datos de la reseña
      * @return Reseña creada
@@ -66,6 +74,9 @@ public class ReviewController {
 
     /**
      * Actualiza una reseña existente.
+     * 
+     * Solo se permiten actualizaciones en reseñas de proyectos con estado COMPLETED.
+     * Si el proyecto no está completado, se lanzará una excepción.
      * 
      * @param userPrincipal Usuario autenticado
      * @param reviewId ID de la reseña a actualizar

@@ -3,6 +3,7 @@ package com.devmatch.api.shared.infrastructure.exception;
 import com.devmatch.api.project.domain.exception.ProjectNotFoundException;
 import com.devmatch.api.project.domain.exception.ProjectOperationNotAllowedException;
 import com.devmatch.api.project.domain.exception.ProjectLimitExceededException;
+import com.devmatch.api.projectreview.domain.exception.ReviewOperationNotAllowedException;
 import com.devmatch.api.role.domain.exception.RoleAlreadyExistsException;
 import com.devmatch.api.role.domain.exception.RoleInUseException;
 import com.devmatch.api.role.domain.exception.RoleNotFoundException;
@@ -314,6 +315,22 @@ public class GlobalExceptionHandler {
         
         log.warn("Límite de proyectos activos excedido: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de operaciones no permitidas en reseñas
+     */
+    @ExceptionHandler(ReviewOperationNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleReviewOperationNotAllowedException(ReviewOperationNotAllowedException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.FORBIDDEN.value(),
+            "Operación no permitida en reseña",
+            ex.getMessage()
+        );
+        
+        log.warn("Operación no permitida en reseña: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     /**
