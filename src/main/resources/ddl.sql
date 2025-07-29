@@ -324,3 +324,11 @@ CREATE TABLE user_notifications (
 CREATE INDEX idx_user_notifications_user_id ON user_notifications(user_id);
 CREATE INDEX idx_user_notifications_notification_type ON user_notifications(notification_type);
 CREATE INDEX idx_user_notifications_is_read ON user_notifications(is_read);
+
+-- Eliminar la constraint actual
+ALTER TABLE project_reviews DROP CONSTRAINT uq_project_user_review;
+
+-- Crear una nueva constraint que considere solo reviews activas
+ALTER TABLE project_reviews 
+ADD CONSTRAINT uq_project_user_review_active 
+UNIQUE (project_id, user_id, is_active, is_deleted);

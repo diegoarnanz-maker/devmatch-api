@@ -37,18 +37,11 @@ public class AdminReviewController {
     /**
      * Elimina una reseña por su ID (admin).
      * @param reviewId ID de la reseña
-     * @param projectId ID del proyecto (opcional, para filtrar después del borrado)
-     * @param pageable Parámetros de paginación
-     * @return Lista paginada de reseñas restantes
+     * @return Respuesta vacía indicando éxito
      */
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Page<ReviewResponseDto>> deleteReview(
-            @PathVariable Long reviewId,
-            @RequestParam(value = "projectId", required = false) Long projectId,
-            Pageable pageable) {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);
-        // Devolver la lista actualizada después del borrado
-        Page<ReviewResponseDto> updatedPage = reviewService.getAllReviews(projectId, pageable);
-        return ResponseEntity.ok(updatedPage);
+        return ResponseEntity.noContent().build();
     }
 } 

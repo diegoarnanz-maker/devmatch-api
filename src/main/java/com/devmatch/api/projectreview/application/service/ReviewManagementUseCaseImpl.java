@@ -89,6 +89,13 @@ public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
+        Page<Review> reviews = reviewRepositoryPort.findByUserId(userId, pageable);
+        return reviews.map(reviewMapper::toResponseDto);
+    }
+
+    @Override
     public ReviewResponseDto updateReview(Long userId, Long reviewId, ReviewRequestDto requestDto) {
         Review existing = reviewRepositoryPort.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
