@@ -4,6 +4,7 @@ import com.devmatch.api.project.domain.exception.ProjectNotFoundException;
 import com.devmatch.api.project.domain.exception.ProjectOperationNotAllowedException;
 import com.devmatch.api.project.domain.exception.ProjectLimitExceededException;
 import com.devmatch.api.projectreview.domain.exception.ReviewOperationNotAllowedException;
+import com.devmatch.api.projectreview.domain.exception.ReviewLimitExceededException;
 import com.devmatch.api.role.domain.exception.RoleAlreadyExistsException;
 import com.devmatch.api.role.domain.exception.RoleInUseException;
 import com.devmatch.api.role.domain.exception.RoleNotFoundException;
@@ -22,6 +23,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -331,6 +333,54 @@ public class GlobalExceptionHandler {
         
         log.warn("Operación no permitida en reseña: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de límite de reseñas excedido
+     */
+    @ExceptionHandler(ReviewLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleReviewLimitExceededException(ReviewLimitExceededException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            "Límite de reseñas excedido",
+            ex.getMessage()
+        );
+        
+        log.warn("Límite de reseñas excedido: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de violación de integridad de datos
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        String message = ex.getMessage();
+        
+        // Detectar si es un problema de review duplicada
+        if (message != null && message.contains("uq_project_user_review_active")) {
+            ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Límite de reseñas excedido",
+                "Ya has dejado una reseña para este proyecto. Solo puedes dejar una reseña por proyecto."
+            );
+            
+            log.warn("Intento de crear review duplicada: {}", message);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
+        
+        // Para otros tipos de violaciones de integridad
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            "Error de integridad de datos",
+            "Los datos proporcionados violan las restricciones de la base de datos."
+        );
+        
+        log.error("Error de integridad de datos", ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
     /**

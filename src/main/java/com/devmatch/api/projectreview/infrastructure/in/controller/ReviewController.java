@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 /**
@@ -105,5 +104,20 @@ public class ReviewController {
             @PathVariable Long reviewId) {
         reviewManagementUseCase.deleteReview(userPrincipal.getUserId(), reviewId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Obtiene todas las reseñas del usuario autenticado.
+     * 
+     * @param userPrincipal Usuario autenticado
+     * @param pageable Parámetros de paginación
+     * @return Página de reseñas del usuario
+     */
+    @GetMapping("/my-reviews")
+    public ResponseEntity<Page<ReviewResponseDto>> getMyReviews(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            Pageable pageable) {
+        Page<ReviewResponseDto> reviews = reviewManagementUseCase.getMyReviews(userPrincipal.getUserId(), pageable);
+        return ResponseEntity.ok(reviews);
     }
 } 

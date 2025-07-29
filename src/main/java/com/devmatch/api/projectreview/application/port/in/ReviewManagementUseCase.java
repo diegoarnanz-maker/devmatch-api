@@ -37,4 +37,9 @@ public interface ReviewManagementUseCase {
      * Listar reviews de un usuario
      */
     List<ReviewResponseDto> getReviewsByUser(Long userId);
+
+    /**
+     * Listar reviews del usuario autenticado de forma paginada
+     */
+    Page<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable);
 }
