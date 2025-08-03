@@ -3,6 +3,7 @@ package com.devmatch.api.usernotification.domain.service;
 import com.devmatch.api.usernotification.domain.model.Notification;
 import com.devmatch.api.usernotification.domain.model.valueobject.NotificationMessage;
 import com.devmatch.api.usernotification.domain.model.valueobject.NotificationType;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * Servicio de dominio para la gestión de notificaciones.
  * Encapsula la lógica de negocio compleja relacionada con las notificaciones.
  */
+@Component
 public class NotificationDomainService {
 
     /**
