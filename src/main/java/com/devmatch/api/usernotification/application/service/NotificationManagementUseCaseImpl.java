@@ -7,6 +7,7 @@ import com.devmatch.api.usernotification.application.mapper.NotificationMapper;
 import com.devmatch.api.usernotification.application.port.in.NotificationManagementUseCase;
 import com.devmatch.api.usernotification.application.port.out.NotificationEventPublisherPort;
 import com.devmatch.api.usernotification.application.port.out.NotificationRepositoryPort;
+import com.devmatch.api.usernotification.application.port.out.ProjectQueryPort;
 import com.devmatch.api.usernotification.domain.exception.NotificationDuplicateException;
 import com.devmatch.api.usernotification.domain.exception.NotificationInvalidStateException;
 import com.devmatch.api.usernotification.domain.exception.NotificationLimitExceededException;
@@ -33,6 +34,7 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
     private final NotificationEventPublisherPort notificationEventPublisherPort;
     private final NotificationMapper notificationMapper;
     private final NotificationDomainService notificationDomainService;
+    private final ProjectQueryPort projectQueryPort;
 
     private static final int MAX_NOTIFICATIONS_PER_USER = 1000;
     private static final int DUPLICATE_TIME_WINDOW_MINUTES = 5;
@@ -64,7 +66,11 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
 
     @Override
     @Transactional
-    public NotificationResponseDto createProjectApplicationNotification(Long userId, Long projectId, String projectTitle) {
+    public NotificationResponseDto createProjectApplicationNotification(Long userId, Long projectId) {
+        // Obtener el título del proyecto automáticamente
+        String projectTitle = projectQueryPort.getProjectTitleById(projectId)
+                .orElse("Proyecto #" + projectId);
+        
         Notification notification = notificationMapper.createProjectApplicationNotification(userId, projectId, projectTitle);
         Notification savedNotification = notificationRepositoryPort.save(notification);
         notificationEventPublisherPort.publishNotificationCreated(savedNotification);

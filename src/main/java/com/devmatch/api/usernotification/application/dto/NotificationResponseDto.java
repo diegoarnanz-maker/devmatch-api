@@ -1,6 +1,8 @@
 package com.devmatch.api.usernotification.application.dto;
 
 import com.devmatch.api.usernotification.domain.model.valueobject.NotificationType;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationResponseDto {
     
     private Long id;
@@ -24,8 +27,11 @@ public class NotificationResponseDto {
     private Long projectId;
     private Long reviewId;
     private String achievementCode;
+    @JsonProperty("isRead")
     private boolean isRead;
+    @JsonProperty("isActive")
     private boolean isActive;
+    @JsonProperty("isDeleted")
     private boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
