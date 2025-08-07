@@ -43,49 +43,46 @@ public class NotificationController {
     /**
      * Crea una notificación de aplicación aceptada (llamada interna del sistema).
      */
-    @PostMapping("/internal/project-application-accepted")
+    @PostMapping("/internal/project-application-accepted/{userId}/{projectId}")
     public ResponseEntity<NotificationResponseDto> createInternalProjectApplicationAcceptedNotification(
-            @RequestParam Long userId,
-            @RequestParam Long projectId,
-            @RequestParam String projectTitle) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationAcceptedNotification(userId, projectId, projectTitle);
+            @PathVariable Long userId,
+            @PathVariable Long projectId) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationAcceptedNotification(userId, projectId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * Crea una notificación de aplicación rechazada (llamada interna del sistema).
      */
-    @PostMapping("/internal/project-application-rejected")
+    @PostMapping("/internal/project-application-rejected/{userId}/{projectId}")
     public ResponseEntity<NotificationResponseDto> createInternalProjectApplicationRejectedNotification(
-            @RequestParam Long userId,
-            @RequestParam Long projectId,
-            @RequestParam String projectTitle,
+            @PathVariable Long userId,
+            @PathVariable Long projectId,
             @RequestParam String reason) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationRejectedNotification(userId, projectId, projectTitle, reason);
+        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationRejectedNotification(userId, projectId, reason);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * Crea una notificación de nuevo miembro en proyecto (llamada interna del sistema).
      */
-    @PostMapping("/internal/project-member-joined")
+    @PostMapping("/internal/project-member-joined/{userId}/{projectId}")
     public ResponseEntity<NotificationResponseDto> createInternalProjectMemberJoinedNotification(
-            @RequestParam Long userId,
-            @RequestParam Long projectId,
-            @RequestParam String projectTitle,
+            @PathVariable Long userId,
+            @PathVariable Long projectId,
             @RequestParam String memberName) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectMemberJoinedNotification(userId, projectId, projectTitle, memberName);
+        NotificationResponseDto response = notificationManagementUseCase.createProjectMemberJoinedNotification(userId, projectId, memberName);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * Crea una notificación de review recibida (llamada interna del sistema).
      */
-    @PostMapping("/internal/project-review-received")
+    @PostMapping("/internal/project-review-received/{userId}/{projectId}/{reviewId}")
     public ResponseEntity<NotificationResponseDto> createInternalProjectReviewReceivedNotification(
-            @RequestParam Long userId,
-            @RequestParam Long projectId,
-            @RequestParam Long reviewId,
+            @PathVariable Long userId,
+            @PathVariable Long projectId,
+            @PathVariable Long reviewId,
             @RequestParam String reviewerName) {
         NotificationResponseDto response = notificationManagementUseCase.createProjectReviewReceivedNotification(userId, projectId, reviewId, reviewerName);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -94,10 +91,10 @@ public class NotificationController {
     /**
      * Crea una notificación de logro desbloqueado (llamada interna del sistema).
      */
-    @PostMapping("/internal/achievement-unlocked")
+    @PostMapping("/internal/achievement-unlocked/{userId}/{achievementCode}")
     public ResponseEntity<NotificationResponseDto> createInternalAchievementUnlockedNotification(
-            @RequestParam Long userId,
-            @RequestParam String achievementCode,
+            @PathVariable Long userId,
+            @PathVariable String achievementCode,
             @RequestParam String achievementName) {
         NotificationResponseDto response = notificationManagementUseCase.createAchievementUnlockedNotification(userId, achievementCode, achievementName);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -106,9 +103,9 @@ public class NotificationController {
     /**
      * Crea una notificación de bienvenida (llamada interna del sistema).
      */
-    @PostMapping("/internal/welcome")
+    @PostMapping("/internal/welcome/{userId}")
     public ResponseEntity<NotificationResponseDto> createInternalWelcomeNotification(
-            @RequestParam Long userId,
+            @PathVariable Long userId,
             @RequestParam String username) {
         NotificationResponseDto response = notificationManagementUseCase.createWelcomeNotification(userId, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -117,9 +114,9 @@ public class NotificationController {
     /**
      * Crea una notificación del sistema (llamada interna del sistema).
      */
-    @PostMapping("/internal/system")
+    @PostMapping("/internal/system/{userId}")
     public ResponseEntity<NotificationResponseDto> createInternalSystemNotification(
-            @RequestParam Long userId,
+            @PathVariable Long userId,
             @RequestParam String message) {
         NotificationResponseDto response = notificationManagementUseCase.createSystemNotification(userId, message);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

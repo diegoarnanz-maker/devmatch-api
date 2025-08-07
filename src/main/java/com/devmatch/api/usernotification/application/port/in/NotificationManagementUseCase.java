@@ -34,32 +34,29 @@ public interface NotificationManagementUseCase {
      * 
      * @param userId ID del usuario cuya aplicación fue aceptada
      * @param projectId ID del proyecto
-     * @param projectTitle Título del proyecto
      * @return DTO con la notificación creada
      */
-    NotificationResponseDto createProjectApplicationAcceptedNotification(Long userId, Long projectId, String projectTitle);
+    NotificationResponseDto createProjectApplicationAcceptedNotification(Long userId, Long projectId);
 
     /**
      * Crea una notificación de aplicación rechazada.
      * 
      * @param userId ID del usuario cuya aplicación fue rechazada
      * @param projectId ID del proyecto
-     * @param projectTitle Título del proyecto
      * @param reason Razón del rechazo (opcional)
      * @return DTO con la notificación creada
      */
-    NotificationResponseDto createProjectApplicationRejectedNotification(Long userId, Long projectId, String projectTitle, String reason);
+    NotificationResponseDto createProjectApplicationRejectedNotification(Long userId, Long projectId, String reason);
 
     /**
      * Crea una notificación de nuevo miembro en proyecto.
      * 
      * @param userId ID del usuario que se unió al proyecto
      * @param projectId ID del proyecto
-     * @param projectTitle Título del proyecto
      * @param memberName Nombre del nuevo miembro
      * @return DTO con la notificación creada
      */
-    NotificationResponseDto createProjectMemberJoinedNotification(Long userId, Long projectId, String projectTitle, String memberName);
+    NotificationResponseDto createProjectMemberJoinedNotification(Long userId, Long projectId, String memberName);
 
     /**
      * Crea una notificación de review recibida.
