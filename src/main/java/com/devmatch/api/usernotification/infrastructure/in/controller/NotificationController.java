@@ -22,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class NotificationController {
 
     private final NotificationManagementUseCase notificationManagementUseCase;
@@ -33,12 +32,11 @@ public class NotificationController {
     /**
      * Crea una notificación de aplicación a proyecto (llamada interna del sistema).
      */
-    @PostMapping("/internal/project-application")
+    @PostMapping("/internal/project-application/{userId}/{projectId}")
     public ResponseEntity<NotificationResponseDto> createInternalProjectApplicationNotification(
-            @RequestParam Long userId,
-            @RequestParam Long projectId,
-            @RequestParam String projectTitle) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationNotification(userId, projectId, projectTitle);
+            @PathVariable Long userId,
+            @PathVariable Long projectId) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationNotification(userId, projectId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

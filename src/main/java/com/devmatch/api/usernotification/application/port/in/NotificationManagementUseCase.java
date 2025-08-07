@@ -25,10 +25,9 @@ public interface NotificationManagementUseCase {
      * 
      * @param userId ID del usuario que aplicó al proyecto
      * @param projectId ID del proyecto
-     * @param projectTitle Título del proyecto
      * @return DTO con la notificación creada
      */
-    NotificationResponseDto createProjectApplicationNotification(Long userId, Long projectId, String projectTitle);
+    NotificationResponseDto createProjectApplicationNotification(Long userId, Long projectId);
 
     /**
      * Crea una notificación de aplicación aceptada.
