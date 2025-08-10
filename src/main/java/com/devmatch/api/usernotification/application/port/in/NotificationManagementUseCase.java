@@ -83,10 +83,9 @@ public interface NotificationManagementUseCase {
      * Crea una notificación de bienvenida.
      * 
      * @param userId ID del usuario
-     * @param username Nombre de usuario
      * @return DTO con la notificación creada
      */
-    NotificationResponseDto createWelcomeNotification(Long userId, String username);
+    NotificationResponseDto createWelcomeNotification(Long userId);
 
     /**
      * Crea una notificación del sistema.

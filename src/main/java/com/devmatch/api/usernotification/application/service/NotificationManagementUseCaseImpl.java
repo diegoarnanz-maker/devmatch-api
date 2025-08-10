@@ -136,7 +136,11 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
 
     @Override
     @Transactional
-    public NotificationResponseDto createWelcomeNotification(Long userId, String username) {
+    public NotificationResponseDto createWelcomeNotification(Long userId) {
+        // TODO: Obtener username del usuario desde la base de datos
+        // Por ahora usamos un placeholder, pero deberías implementar la consulta al usuario
+        String username = "Usuario #" + userId; // Placeholder temporal
+        
         Notification notification = notificationMapper.createWelcomeNotification(userId, username);
         Notification savedNotification = notificationRepositoryPort.save(notification);
         notificationEventPublisherPort.publishNotificationCreated(savedNotification);
