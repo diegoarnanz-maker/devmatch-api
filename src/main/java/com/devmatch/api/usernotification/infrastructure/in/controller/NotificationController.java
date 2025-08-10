@@ -1,7 +1,11 @@
 package com.devmatch.api.usernotification.infrastructure.in.controller;
 
 import com.devmatch.api.usernotification.application.dto.NotificationResponseDto;
+import com.devmatch.api.usernotification.application.dto.NotificationRejectionRequestDto;
 import com.devmatch.api.usernotification.application.dto.NotificationStatusRequestDto;
+import com.devmatch.api.usernotification.application.dto.ProjectMemberJoinedRequestDto;
+import com.devmatch.api.usernotification.application.dto.ProjectReviewReceivedRequestDto;
+import com.devmatch.api.usernotification.application.dto.AchievementUnlockedRequestDto;
 import com.devmatch.api.usernotification.application.port.in.NotificationManagementUseCase;
 import com.devmatch.api.usernotification.application.port.in.NotificationQueryUseCase;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
@@ -58,8 +62,8 @@ public class NotificationController {
     public ResponseEntity<NotificationResponseDto> createInternalProjectApplicationRejectedNotification(
             @PathVariable Long userId,
             @PathVariable Long projectId,
-            @RequestParam String reason) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationRejectedNotification(userId, projectId, reason);
+            @Valid @RequestBody NotificationRejectionRequestDto request) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationRejectedNotification(userId, projectId, request.getReason());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -70,8 +74,8 @@ public class NotificationController {
     public ResponseEntity<NotificationResponseDto> createInternalProjectMemberJoinedNotification(
             @PathVariable Long userId,
             @PathVariable Long projectId,
-            @RequestParam String memberName) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectMemberJoinedNotification(userId, projectId, memberName);
+            @Valid @RequestBody ProjectMemberJoinedRequestDto request) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectMemberJoinedNotification(userId, projectId, request.getMemberName());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -83,8 +87,8 @@ public class NotificationController {
             @PathVariable Long userId,
             @PathVariable Long projectId,
             @PathVariable Long reviewId,
-            @RequestParam String reviewerName) {
-        NotificationResponseDto response = notificationManagementUseCase.createProjectReviewReceivedNotification(userId, projectId, reviewId, reviewerName);
+            @Valid @RequestBody ProjectReviewReceivedRequestDto request) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectReviewReceivedNotification(userId, projectId, reviewId, request.getReviewerName());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -95,8 +99,8 @@ public class NotificationController {
     public ResponseEntity<NotificationResponseDto> createInternalAchievementUnlockedNotification(
             @PathVariable Long userId,
             @PathVariable String achievementCode,
-            @RequestParam String achievementName) {
-        NotificationResponseDto response = notificationManagementUseCase.createAchievementUnlockedNotification(userId, achievementCode, achievementName);
+            @Valid @RequestBody AchievementUnlockedRequestDto request) {
+        NotificationResponseDto response = notificationManagementUseCase.createAchievementUnlockedNotification(userId, achievementCode, request.getAchievementName());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -105,9 +109,8 @@ public class NotificationController {
      */
     @PostMapping("/internal/welcome/{userId}")
     public ResponseEntity<NotificationResponseDto> createInternalWelcomeNotification(
-            @PathVariable Long userId,
-            @RequestParam String username) {
-        NotificationResponseDto response = notificationManagementUseCase.createWelcomeNotification(userId, username);
+            @PathVariable Long userId) {
+        NotificationResponseDto response = notificationManagementUseCase.createWelcomeNotification(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
