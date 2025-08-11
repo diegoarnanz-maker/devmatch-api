@@ -114,17 +114,6 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Crea una notificación del sistema (llamada interna del sistema).
-     */
-    @PostMapping("/internal/system/{userId}")
-    public ResponseEntity<NotificationResponseDto> createInternalSystemNotification(
-            @PathVariable Long userId,
-            @RequestParam String message) {
-        NotificationResponseDto response = notificationManagementUseCase.createSystemNotification(userId, message);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     // ==================== ENDPOINTS DE USUARIO (PROTEGIDOS) ====================
 
     /**

@@ -15,6 +15,7 @@ import com.devmatch.api.usernotification.domain.exception.NotificationNotFoundEx
 import com.devmatch.api.usernotification.domain.exception.NotificationUserMismatchException;
 import com.devmatch.api.usernotification.domain.model.Notification;
 import com.devmatch.api.usernotification.domain.service.NotificationDomainService;
+import com.devmatch.api.user.application.port.in.UserQueryUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
     private final NotificationMapper notificationMapper;
     private final NotificationDomainService notificationDomainService;
     private final ProjectQueryPort projectQueryPort;
+    private final UserQueryUseCase userQueryUseCase;
 
     private static final int MAX_NOTIFICATIONS_PER_USER = 1000;
     private static final int DUPLICATE_TIME_WINDOW_MINUTES = 5;
@@ -137,20 +139,9 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
     @Override
     @Transactional
     public NotificationResponseDto createWelcomeNotification(Long userId) {
-        // TODO: Obtener username del usuario desde la base de datos
-        // Por ahora usamos un placeholder, pero deberías implementar la consulta al usuario
-        String username = "Usuario #" + userId; // Placeholder temporal
+        String username = userQueryUseCase.findUserById(userId).getUsername();
         
         Notification notification = notificationMapper.createWelcomeNotification(userId, username);
-        Notification savedNotification = notificationRepositoryPort.save(notification);
-        notificationEventPublisherPort.publishNotificationCreated(savedNotification);
-        return notificationMapper.toResponseDto(savedNotification);
-    }
-
-    @Override
-    @Transactional
-    public NotificationResponseDto createSystemNotification(Long userId, String message) {
-        Notification notification = notificationMapper.createSystemNotification(userId, message);
         Notification savedNotification = notificationRepositoryPort.save(notification);
         notificationEventPublisherPort.publishNotificationCreated(savedNotification);
         return notificationMapper.toResponseDto(savedNotification);

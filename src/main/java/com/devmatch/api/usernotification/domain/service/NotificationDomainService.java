@@ -149,31 +149,19 @@ public class NotificationDomainService {
      * @return Notificación creada
      */
     public Notification createWelcomeNotification(Long userId, String username) {
-        NotificationMessage message = new NotificationMessage(
-            "¡Bienvenido a DevMatch, " + username + "! Estamos emocionados de tenerte con nosotros."
-        );
-        
         return new Notification(
-            null, userId, message, NotificationType.WELCOME_MESSAGE,
-            null, null, null, false, true, false,
-            LocalDateTime.now(), LocalDateTime.now()
-        );
-    }
-
-    /**
-     * Crea una notificación del sistema.
-     * 
-     * @param userId ID del usuario destinatario
-     * @param message Mensaje del sistema
-     * @return Notificación creada
-     */
-    public Notification createSystemNotification(Long userId, String message) {
-        NotificationMessage notificationMessage = new NotificationMessage(message);
-        
-        return new Notification(
-            null, userId, notificationMessage, NotificationType.SYSTEM_MESSAGE,
-            null, null, null, false, true, false,
-            LocalDateTime.now(), LocalDateTime.now()
+            null,
+            userId,
+            new NotificationMessage("¡Bienvenido a DevMatch, " + username + "! Estamos emocionados de tenerte con nosotros."),
+            NotificationType.WELCOME_MESSAGE,
+            null,
+            null,
+            null,
+            false,
+            true,
+            false,
+            LocalDateTime.now(),
+            LocalDateTime.now()
         );
     }
 
