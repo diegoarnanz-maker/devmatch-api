@@ -88,15 +88,6 @@ public interface NotificationManagementUseCase {
     NotificationResponseDto createWelcomeNotification(Long userId);
 
     /**
-     * Crea una notificación del sistema.
-     * 
-     * @param userId ID del usuario destinatario
-     * @param message Mensaje del sistema
-     * @return DTO con la notificación creada
-     */
-    NotificationResponseDto createSystemNotification(Long userId, String message);
-
-    /**
      * Marca una notificación como leída.
      * 
      * @param notificationId ID de la notificación

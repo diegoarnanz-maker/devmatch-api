@@ -337,28 +337,4 @@ public class NotificationMapper {
             LocalDateTime.now()
         );
     }
-
-    /**
-     * Crea una notificación del sistema.
-     * 
-     * @param userId ID del usuario
-     * @param message Mensaje del sistema
-     * @return Entidad de dominio
-     */
-    public Notification createSystemNotification(Long userId, String message) {
-        return new Notification(
-            null,
-            userId,
-            new NotificationMessage(message),
-            NotificationType.SYSTEM_MESSAGE,
-            null,
-            null,
-            null,
-            false,
-            true,
-            false,
-            LocalDateTime.now(),
-            LocalDateTime.now()
-        );
-    }
 } 
