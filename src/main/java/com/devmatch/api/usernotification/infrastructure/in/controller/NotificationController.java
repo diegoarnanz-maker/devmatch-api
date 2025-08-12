@@ -2,7 +2,7 @@ package com.devmatch.api.usernotification.infrastructure.in.controller;
 
 import com.devmatch.api.usernotification.application.dto.NotificationResponseDto;
 import com.devmatch.api.usernotification.application.dto.NotificationRejectionRequestDto;
-import com.devmatch.api.usernotification.application.dto.NotificationStatusRequestDto;
+
 import com.devmatch.api.usernotification.application.dto.ProjectMemberJoinedRequestDto;
 import com.devmatch.api.usernotification.application.dto.ProjectReviewReceivedRequestDto;
 import com.devmatch.api.usernotification.application.dto.AchievementUnlockedRequestDto;
@@ -170,61 +170,7 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-    /**
-     * Obtiene las notificaciones del usuario autenticado por review con paginación.
-     */
-    @GetMapping("/my-notifications/review/{reviewId}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<NotificationResponseDto>> getMyNotificationsByReviewPaginated(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            @PathVariable Long reviewId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        List<NotificationResponseDto> notifications = notificationQueryUseCase.getUserNotificationsByReviewPaginated(userPrincipal.getUserId(), reviewId, page, size);
-        return ResponseEntity.ok(notifications);
-    }
 
-    /**
-     * Obtiene las notificaciones de logros del usuario autenticado con paginación.
-     */
-    @GetMapping("/my-notifications/achievements")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<NotificationResponseDto>> getMyAchievementNotificationsPaginated(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        List<NotificationResponseDto> notifications = notificationQueryUseCase.getUserAchievementNotificationsPaginated(userPrincipal.getUserId(), page, size);
-        return ResponseEntity.ok(notifications);
-    }
-
-    /**
-     * Obtiene las notificaciones del usuario autenticado por rango de fechas con paginación.
-     */
-    @GetMapping("/my-notifications/date-range")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<NotificationResponseDto>> getMyNotificationsByDateRangePaginated(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            @RequestParam String startDate,
-            @RequestParam String endDate,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        List<NotificationResponseDto> notifications = notificationQueryUseCase.getUserNotificationsByDateRangePaginated(userPrincipal.getUserId(), startDate, endDate, page, size);
-        return ResponseEntity.ok(notifications);
-    }
-
-    /**
-     * Busca notificaciones del usuario autenticado por texto con paginación.
-     */
-    @GetMapping("/my-notifications/search")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<NotificationResponseDto>> searchMyNotificationsPaginated(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            @RequestParam String searchText,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        List<NotificationResponseDto> notifications = notificationQueryUseCase.searchUserNotificationsPaginated(userPrincipal.getUserId(), searchText, page, size);
-        return ResponseEntity.ok(notifications);
-    }
 
     // ==================== ENDPOINTS DE GESTIÓN DE USUARIO ====================
 
@@ -277,19 +223,6 @@ public class NotificationController {
     }
 
     /**
-     * Actualiza el estado de una notificación del usuario autenticado.
-     */
-    @PutMapping("/{notificationId}/status")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<NotificationResponseDto> updateMyNotificationStatus(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            @PathVariable Long notificationId,
-            @Valid @RequestBody NotificationStatusRequestDto statusRequest) {
-        NotificationResponseDto response = notificationManagementUseCase.updateNotificationStatus(notificationId, userPrincipal.getUserId(), statusRequest);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
      * Elimina una notificación del usuario autenticado.
      */
     @DeleteMapping("/{notificationId}")
@@ -324,39 +257,4 @@ public class NotificationController {
         return ResponseEntity.ok(count);
     }
 
-    // ==================== ENDPOINTS DE ESTADÍSTICAS DE USUARIO ====================
-
-    /**
-     * Obtiene el conteo total de notificaciones del usuario autenticado.
-     */
-    @GetMapping("/my-notifications/count")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Long> countMyNotifications(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
-        long count = notificationQueryUseCase.countUserNotifications(userPrincipal.getUserId());
-        return ResponseEntity.ok(count);
-    }
-
-    /**
-     * Obtiene el conteo de notificaciones no leídas del usuario autenticado.
-     */
-    @GetMapping("/my-notifications/count/unread")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Long> countMyUnreadNotifications(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
-        long count = notificationQueryUseCase.countUnreadUserNotifications(userPrincipal.getUserId());
-        return ResponseEntity.ok(count);
-    }
-
-    /**
-     * Obtiene el conteo de notificaciones del usuario autenticado por tipo.
-     */
-    @GetMapping("/my-notifications/count/type/{notificationType}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Long> countMyNotificationsByType(
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            @PathVariable String notificationType) {
-        long count = notificationQueryUseCase.countUserNotificationsByType(userPrincipal.getUserId(), notificationType);
-        return ResponseEntity.ok(count);
-    }
 } 

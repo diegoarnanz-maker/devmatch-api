@@ -98,76 +98,7 @@ public class NotificationQueryUseCaseImpl implements NotificationQueryUseCase {
         return notificationMapper.toResponseDtoList(notifications);
     }
 
-    @Override
-    public List<NotificationResponseDto> getUserNotificationsByReview(Long userId, Long reviewId) {
-        List<Notification> notifications = notificationRepositoryPort.findByUserIdAndReviewId(userId, reviewId);
-        return notificationMapper.toResponseDtoList(notifications);
-    }
 
-    @Override
-    public List<NotificationResponseDto> getUserNotificationsByReviewPaginated(Long userId, Long reviewId, int page, int size) {
-        List<Notification> notifications = notificationRepositoryPort.findByUserIdAndReviewIdPaginated(userId, reviewId, page, size);
-        return notificationMapper.toResponseDtoList(notifications);
-    }
-
-    @Override
-    public List<NotificationResponseDto> getUserAchievementNotifications(Long userId) {
-        List<Notification> notifications = notificationRepositoryPort.findAchievementNotificationsByUserId(userId);
-        return notificationMapper.toResponseDtoList(notifications);
-    }
-
-    @Override
-    public List<NotificationResponseDto> getUserAchievementNotificationsPaginated(Long userId, int page, int size) {
-        List<Notification> notifications = notificationRepositoryPort.findAchievementNotificationsByUserIdPaginated(userId, page, size);
-        return notificationMapper.toResponseDtoList(notifications);
-    }
-
-    @Override
-    public List<NotificationResponseDto> getUserNotificationsByDateRange(Long userId, String startDate, String endDate) {
-        try {
-            LocalDateTime start = LocalDateTime.parse(startDate, DATE_FORMATTER);
-            LocalDateTime end = LocalDateTime.parse(endDate, DATE_FORMATTER);
-            List<Notification> notifications = notificationRepositoryPort.findByUserIdAndDateRange(userId, start, end);
-            return notificationMapper.toResponseDtoList(notifications);
-        } catch (DateTimeParseException e) {
-            // Si el formato de fecha no es válido, retornar lista vacía
-            return List.of();
-        }
-    }
-
-    @Override
-    public List<NotificationResponseDto> getUserNotificationsByDateRangePaginated(Long userId, String startDate, String endDate, int page, int size) {
-        try {
-            LocalDateTime start = LocalDateTime.parse(startDate, DATE_FORMATTER);
-            LocalDateTime end = LocalDateTime.parse(endDate, DATE_FORMATTER);
-            List<Notification> notifications = notificationRepositoryPort.findByUserIdAndDateRangePaginated(userId, start, end, page, size);
-            return notificationMapper.toResponseDtoList(notifications);
-        } catch (DateTimeParseException e) {
-            // Si el formato de fecha no es válido, retornar lista vacía
-            return List.of();
-        }
-    }
-
-    @Override
-    public long countUserNotifications(Long userId) {
-        return notificationRepositoryPort.countByUserId(userId);
-    }
-
-    @Override
-    public long countUnreadUserNotifications(Long userId) {
-        return notificationRepositoryPort.countUnreadByUserId(userId);
-    }
-
-    @Override
-    public long countUserNotificationsByType(Long userId, String notificationType) {
-        try {
-            NotificationType type = NotificationType.fromString(notificationType);
-            return notificationRepositoryPort.countByUserIdAndType(userId, type);
-        } catch (IllegalArgumentException e) {
-            // Si el tipo no es válido, retornar 0
-            return 0;
-        }
-    }
 
     @Override
     public List<NotificationResponseDto> searchUserNotifications(Long userId, String searchText) {

@@ -2,7 +2,7 @@ package com.devmatch.api.usernotification.application.mapper;
 
 import com.devmatch.api.usernotification.application.dto.NotificationRequestDto;
 import com.devmatch.api.usernotification.application.dto.NotificationResponseDto;
-import com.devmatch.api.usernotification.application.dto.NotificationStatusRequestDto;
+
 import com.devmatch.api.usernotification.domain.model.Notification;
 import com.devmatch.api.usernotification.domain.model.valueobject.NotificationMessage;
 import com.devmatch.api.usernotification.domain.model.valueobject.NotificationType;
@@ -54,8 +54,7 @@ public class NotificationMapper {
             notification.getId(),
             notification.getUserId(),
             notification.getMessage().getValue(),
-            notification.getNotificationType(),
-            notification.getNotificationType().getDescription(),
+            notification.getNotificationType().getValue(),
             notification.getProjectId(),
             notification.getReviewId(),
             notification.getAchievementCode(),
@@ -83,32 +82,7 @@ public class NotificationMapper {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Actualiza una entidad de dominio existente con datos de un DTO de estado.
-     * 
-     * @param existingNotification Entidad de dominio existente
-     * @param statusRequestDto DTO con los cambios de estado
-     * @return Entidad de dominio actualizada
-     */
-    public Notification updateFromStatusDto(Notification existingNotification, NotificationStatusRequestDto statusRequestDto) {
-        // Crear una nueva instancia con los datos actualizados
-        return new Notification(
-            existingNotification.getId(),
-            existingNotification.getUserId(),
-            statusRequestDto.getMessage() != null ? 
-                new NotificationMessage(statusRequestDto.getMessage()) : 
-                existingNotification.getMessage(),
-            existingNotification.getNotificationType(),
-            existingNotification.getProjectId(),
-            existingNotification.getReviewId(),
-            existingNotification.getAchievementCode(),
-            statusRequestDto.getIsRead() != null ? statusRequestDto.getIsRead() : existingNotification.isRead(),
-            statusRequestDto.getIsActive() != null ? statusRequestDto.getIsActive() : existingNotification.isActive(),
-            existingNotification.isDeleted(),
-            existingNotification.getCreatedAt(),
-            statusRequestDto.getUpdatedAt() != null ? statusRequestDto.getUpdatedAt() : LocalDateTime.now()
-        );
-    }
+
 
     /**
      * Marca una notificación como leída.
