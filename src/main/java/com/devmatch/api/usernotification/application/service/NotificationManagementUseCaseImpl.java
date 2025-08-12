@@ -2,7 +2,7 @@ package com.devmatch.api.usernotification.application.service;
 
 import com.devmatch.api.usernotification.application.dto.NotificationRequestDto;
 import com.devmatch.api.usernotification.application.dto.NotificationResponseDto;
-import com.devmatch.api.usernotification.application.dto.NotificationStatusRequestDto;
+
 import com.devmatch.api.usernotification.application.mapper.NotificationMapper;
 import com.devmatch.api.usernotification.application.port.in.NotificationManagementUseCase;
 import com.devmatch.api.usernotification.application.port.out.NotificationEventPublisherPort;
@@ -204,27 +204,7 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
         return updatedCount;
     }
 
-    @Override
-    @Transactional
-    public NotificationResponseDto updateNotificationStatus(Long notificationId, Long userId, NotificationStatusRequestDto statusRequest) {
-        // Buscar notificación y validar propiedad
-        Notification notification = notificationRepositoryPort.findByIdAndUserId(notificationId, userId)
-                .orElseThrow(() -> new NotificationNotFoundException(notificationId, userId));
 
-        // Validar que hay cambios para actualizar
-        if (!statusRequest.hasUpdates()) {
-            return notificationMapper.toResponseDto(notification);
-        }
-
-        // Actualizar notificación
-        Notification updatedNotification = notificationMapper.updateFromStatusDto(notification, statusRequest);
-        Notification savedNotification = notificationRepositoryPort.save(updatedNotification);
-
-        // Publicar evento
-        notificationEventPublisherPort.publishNotificationUpdated(savedNotification);
-
-        return notificationMapper.toResponseDto(savedNotification);
-    }
 
     @Override
     @Transactional

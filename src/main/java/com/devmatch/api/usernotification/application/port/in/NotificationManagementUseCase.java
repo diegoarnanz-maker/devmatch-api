@@ -2,7 +2,7 @@ package com.devmatch.api.usernotification.application.port.in;
 
 import com.devmatch.api.usernotification.application.dto.NotificationRequestDto;
 import com.devmatch.api.usernotification.application.dto.NotificationResponseDto;
-import com.devmatch.api.usernotification.application.dto.NotificationStatusRequestDto;
+
 
 import java.util.List;
 
@@ -113,15 +113,7 @@ public interface NotificationManagementUseCase {
      */
     int markAllAsRead(Long userId);
 
-    /**
-     * Actualiza el estado de una notificación.
-     * 
-     * @param notificationId ID de la notificación
-     * @param userId ID del usuario que realiza la acción
-     * @param statusRequest DTO con el nuevo estado
-     * @return DTO con la notificación actualizada
-     */
-    NotificationResponseDto updateNotificationStatus(Long notificationId, Long userId, NotificationStatusRequestDto statusRequest);
+
 
     /**
      * Elimina una notificación (marcado lógico).
