@@ -177,4 +177,24 @@ public class ProjectApplication {
             false, isDeleted, createdAt, LocalDateTime.now()
         );
     }
+
+    public boolean canBeExpired() {
+        return isPending() && isActive && !isDeleted;
+    }
+
+    public ProjectApplication expire() {
+        if (!canBeExpired()) {
+            throw new IllegalStateException("La aplicación no puede ser expirada");
+        }
+        return new ProjectApplication(
+            id, projectId, userId, motivationMessage,
+            ApplicationStatus.EXPIRED, seenByOwner, submittedAt,
+            LocalDateTime.now(), isActive, isDeleted,
+            createdAt, LocalDateTime.now()
+        );
+    }
+
+    public boolean isExpired() {
+        return status == ApplicationStatus.EXPIRED;
+    }
 } 

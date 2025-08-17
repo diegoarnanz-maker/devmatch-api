@@ -238,6 +238,56 @@ public class NotificationMapper {
     }
 
     /**
+     * Crea una notificación de aplicación cancelada.
+     * 
+     * @param userId ID del usuario
+     * @param projectId ID del proyecto
+     * @param projectTitle Título del proyecto
+     * @return Entidad de dominio
+     */
+    public Notification createProjectApplicationCancelledNotification(Long userId, Long projectId, String projectTitle) {
+        return new Notification(
+            null,
+            userId,
+            new NotificationMessage("Has cancelado tu aplicación al proyecto '" + projectTitle + "'"),
+            NotificationType.PROJECT_APPLICATION_CANCELLED,
+            projectId,
+            null,
+            null,
+            false,
+            true,
+            false,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+    }
+
+    /**
+     * Crea una notificación de aplicación expirada.
+     * 
+     * @param userId ID del usuario
+     * @param projectId ID del proyecto
+     * @param projectTitle Título del proyecto
+     * @return Entidad de dominio
+     */
+    public Notification createProjectApplicationExpiredNotification(Long userId, Long projectId, String projectTitle) {
+        return new Notification(
+            null,
+            userId,
+            new NotificationMessage("Tu aplicación al proyecto '" + projectTitle + "' ha expirado por inactividad"),
+            NotificationType.PROJECT_APPLICATION_EXPIRED,
+            projectId,
+            null,
+            null,
+            false,
+            true,
+            false,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+    }
+
+    /**
      * Crea una notificación de review recibida.
      * 
      * @param userId ID del usuario

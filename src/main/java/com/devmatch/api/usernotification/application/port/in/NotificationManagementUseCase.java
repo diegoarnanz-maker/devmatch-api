@@ -59,6 +59,24 @@ public interface NotificationManagementUseCase {
     NotificationResponseDto createProjectMemberJoinedNotification(Long userId, Long projectId, String memberName);
 
     /**
+     * Crea una notificación de aplicación cancelada.
+     * 
+     * @param userId ID del usuario que canceló la aplicación
+     * @param projectId ID del proyecto
+     * @return DTO con la notificación creada
+     */
+    NotificationResponseDto createProjectApplicationCancelledNotification(Long userId, Long projectId);
+
+    /**
+     * Crea una notificación de aplicación expirada.
+     * 
+     * @param userId ID del usuario cuya aplicación expiró
+     * @param projectId ID del proyecto
+     * @return DTO con la notificación creada
+     */
+    NotificationResponseDto createProjectApplicationExpiredNotification(Long userId, Long projectId);
+
+    /**
      * Crea una notificación de review recibida.
      * 
      * @param userId ID del usuario que recibió la review

@@ -19,6 +19,12 @@ import com.devmatch.api.project.domain.model.valueobject.MotivationMessage;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.model.User;
+import com.devmatch.api.project.domain.event.ProjectApplicationSubmittedEvent;
+import com.devmatch.api.project.domain.event.ProjectApplicationAcceptedEvent;
+import com.devmatch.api.project.domain.event.ProjectApplicationRejectedEvent;
+import com.devmatch.api.project.domain.event.ProjectApplicationCancelledEvent;
+import com.devmatch.api.project.domain.event.ProjectMemberJoinedEvent;
+import com.devmatch.api.shared.application.port.out.DomainEventPublisher;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +38,7 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
     private final ProjectMemberRepositoryPort projectMemberRepositoryPort;
     private final ProjectApplicationRepositoryPort projectApplicationRepositoryPort;
     private final ProjectApplicationMapper projectApplicationMapper;
+    private final DomainEventPublisher domainEventPublisher;
 
     @Override
     public void applyToProject(Long projectId, Long userId, String motivationMessage) {
@@ -74,6 +81,14 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         
         // 8. Guardar la aplicación
         projectApplicationRepositoryPort.save(application);
+        
+        // 9. Publicar evento de solicitud enviada
+        domainEventPublisher.publish(new ProjectApplicationSubmittedEvent(
+            userId,                   // Usuario que solicita (recibe confirmación)
+            projectId,                // ID del proyecto
+            project.getTitle().getValue(), // Nombre del proyecto
+            project.getOwnerId()      // Propietario (para referencia)
+        ));
     }
 
     @Override
@@ -165,6 +180,21 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         
         // 8. Agregar al usuario como miembro del proyecto
         projectMemberRepositoryPort.addMember(projectId, acceptedApplication.getUserId(), "DEVELOPER", false);
+        
+        // 9. Publicar evento de solicitud aceptada
+        domainEventPublisher.publish(new ProjectApplicationAcceptedEvent(
+            acceptedApplication.getUserId(), // Usuario que fue aceptado
+            projectId,                      // ID del proyecto
+            project.getTitle().getValue()   // Nombre del proyecto
+        ));
+        
+        // 10. Publicar evento de nuevo miembro unido
+        domainEventPublisher.publish(new ProjectMemberJoinedEvent(
+            acceptedApplication.getUserId(), // ID del nuevo miembro
+            projectId,                      // ID del proyecto
+            project.getTitle().getValue(),  // Nombre del proyecto
+            "DEVELOPER"                     // Rol del nuevo miembro
+        ));
     }
 
     @Override
@@ -200,6 +230,13 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         
         // 6. Guardar la aplicación actualizada
         projectApplicationRepositoryPort.save(rejectedApplication);
+        
+        // 7. Publicar evento de solicitud rechazada
+        domainEventPublisher.publish(new ProjectApplicationRejectedEvent(
+            rejectedApplication.getUserId(), // Usuario que fue rechazado
+            projectId,                      // ID del proyecto
+            project.getTitle().getValue()   // Nombre del proyecto
+        ));
     }
 
     @Override
@@ -226,6 +263,18 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         
         // 5. Guardar la aplicación actualizada
         projectApplicationRepositoryPort.save(cancelledApplication);
+        
+        // 6. Obtener información del proyecto para el evento
+        Project project = projectRepositoryPort.findById(application.getProjectId())
+                .orElseThrow(() -> new ProjectNotFoundException(application.getProjectId()));
+        
+        // 7. Publicar evento de aplicación cancelada
+        domainEventPublisher.publish(new ProjectApplicationCancelledEvent(
+            cancelledApplication.getUserId(), // Usuario que canceló
+            application.getProjectId(),       // ID del proyecto
+            project.getTitle().getValue(),    // Nombre del proyecto
+            project.getOwnerId()             // ID del propietario
+        ));
     }
 
 }

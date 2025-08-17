@@ -80,6 +80,28 @@ public class NotificationController {
     }
 
     /**
+     * Crea una notificación de aplicación cancelada (llamada interna del sistema).
+     */
+    @PostMapping("/internal/project-application-cancelled/{userId}/{projectId}")
+    public ResponseEntity<NotificationResponseDto> createInternalProjectApplicationCancelledNotification(
+            @PathVariable Long userId,
+            @PathVariable Long projectId) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationCancelledNotification(userId, projectId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Crea una notificación de aplicación expirada (llamada interna del sistema).
+     */
+    @PostMapping("/internal/project-application-expired/{userId}/{projectId}")
+    public ResponseEntity<NotificationResponseDto> createInternalProjectApplicationExpiredNotification(
+            @PathVariable Long userId,
+            @PathVariable Long projectId) {
+        NotificationResponseDto response = notificationManagementUseCase.createProjectApplicationExpiredNotification(userId, projectId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
      * Crea una notificación de review recibida (llamada interna del sistema).
      */
     @PostMapping("/internal/project-review-received/{userId}/{projectId}/{reviewId}")
