@@ -7,7 +7,8 @@ package com.devmatch.api.project.domain.model.valueobject;
 public enum ApplicationStatus {
     PENDING("PENDING", "Pendiente de revisión"),
     ACCEPTED("ACCEPTED", "Aceptada"),
-    REJECTED("REJECTED", "Rechazada");
+    REJECTED("REJECTED", "Rechazada"),
+    EXPIRED("EXPIRED", "Expirada por inactividad");
 
     private final String value;
     private final String description;
