@@ -14,6 +14,8 @@ import com.devmatch.api.role.domain.model.Role;
 import com.devmatch.api.user.domain.model.valueobject.user.Email;
 import com.devmatch.api.user.domain.model.valueobject.user.Password;
 import com.devmatch.api.user.domain.model.valueobject.user.Username;
+import com.devmatch.api.user.domain.event.UserRegisteredEvent;
+import com.devmatch.api.shared.application.port.out.DomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class AuthUseCaseImpl implements AuthUseCase {
     private final AuthTokenRepositoryPort authTokenRepositoryPort;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final DomainEventPublisher domainEventPublisher;
 
     @Override
     @Transactional
@@ -80,6 +83,14 @@ public class AuthUseCaseImpl implements AuthUseCase {
 
         // Guardar el usuario
         User savedUser = userRepositoryPort.save(user);
+        
+        // Publicar evento de usuario registrado
+        domainEventPublisher.publish(new UserRegisteredEvent(
+            savedUser.getId(),
+            savedUser.getUsername().getValue(),
+            savedUser.getEmail().getValue()
+        ));
+        
         return userMapper.toDto(savedUser);
     }
 } 
