@@ -142,8 +142,34 @@ public class NotificationMapper {
         return new Notification(
             null,
             userId,
-            new NotificationMessage("Has aplicado al proyecto: " + projectTitle),
+            new NotificationMessage("✅ Has enviado tu aplicación al proyecto '" + projectTitle + "'. Espera la respuesta del propietario."),
             NotificationType.PROJECT_APPLICATION,
+            projectId,
+            null,
+            null,
+            false,
+            true,
+            false,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+    }
+
+    /**
+     * Crea una notificación para el propietario del proyecto cuando recibe una nueva solicitud.
+     * 
+     * @param ownerId ID del propietario del proyecto
+     * @param projectId ID del proyecto
+     * @param projectTitle Título del proyecto
+     * @param applicantName Nombre del solicitante
+     * @return Entidad de dominio
+     */
+    public Notification createProjectApplicationReceivedNotification(Long ownerId, Long projectId, String projectTitle, String applicantName) {
+        return new Notification(
+            null,
+            ownerId,
+            new NotificationMessage("📝 Nueva solicitud para tu proyecto '" + projectTitle + "' de " + applicantName),
+            NotificationType.PROJECT_APPLICATION_RECEIVED,
             projectId,
             null,
             null,

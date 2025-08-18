@@ -3,6 +3,7 @@ package com.devmatch.api.usernotification.domain.model.valueobject;
 public enum NotificationType {
     // Notificaciones de proyectos
     PROJECT_APPLICATION("PROJECT_APPLICATION", "Nueva aplicación a proyecto"),
+    PROJECT_APPLICATION_RECEIVED("PROJECT_APPLICATION_RECEIVED", "Solicitud recibida por propietario"),
     PROJECT_APPLICATION_ACCEPTED("PROJECT_APPLICATION_ACCEPTED", "Aplicación aceptada"),
     PROJECT_APPLICATION_REJECTED("PROJECT_APPLICATION_REJECTED", "Aplicación rechazada"),
     PROJECT_APPLICATION_CANCELLED("PROJECT_APPLICATION_CANCELLED", "Aplicación cancelada"),
