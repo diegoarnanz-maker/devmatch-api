@@ -84,10 +84,10 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
         
         // 9. Publicar evento de solicitud enviada
         domainEventPublisher.publish(new ProjectApplicationSubmittedEvent(
-            userId,                   // Usuario que solicita (recibe confirmación)
+            project.getOwnerId(),     // Propietario (para referencia)
             projectId,                // ID del proyecto
             project.getTitle().getValue(), // Nombre del proyecto
-            project.getOwnerId()      // Propietario (para referencia)
+            userId                    // Usuario que solicita (recibe confirmación)
         ));
     }
 

@@ -81,6 +81,22 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
 
     @Override
     @Transactional
+    public NotificationResponseDto createProjectApplicationReceivedNotification(Long ownerId, Long projectId, Long applicantId) {
+        // Obtener el título del proyecto automáticamente
+        String projectTitle = projectQueryPort.getProjectTitleById(projectId)
+                .orElse("Proyecto #" + projectId);
+        
+        // Obtener el nombre del solicitante
+        String applicantName = userQueryUseCase.findUserById(applicantId).getUsername();
+        
+        Notification notification = notificationMapper.createProjectApplicationReceivedNotification(ownerId, projectId, projectTitle, applicantName);
+        Notification savedNotification = notificationRepositoryPort.save(notification);
+        notificationEventPublisherPort.publishNotificationCreated(savedNotification);
+        return notificationMapper.toResponseDto(savedNotification);
+    }
+
+    @Override
+    @Transactional
     public NotificationResponseDto createProjectApplicationAcceptedNotification(Long userId, Long projectId) {
         // Obtener el título del proyecto automáticamente
         String projectTitle = projectQueryPort.getProjectTitleById(projectId)
