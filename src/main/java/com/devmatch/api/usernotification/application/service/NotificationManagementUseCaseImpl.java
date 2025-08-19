@@ -171,6 +171,15 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
 
     @Override
     @Transactional
+    public NotificationResponseDto createProjectReviewResponseNotification(Long userId, Long projectId, String ownerName) {
+        Notification notification = notificationMapper.createProjectReviewResponseNotification(userId, projectId, ownerName);
+        Notification savedNotification = notificationRepositoryPort.save(notification);
+        notificationEventPublisherPort.publishNotificationCreated(savedNotification);
+        return notificationMapper.toResponseDto(savedNotification);
+    }
+
+    @Override
+    @Transactional
     public NotificationResponseDto createAchievementUnlockedNotification(Long userId, String achievementCode, String achievementName) {
         Notification notification = notificationMapper.createAchievementUnlockedNotification(userId, achievementCode, achievementName);
         Notification savedNotification = notificationRepositoryPort.save(notification);

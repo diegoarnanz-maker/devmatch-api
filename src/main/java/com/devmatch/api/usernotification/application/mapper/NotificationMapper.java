@@ -365,6 +365,31 @@ public class NotificationMapper {
     }
 
     /**
+     * Crea una notificación de respuesta a review.
+     * 
+     * @param userId ID del usuario que recibe la notificación (revisor)
+     * @param projectId ID del proyecto
+     * @param ownerName Nombre del propietario que respondió
+     * @return Entidad de dominio
+     */
+    public Notification createProjectReviewResponseNotification(Long userId, Long projectId, String ownerName) {
+        return new Notification(
+            null,
+            userId,
+            new NotificationMessage(ownerName + " ha respondido a tu review"),
+            NotificationType.PROJECT_REVIEW_RESPONSE,
+            projectId,
+            null,
+            null,
+            false,
+            true,
+            false,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+    }
+
+    /**
      * Crea una notificación de bienvenida.
      * 
      * @param userId ID del usuario

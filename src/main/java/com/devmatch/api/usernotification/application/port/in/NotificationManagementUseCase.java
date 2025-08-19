@@ -98,6 +98,16 @@ public interface NotificationManagementUseCase {
     NotificationResponseDto createProjectReviewReceivedNotification(Long userId, Long projectId, Long reviewId, String reviewerName);
 
     /**
+     * Crea una notificación de respuesta a review.
+     * 
+     * @param userId ID del usuario que recibe la notificación (revisor)
+     * @param projectId ID del proyecto
+     * @param ownerName Nombre del propietario que respondió
+     * @return DTO con la notificación creada
+     */
+    NotificationResponseDto createProjectReviewResponseNotification(Long userId, Long projectId, String ownerName);
+
+    /**
      * Crea una notificación de logro desbloqueado.
      * 
      * @param userId ID del usuario que desbloqueó el logro
