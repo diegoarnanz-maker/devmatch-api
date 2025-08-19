@@ -90,7 +90,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el owner)
      * @return Respuesta HTTP 200 si la aplicación se aceptó exitosamente
      */
-    @PutMapping("/project/{projectId}/application/{applicationId}/accept")
+    @PutMapping("/{projectId}/applications/{applicationId}/accept")
     public ResponseEntity<Void> acceptApplication(
             @PathVariable Long projectId,
             @PathVariable Long applicationId,
@@ -109,7 +109,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el owner)
      * @return Respuesta HTTP 200 si la aplicación se rechazó exitosamente
      */
-    @PutMapping("/project/{projectId}/application/{applicationId}/reject")
+    @PutMapping("/{projectId}/applications/{applicationId}/reject")
     public ResponseEntity<Void> rejectApplication(
             @PathVariable Long projectId,
             @PathVariable Long applicationId,
@@ -128,7 +128,7 @@ public class ProjectApplicationController {
      * @param userPrincipal Usuario autenticado (debe ser el que aplicó)
      * @return Respuesta HTTP 200 si la aplicación se canceló exitosamente
      */
-    @DeleteMapping("/application/{applicationId}/cancel")
+    @DeleteMapping("/applications/{applicationId}/cancel")
     public ResponseEntity<Void> cancelApplication(
             @PathVariable Long applicationId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
