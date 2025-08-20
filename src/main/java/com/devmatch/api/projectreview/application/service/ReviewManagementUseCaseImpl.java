@@ -2,6 +2,7 @@ package com.devmatch.api.projectreview.application.service;
 
 import com.devmatch.api.projectreview.application.dto.ReviewRequestDto;
 import com.devmatch.api.projectreview.application.dto.ReviewResponseDto;
+import com.devmatch.api.projectreview.application.dto.ReviewResponseRequestDto;
 import com.devmatch.api.projectreview.application.mapper.ReviewMapper;
 import com.devmatch.api.projectreview.application.port.in.ReviewManagementUseCase;
 import com.devmatch.api.projectreview.application.port.out.ReviewRepositoryPort;
@@ -13,6 +14,7 @@ import com.devmatch.api.project.application.port.out.ProjectRepositoryPort;
 import com.devmatch.api.project.domain.model.valueobject.ProjectStatus;
 import com.devmatch.api.shared.application.port.out.DomainEventPublisher;
 import com.devmatch.api.projectreview.domain.event.ProjectReviewReceivedEvent;
+import com.devmatch.api.projectreview.domain.event.ProjectReviewResponseEvent;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -153,5 +156,46 @@ public class ReviewManagementUseCaseImpl implements ReviewManagementUseCase {
         existing.setActive(false);
         existing.setDeleted(true);
         reviewRepositoryPort.save(existing);
+    }
+    
+    @Override
+    @Transactional
+    public ReviewResponseDto respondToReview(Long ownerId, Long reviewId, ReviewResponseRequestDto requestDto) {
+        // Obtener la review
+        Review review = reviewRepositoryPort.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        
+        // Obtener el proyecto para validar que el usuario es el propietario
+        var project = projectRepositoryPort.findById(review.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + review.getProjectId()));
+        
+        // Validar que el usuario es el propietario del proyecto
+        if (!project.getOwnerId().equals(ownerId)) {
+            throw ReviewOperationNotAllowedException.insufficientPermissions(ownerId, reviewId);
+        }
+        
+        // Validar que el proyecto está en estado COMPLETED
+        if (project.getStatus() != ProjectStatus.COMPLETED) {
+            throw ReviewOperationNotAllowedException.projectNotCompleted(project.getId());
+        }
+        
+        // Actualizar la review con la respuesta del propietario
+        review.setOwnerResponse(new com.devmatch.api.projectreview.domain.model.valueobject.Comment(requestDto.getResponseMessage()));
+        review.setOwnerResponsePublic(requestDto.getIsPublic() != null ? requestDto.getIsPublic() : true);
+        review.setOwnerResponseDate(LocalDateTime.now());
+        
+        Review saved = reviewRepositoryPort.save(review);
+        
+        // Publicar evento de respuesta a la review
+        domainEventPublisher.publish(new ProjectReviewResponseEvent(
+            project.getId(),
+            project.getTitle().getValue(),
+            review.getUserId(),           // ID del revisor original
+            "Usuario " + review.getUserId(), // Fallback para el nombre del revisor
+            ownerId,                      // ID del propietario que responde
+            "Usuario " + ownerId          // Fallback para el nombre del propietario
+        ));
+        
+        return reviewMapper.toResponseDto(saved);
     }
 }
