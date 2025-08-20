@@ -332,3 +332,15 @@ ALTER TABLE project_reviews DROP CONSTRAINT uq_project_user_review;
 ALTER TABLE project_reviews 
 ADD CONSTRAINT uq_project_user_review_active 
 UNIQUE (project_id, user_id, is_active, is_deleted);
+
+ALTER TABLE users ADD COLUMN notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+
+SHOW CREATE TABLE project_reviews;
+
+-- Ejecutar en MySQL después de detener la aplicación
+USE devmatch_db;
+
+ALTER TABLE project_reviews 
+ADD COLUMN owner_response TEXT NULL AFTER comment,
+ADD COLUMN owner_response_public BOOLEAN NOT NULL DEFAULT TRUE AFTER owner_response,
+ADD COLUMN owner_response_date TIMESTAMP NULL AFTER owner_response_public;

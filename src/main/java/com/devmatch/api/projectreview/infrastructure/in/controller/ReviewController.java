@@ -2,6 +2,7 @@ package com.devmatch.api.projectreview.infrastructure.in.controller;
 
 import com.devmatch.api.projectreview.application.dto.ReviewRequestDto;
 import com.devmatch.api.projectreview.application.dto.ReviewResponseDto;
+import com.devmatch.api.projectreview.application.dto.ReviewResponseRequestDto;
 import com.devmatch.api.projectreview.application.port.in.ReviewManagementUseCase;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 
@@ -123,5 +124,22 @@ public class ReviewController {
             Pageable pageable) {
         Page<ReviewResponseDto> reviews = reviewManagementUseCase.getMyReviews(userPrincipal.getUserId(), pageable);
         return ResponseEntity.ok(reviews);
+    }
+    
+    /**
+     * Permite al propietario del proyecto responder a una reseña.
+     * 
+     * @param userPrincipal Usuario autenticado (debe ser propietario del proyecto)
+     * @param reviewId ID de la reseña a responder
+     * @param request DTO con el mensaje de respuesta
+     * @return Reseña actualizada con la respuesta del propietario
+     */
+    @PostMapping("/{reviewId}/response")
+    public ResponseEntity<ReviewResponseDto> respondToReview(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            @PathVariable Long reviewId,
+            @Valid @RequestBody ReviewResponseRequestDto request) {
+        ReviewResponseDto updatedReview = reviewManagementUseCase.respondToReview(userPrincipal.getUserId(), reviewId, request);
+        return ResponseEntity.ok(updatedReview);
     }
 } 

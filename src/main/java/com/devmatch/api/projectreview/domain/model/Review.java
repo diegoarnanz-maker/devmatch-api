@@ -15,6 +15,11 @@ public class Review {
     private boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // Campos para la respuesta del propietario
+    private Comment ownerResponse;
+    private boolean ownerResponsePublic;
+    private LocalDateTime ownerResponseDate;
 
     public Review() {
     }
@@ -30,6 +35,9 @@ public class Review {
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.ownerResponse = null;
+        this.ownerResponsePublic = true;
+        this.ownerResponseDate = null;
     }
 
     public Long getId() {
@@ -110,5 +118,30 @@ public class Review {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    // Getters y setters para la respuesta del propietario
+    public Comment getOwnerResponse() {
+        return ownerResponse;
+    }
+
+    public void setOwnerResponse(Comment ownerResponse) {
+        this.ownerResponse = ownerResponse;
+    }
+
+    public boolean isOwnerResponsePublic() {
+        return ownerResponsePublic;
+    }
+
+    public void setOwnerResponsePublic(boolean ownerResponsePublic) {
+        this.ownerResponsePublic = ownerResponsePublic;
+    }
+
+    public LocalDateTime getOwnerResponseDate() {
+        return ownerResponseDate;
+    }
+
+    public void setOwnerResponseDate(LocalDateTime ownerResponseDate) {
+        this.ownerResponseDate = ownerResponseDate;
     }
 }
