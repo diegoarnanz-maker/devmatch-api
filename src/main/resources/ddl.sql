@@ -344,3 +344,7 @@ ALTER TABLE project_reviews
 ADD COLUMN owner_response TEXT NULL AFTER comment,
 ADD COLUMN owner_response_public BOOLEAN NOT NULL DEFAULT TRUE AFTER owner_response,
 ADD COLUMN owner_response_date TIMESTAMP NULL AFTER owner_response_public;
+
+ALTER TABLE achievement_catalog 
+ADD COLUMN points INT NOT NULL DEFAULT 10 AFTER description,
+ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'GENERAL' AFTER points;
