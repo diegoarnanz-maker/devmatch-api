@@ -1,118 +1,97 @@
 package com.devmatch.api.achievement.application.service;
 
-import com.devmatch.api.achievement.application.port.in.AchievementTriggerUseCase;
-import com.devmatch.api.achievement.application.port.out.AchievementRepository;
-import com.devmatch.api.achievement.application.port.out.UserAchievementRepository;
+import com.devmatch.api.achievement.application.dto.AchievementProgressDto;
 import com.devmatch.api.achievement.application.port.out.AchievementTriggerService;
-import com.devmatch.api.achievement.application.port.out.AchievementEventPublisher;
-import com.devmatch.api.achievement.application.dto.AchievementTriggerRequestDto;
-import com.devmatch.api.achievement.application.dto.AchievementUnlockedResponseDto;
-import com.devmatch.api.achievement.application.mapper.UserAchievementMapper;
-import com.devmatch.api.achievement.domain.model.Achievement;
-import com.devmatch.api.achievement.domain.model.UserAchievement;
-import com.devmatch.api.achievement.domain.model.valueobject.AchievementCode;
-import com.devmatch.api.achievement.domain.event.AchievementUnlockedEvent;
-import com.devmatch.api.achievement.domain.event.UserAchievementEarnedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 /**
- * Implementación del caso de uso para triggers automáticos de achievements.
- * Maneja el desbloqueo automático de achievements basado en acciones del usuario.
+ * Implementación del caso de uso de triggers para achievements.
+ * Contiene la lógica de negocio para determinar cuándo un usuario puede desbloquear un achievement.
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
-public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase {
+public class AchievementTriggerUseCaseImpl implements com.devmatch.api.achievement.application.port.out.AchievementTriggerService {
     
-    private final AchievementRepository achievementRepository;
-    private final UserAchievementRepository userAchievementRepository;
-    private final AchievementTriggerService achievementTriggerService;
-    private final AchievementEventPublisher eventPublisher;
+    // Mapa de criterios por código de achievement
+    private final Map<String, AchievementCriteria> achievementCriteriaMap;
+    
+    public AchievementTriggerUseCaseImpl() {
+        this.achievementCriteriaMap = initializeAchievementCriteria();
+    }
     
     @Override
-    public List<AchievementUnlockedResponseDto> processAchievementTrigger(AchievementTriggerRequestDto request) {
-        log.info("Procesando trigger de achievement para usuario {} con tipo {}", 
-                request.getUserId(), request.getAchievementType());
+    public boolean checkAchievementCriteria(Long userId, String achievementCode) {
+        log.debug("Verificando criterios para achievement '{}' del usuario {}", achievementCode, userId);
         
-        List<AchievementUnlockedResponseDto> unlockedAchievements = new ArrayList<>();
+        AchievementCriteria criteria = achievementCriteriaMap.get(achievementCode);
+        if (criteria == null) {
+            log.warn("No se encontraron criterios para achievement: {}", achievementCode);
+            return false;
+        }
         
         try {
-            // 1. Obtener achievements del tipo especificado
-            List<Achievement> achievements = achievementRepository.findByType(request.getAchievementType());
-            
-            for (Achievement achievement : achievements) {
-                // 2. Verificar si el usuario ya tiene este achievement
-                if (userAchievementRepository.existsByUserIdAndAchievementCode(
-                        request.getUserId(), achievement.getCode().getValue())) {
-                    continue; // Ya lo tiene, saltar
-                }
-                
-                // 3. Verificar si cumple los criterios para desbloquear
-                if (achievementTriggerService.checkAchievementCriteria(
-                        request.getUserId(), achievement.getCode().getValue())) {
-                    
-                    // 4. Desbloquear achievement
-                    UserAchievement userAchievement = unlockAchievement(request.getUserId(), achievement);
-                    
-                    // 5. Publicar eventos de dominio
-                    publishAchievementEvents(userAchievement, achievement);
-                    
-                    // 6. Agregar a la lista de respuestas
-                    unlockedAchievements.add(UserAchievementMapper.toUnlockedResponseDto(userAchievement, achievement));
-                    
-                    log.info("Achievement '{}' desbloqueado para usuario {}", 
-                            achievement.getCode().getValue(), request.getUserId());
-                }
-            }
-            
+            // Por ahora, implementación simple basada en el tipo de achievement
+            return checkSimpleCriteria(userId, criteria);
         } catch (Exception e) {
-            log.error("Error procesando trigger de achievement para usuario {}: {}", 
-                    request.getUserId(), e.getMessage(), e);
-            throw new RuntimeException("Error procesando achievement trigger", e);
+            log.error("Error verificando criterios para achievement {} del usuario {}: {}", 
+                    achievementCode, userId, e.getMessage(), e);
+            return false;
         }
-        
-        log.info("Trigger procesado. {} achievements desbloqueados para usuario {}", 
-                unlockedAchievements.size(), request.getUserId());
-        
-        return unlockedAchievements;
     }
     
     @Override
-    public List<String> checkPotentialAchievements(Long userId, String achievementType) {
-        log.debug("Verificando achievements potenciales para usuario {} tipo {}", userId, achievementType);
+    public AchievementProgressDto getUserProgress(Long userId, String achievementCode) {
+        log.debug("Obteniendo progreso del usuario {} hacia achievement '{}'", userId, achievementCode);
         
-        List<String> potentialAchievements = new ArrayList<>();
-        List<Achievement> achievements = achievementRepository.findByType(achievementType);
+        AchievementCriteria criteria = achievementCriteriaMap.get(achievementCode);
+        if (criteria == null) {
+            log.warn("No se encontraron criterios para achievement: {}", achievementCode);
+            return null;
+        }
         
-        for (Achievement achievement : achievements) {
-            if (!userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievement.getCode().getValue())) {
-                potentialAchievements.add(achievement.getCode().getValue());
+        // Por ahora, retornamos progreso básico
+        return new AchievementProgressDto(
+            achievementCode,
+            "Achievement " + achievementCode, // Título temporal
+            "Descripción temporal", // Descripción temporal
+            0, // Progreso actual
+            1, // Progreso requerido
+            criteria.getType()
+        );
+    }
+    
+    @Override
+    public List<String> getAchievementsForTriggerType(String triggerType) {
+        log.debug("Obteniendo achievements para trigger type: {}", triggerType);
+        
+        List<String> achievements = new ArrayList<>();
+        for (Map.Entry<String, AchievementCriteria> entry : achievementCriteriaMap.entrySet()) {
+            if (triggerType.equals(entry.getValue().getType())) {
+                achievements.add(entry.getKey());
             }
         }
         
-        return potentialAchievements;
+        return achievements;
     }
     
     @Override
-    public int getUserProgressTowardsAchievement(Long userId, String achievementType) {
-        log.debug("Obteniendo progreso del usuario {} hacia achievement tipo {}", userId, achievementType);
+    public List<String> processTrigger(Long userId, String triggerType, Object triggerData) {
+        log.debug("Procesando trigger tipo '{}' para usuario {} con datos: {}", triggerType, userId, triggerData);
         
-        // Implementación simple: contar cuántos achievements del tipo tiene
-        List<Achievement> achievements = achievementRepository.findByType(achievementType);
-        int totalAchievements = achievements.size();
-        int unlockedAchievements = 0;
+        List<String> unlockedAchievements = new ArrayList<>();
+        List<String> potentialAchievements = getAchievementsForTriggerType(triggerType);
         
-        for (Achievement achievement : achievements) {
-            if (userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievement.getCode().getValue())) {
-                unlockedAchievements++;
+        for (String achievementCode : potentialAchievements) {
+            if (checkAchievementCriteria(userId, achievementCode)) {
+                unlockedAchievements.add(achievementCode);
             }
         }
         
@@ -120,61 +99,125 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
     }
     
     @Override
-    public List<AchievementUnlockedResponseDto> forceAchievementCheck(Long userId) {
-        log.info("Forzando verificación de achievements para usuario {}", userId);
+    public Object getUserStatsForAchievementType(Long userId, String achievementType) {
+        log.debug("Obteniendo estadísticas del usuario {} para achievement type: {}", userId, achievementType);
         
-        List<AchievementUnlockedResponseDto> unlockedAchievements = new ArrayList<>();
+        // Por ahora, retornamos un mapa básico
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("userId", userId);
+        stats.put("achievementType", achievementType);
+        stats.put("totalAchievements", 0);
+        stats.put("unlockedAchievements", 0);
         
-        // Verificar todos los tipos de achievements
-        List<String> achievementTypes = List.of("PROJECT_CREATION", "REVIEW_SUBMISSION", "USER_REGISTRATION");
+        return stats;
+    }
+    
+    @Override
+    public boolean hasUserAchievement(Long userId, String achievementCode) {
+        log.debug("Verificando si usuario {} tiene achievement '{}'", userId, achievementCode);
         
-        for (String achievementType : achievementTypes) {
-            AchievementTriggerRequestDto request = new AchievementTriggerRequestDto(userId, achievementType);
-            unlockedAchievements.addAll(processAchievementTrigger(request));
+        // Esta verificación se hace en el repositorio, no aquí
+        // Por ahora retornamos false
+        return false;
+    }
+    
+    /**
+     * Verifica criterios simples basados en el tipo de achievement
+     */
+    private boolean checkSimpleCriteria(Long userId, AchievementCriteria criteria) {
+        switch (criteria.getType()) {
+            case "USER_REGISTRATION":
+                // Siempre se cumple al registrarse
+                return true;
+                
+            case "PROJECT_CREATION":
+                // Verificar si el usuario tiene al menos 1 proyecto
+                return checkUserProjectCount(userId, 1);
+                
+            case "REVIEW_SUBMISSION":
+                // Verificar si el usuario ha enviado al menos 1 review
+                return checkUserReviewCount(userId, 1);
+                
+            case "PROJECT_COMPLETION":
+                // Verificar si el usuario ha completado al menos 1 proyecto
+                return checkUserCompletedProjectCount(userId, 1);
+                
+            default:
+                log.warn("Tipo de achievement no reconocido: {}", criteria.getType());
+                return false;
+        }
+    }
+    
+    /**
+     * Verifica el número de proyectos del usuario
+     */
+    private boolean checkUserProjectCount(Long userId, int requiredCount) {
+        // TODO: Implementar consulta real a la BD
+        log.debug("Verificando proyectos del usuario {} (requeridos: {})", userId, requiredCount);
+        return true; // Temporalmente siempre true
+    }
+    
+    /**
+     * Verifica el número de reviews del usuario
+     */
+    private boolean checkUserReviewCount(Long userId, int requiredCount) {
+        // TODO: Implementar consulta real a la BD
+        log.debug("Verificando reviews del usuario {} (requeridos: {})", userId, requiredCount);
+        return true; // Temporalmente siempre true
+    }
+    
+    /**
+     * Verifica el número de proyectos completados del usuario
+     */
+    private boolean checkUserCompletedProjectCount(Long userId, int requiredCount) {
+        // TODO: Implementar consulta real a la BD
+        log.debug("Verificando proyectos completados del usuario {} (requeridos: {})", userId, requiredCount);
+        return true; // Temporalmente siempre true
+    }
+    
+    /**
+     * Inicializa el mapa de criterios de achievements
+     */
+    private Map<String, AchievementCriteria> initializeAchievementCriteria() {
+        Map<String, AchievementCriteria> criteriaMap = new HashMap<>();
+        
+        // Achievements de registro de usuario
+        criteriaMap.put("FIRST_LOGIN", new AchievementCriteria("USER_REGISTRATION", "Primer login del usuario"));
+        criteriaMap.put("PROFILE_COMPLETE", new AchievementCriteria("USER_REGISTRATION", "Perfil completo"));
+        
+        // Achievements de creación de proyectos
+        criteriaMap.put("FIRST_PROJECT", new AchievementCriteria("PROJECT_CREATION", "Primer proyecto creado"));
+        criteriaMap.put("PROJECT_MASTER", new AchievementCriteria("PROJECT_CREATION", "Múltiples proyectos creados"));
+        
+        // Achievements de reviews
+        criteriaMap.put("FIRST_REVIEW", new AchievementCriteria("REVIEW_SUBMISSION", "Primera review enviada"));
+        criteriaMap.put("REVIEW_EXPERT", new AchievementCriteria("REVIEW_SUBMISSION", "Múltiples reviews enviadas"));
+        
+        // Achievements de finalización de proyectos
+        criteriaMap.put("PROJECT_FINISHER", new AchievementCriteria("PROJECT_COMPLETION", "Primer proyecto completado"));
+        criteriaMap.put("COMPLETION_MASTER", new AchievementCriteria("PROJECT_COMPLETION", "Múltiples proyectos completados"));
+        
+        return criteriaMap;
+    }
+    
+    /**
+     * Clase interna para representar criterios de achievements
+     */
+    private static class AchievementCriteria {
+        private final String type;
+        private final String description;
+        
+        public AchievementCriteria(String type, String description) {
+            this.type = type;
+            this.description = description;
         }
         
-        return unlockedAchievements;
-    }
-    
-    /**
-     * Desbloquea un achievement para un usuario
-     */
-    private UserAchievement unlockAchievement(Long userId, Achievement achievement) {
-        UserAchievement userAchievement = new UserAchievement(
-            userId, 
-            new AchievementCode(achievement.getCode().getValue())
-        );
+        public String getType() {
+            return type;
+        }
         
-        return userAchievementRepository.save(userAchievement);
-    }
-    
-    /**
-     * Publica eventos de dominio relacionados con el achievement desbloqueado
-     */
-    private void publishAchievementEvents(UserAchievement userAchievement, Achievement achievement) {
-        // Evento de achievement desbloqueado
-        AchievementUnlockedEvent unlockedEvent = new AchievementUnlockedEvent(
-            userAchievement.getUserId(),
-            achievement.getId(),
-            achievement.getCode().getValue(),
-            achievement.getTitle().getValue(),
-            achievement.getDescription().getValue()
-        );
-        
-        // Evento de user achievement ganado
-        UserAchievementEarnedEvent earnedEvent = new UserAchievementEarnedEvent(
-            userAchievement.getUserId(),
-            userAchievement.getId(),
-            achievement.getId(),
-            achievement.getCode().getValue(),
-            achievement.getTitle().getValue(),
-            achievement.getDescription().getValue(),
-            achievement.getIcon().getValue(),
-            userAchievement.getAchievedAt().toString()
-        );
-        
-        // Por ahora, solo logueamos los eventos hasta implementar el publisher
-        log.info("Evento AchievementUnlockedEvent publicado: {}", unlockedEvent);
-        log.info("Evento UserAchievementEarnedEvent publicado: {}", earnedEvent);
+        public String getDescription() {
+            return description;
+        }
     }
 }
