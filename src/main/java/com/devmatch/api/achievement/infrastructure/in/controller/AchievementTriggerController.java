@@ -4,7 +4,6 @@ import com.devmatch.api.achievement.application.dto.AchievementTriggerRequestDto
 import com.devmatch.api.achievement.application.dto.AchievementUnlockedResponseDto;
 import com.devmatch.api.achievement.application.port.in.AchievementTriggerUseCase;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/achievements/triggers")
 @RequiredArgsConstructor
-@Slf4j
-@CrossOrigin(origins = "*")
 public class AchievementTriggerController {
     
     private final AchievementTriggerUseCase achievementTriggerUseCase;
@@ -29,17 +26,8 @@ public class AchievementTriggerController {
     @PostMapping("/process")
     public ResponseEntity<List<AchievementUnlockedResponseDto>> processAchievementTrigger(
             @RequestBody AchievementTriggerRequestDto request) {
-        log.info("Procesando trigger de achievement para usuario {} con tipo {}", 
-                request.getUserId(), request.getAchievementType());
-        
-        try {
-            List<AchievementUnlockedResponseDto> unlockedAchievements = achievementTriggerUseCase.processAchievementTrigger(request);
-            return ResponseEntity.ok(unlockedAchievements);
-        } catch (Exception e) {
-            log.error("Error procesando trigger de achievement para usuario {}: {}", 
-                    request.getUserId(), e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<AchievementUnlockedResponseDto> unlockedAchievements = achievementTriggerUseCase.processAchievementTrigger(request);
+        return ResponseEntity.ok(unlockedAchievements);
     }
     
     /**
@@ -49,16 +37,8 @@ public class AchievementTriggerController {
     public ResponseEntity<List<String>> checkPotentialAchievements(
             @PathVariable Long userId, 
             @PathVariable String achievementType) {
-        log.info("Verificando achievements potenciales para usuario {} tipo {}", userId, achievementType);
-        
-        try {
-            List<String> potentialAchievements = achievementTriggerUseCase.checkPotentialAchievements(userId, achievementType);
-            return ResponseEntity.ok(potentialAchievements);
-        } catch (Exception e) {
-            log.error("Error verificando achievements potenciales para usuario {}: {}", 
-                    userId, e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<String> potentialAchievements = achievementTriggerUseCase.checkPotentialAchievements(userId, achievementType);
+        return ResponseEntity.ok(potentialAchievements);
     }
     
     /**
@@ -68,16 +48,8 @@ public class AchievementTriggerController {
     public ResponseEntity<Integer> getUserProgressTowardsAchievement(
             @PathVariable Long userId, 
             @PathVariable String achievementType) {
-        log.info("Obteniendo progreso del usuario {} hacia achievement tipo '{}'", userId, achievementType);
-        
-        try {
-            Integer progress = achievementTriggerUseCase.getUserProgressTowardsAchievement(userId, achievementType);
-            return ResponseEntity.ok(progress);
-        } catch (Exception e) {
-            log.error("Error obteniendo progreso del usuario {} hacia achievement tipo '{}': {}", 
-                    userId, achievementType, e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        Integer progress = achievementTriggerUseCase.getUserProgressTowardsAchievement(userId, achievementType);
+        return ResponseEntity.ok(progress);
     }
     
     /**
@@ -85,15 +57,7 @@ public class AchievementTriggerController {
      */
     @PostMapping("/force-check/{userId}")
     public ResponseEntity<List<AchievementUnlockedResponseDto>> forceAchievementCheck(@PathVariable Long userId) {
-        log.info("Forzando verificación de achievements para usuario: {}", userId);
-        
-        try {
-            List<AchievementUnlockedResponseDto> unlockedAchievements = achievementTriggerUseCase.forceAchievementCheck(userId);
-            return ResponseEntity.ok(unlockedAchievements);
-        } catch (Exception e) {
-            log.error("Error forzando verificación de achievements para usuario {}: {}", 
-                    userId, e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<AchievementUnlockedResponseDto> unlockedAchievements = achievementTriggerUseCase.forceAchievementCheck(userId);
+        return ResponseEntity.ok(unlockedAchievements);
     }
 }

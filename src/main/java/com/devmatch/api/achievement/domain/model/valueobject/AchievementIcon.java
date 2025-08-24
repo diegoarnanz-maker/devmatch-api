@@ -20,13 +20,8 @@ public class AchievementIcon {
         "cdn.jsdelivr.net",
         "cdnjs.cloudflare.com",
         "fonts.gstatic.com",
-        "cdn.jsdelivr.net",
         "unpkg.com",
-        "cdn.jsdelivr.net",
-        "cdnjs.cloudflare.com",
-        "fonts.gstatic.com",
-        "cdn.jsdelivr.net",
-        "unpkg.com"
+        "cdn.example.com" // Para datos de prueba
     };
     
     public AchievementIcon(String value) {

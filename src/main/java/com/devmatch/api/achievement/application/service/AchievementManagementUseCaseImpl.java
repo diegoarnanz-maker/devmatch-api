@@ -8,6 +8,8 @@ import com.devmatch.api.achievement.domain.model.Achievement;
 import com.devmatch.api.achievement.domain.exception.AchievementNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,14 @@ public class AchievementManagementUseCaseImpl implements AchievementManagementUs
         
         List<Achievement> achievements = achievementRepository.findAllActive();
         return AchievementMapper.toResponseDtoList(achievements);
+    }
+    
+    @Override
+    public Page<AchievementResponseDto> getAllActiveAchievementsPaginated(Pageable pageable) {
+        log.debug("Obteniendo achievements activos paginados con parámetros: {}", pageable);
+        
+        Page<Achievement> achievementsPage = achievementRepository.findAllActivePaginated(pageable);
+        return achievementsPage.map(AchievementMapper::toResponseDto);
     }
     
     @Override
