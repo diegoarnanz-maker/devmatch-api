@@ -12,7 +12,7 @@ public class AchievementTitle {
     // Constantes para validación
     private static final int MIN_LENGTH = 5;
     private static final int MAX_LENGTH = 100;
-    private static final String VALID_PATTERN = "^[a-zA-Z0-9\\s\\-_\\.\\ñ\\á\\é\\í\\ó\\ú\\ü\\Á\\É\\Í\\Ó\\Ú\\Ü]+$";
+    private static final String VALID_PATTERN = "^[a-zA-Z0-9\\s\\-_\\.\\ñ\\á\\é\\í\\ó\\ú\\ü\\Á\\É\\Í\\Ó\\Ú\\Ü\\¡\\¿\\!\\?]+$";
     
     public AchievementTitle(String value) {
         validateTitle(value);

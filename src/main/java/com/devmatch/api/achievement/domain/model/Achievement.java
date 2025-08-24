@@ -70,6 +70,23 @@ public class Achievement extends BaseDomainEntity {
         this.updatedAt = updatedAt;
     }
     
+    // Constructor para cargar logro existente con ID y value objects
+    public Achievement(Long id, AchievementCode code, AchievementTitle title, AchievementDescription description,
+                      AchievementPoints points, AchievementType type, AchievementIcon icon,
+                      boolean isActive, boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.code = code;
+        this.title = title;
+        this.description = description;
+        this.points = points;
+        this.type = type;
+        this.icon = icon;
+        this.isActive = isActive;
+        this.isDeleted = isDeleted;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+    
     // Getters
     public AchievementCode getCode() {
         return code;

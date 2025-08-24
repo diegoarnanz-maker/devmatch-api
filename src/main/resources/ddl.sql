@@ -348,3 +348,30 @@ ADD COLUMN owner_response_date TIMESTAMP NULL AFTER owner_response_public;
 ALTER TABLE achievement_catalog 
 ADD COLUMN points INT NOT NULL DEFAULT 10 AFTER description,
 ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'GENERAL' AFTER points;
+
+USE devmatch_db;
+
+-- Agregar el campo id como clave primaria
+ALTER TABLE achievement_catalog 
+ADD COLUMN id BIGINT AUTO_INCREMENT FIRST;
+
+-- Hacer que id sea la clave primaria
+ALTER TABLE achievement_catalog 
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (id);
+
+-- Hacer que code sea único pero no clave primaria
+ALTER TABLE achievement_catalog 
+ADD UNIQUE KEY uk_achievement_code (code);
+
+-- Deshabilitar safe update
+SET SQL_SAFE_UPDATES = 0;
+
+-- Ahora sí puedes hacer el DELETE
+DELETE FROM achievement_catalog;
+
+-- Resetear auto-increment
+ALTER TABLE achievement_catalog AUTO_INCREMENT = 1;
+
+-- Volver a habilitar safe update
+SET SQL_SAFE_UPDATES = 1;
