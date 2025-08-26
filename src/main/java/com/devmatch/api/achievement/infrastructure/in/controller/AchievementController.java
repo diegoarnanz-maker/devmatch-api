@@ -36,12 +36,12 @@ public class AchievementController {
     /**
      * Obtiene un achievement por su ID
      * 
-     * @param id ID único del achievement a obtener
+     * @param achievementId ID único del achievement a obtener
      * @return Achievement encontrado o 404 si no existe
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<AchievementResponseDto> getAchievementById(@PathVariable Long id) {
-        AchievementResponseDto achievement = achievementManagementUseCase.getAchievementById(id);
+    @GetMapping("/{achievementId}")
+    public ResponseEntity<AchievementResponseDto> getAchievementById(@PathVariable Long achievementId) {
+        AchievementResponseDto achievement = achievementManagementUseCase.getAchievementById(achievementId);
         if (achievement != null) {
             return ResponseEntity.ok(achievement);
         } else {

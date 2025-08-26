@@ -2,64 +2,68 @@ package com.devmatch.api.achievement.infrastructure.in.controller;
 
 import com.devmatch.api.achievement.application.dto.UserAchievementResponseDto;
 import com.devmatch.api.achievement.application.port.in.UserAchievementUseCase;
+import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * Controlador REST para la gestión de achievements de usuarios.
- * Proporciona endpoints para consultar los achievements obtenidos por los usuarios.
+ * Proporciona endpoints para consultar los achievements del usuario autenticado.
  */
 @RestController
-@RequestMapping("/api/v1/users/{userId}/achievements")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserAchievementController {
     
     private final UserAchievementUseCase userAchievementUseCase;
     
     /**
-     * Obtiene todos los achievements de un usuario
+     * Obtiene todos los achievements del usuario autenticado
      */
-    @GetMapping
-    public ResponseEntity<List<UserAchievementResponseDto>> getUserAchievements(@PathVariable Long userId) {
-        List<UserAchievementResponseDto> achievements = userAchievementUseCase.getUserAchievements(userId);
+    @GetMapping("/me/achievements")
+    public ResponseEntity<List<UserAchievementResponseDto>> getMyAchievements(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        Long currentUserId = userPrincipal.getUserId();
+        List<UserAchievementResponseDto> achievements = userAchievementUseCase.getUserAchievements(currentUserId);
         return ResponseEntity.ok(achievements);
     }
     
     /**
-     * Obtiene un achievement específico de un usuario
+     * Obtiene un achievement específico del usuario autenticado
      */
-    @GetMapping("/{achievementCode}")
-    public ResponseEntity<UserAchievementResponseDto> getUserAchievement(
-            @PathVariable Long userId, 
-            @PathVariable String achievementCode) {
-        UserAchievementResponseDto achievement = userAchievementUseCase.getUserAchievement(userId, achievementCode);
-        if (achievement != null) {
-            return ResponseEntity.ok(achievement);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/me/achievements/{achievementCode}")
+    public ResponseEntity<UserAchievementResponseDto> getMyAchievement(
+            @PathVariable String achievementCode,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        Long currentUserId = userPrincipal.getUserId();
+        UserAchievementResponseDto achievement = userAchievementUseCase.getUserAchievement(currentUserId, achievementCode);
+        return ResponseEntity.ok(achievement);
     }
     
     /**
-     * Verifica si un usuario tiene un achievement específico
+     * Verifica si el usuario autenticado tiene un achievement específico
      */
-    @GetMapping("/{achievementCode}/has")
-    public ResponseEntity<Boolean> hasUserAchievement(
-            @PathVariable Long userId, 
-            @PathVariable String achievementCode) {
-        boolean hasAchievement = userAchievementUseCase.hasUserAchievement(userId, achievementCode);
+    @GetMapping("/me/achievements/{achievementCode}/has")
+    public ResponseEntity<Boolean> hasMyAchievement(
+            @PathVariable String achievementCode,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        Long currentUserId = userPrincipal.getUserId();
+        boolean hasAchievement = userAchievementUseCase.hasUserAchievement(currentUserId, achievementCode);
         return ResponseEntity.ok(hasAchievement);
     }
     
     /**
-     * Obtiene el total de puntos de achievements de un usuario
+     * Obtiene el total de puntos de achievements del usuario autenticado
      */
-    @GetMapping("/points/total")
-    public ResponseEntity<Integer> getUserTotalPoints(@PathVariable Long userId) {
-        Integer totalPoints = userAchievementUseCase.getUserTotalPoints(userId);
+    @GetMapping("/me/achievements/points/total")
+    public ResponseEntity<Integer> getMyTotalPoints(
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        Long currentUserId = userPrincipal.getUserId();
+        Integer totalPoints = userAchievementUseCase.getUserTotalPoints(currentUserId);
         return ResponseEntity.ok(totalPoints);
     }
 }
