@@ -19,12 +19,56 @@ import java.util.List;
  * Solo accesible por usuarios con rol ADMIN.
  */
 @RestController
-@RequestMapping("/api/admin/achievements")
+@RequestMapping("/api/v1/admin/achievements")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminAchievementController {
     
     private final AdminAchievementUseCase adminAchievementUseCase;
+    
+    // ========================================
+    // MÉTODOS GET (LECTURA) - AL PRINCIPIO
+    // ========================================
+    
+    /**
+     * Obtiene todos los achievements (incluyendo inactivos y eliminados) con paginación
+     */
+    @GetMapping
+    public ResponseEntity<Page<AchievementResponseDto>> getAllAchievements(Pageable pageable) {
+        Page<AchievementResponseDto> achievements = adminAchievementUseCase.getAllAchievementsPaginated(pageable);
+        return ResponseEntity.ok(achievements);
+    }
+    
+    /**
+     * Obtiene un achievement específico por ID (incluyendo inactivos y eliminados)
+     */
+    @GetMapping("/{achievementId}")
+    public ResponseEntity<AchievementResponseDto> getAchievementById(@PathVariable Long achievementId) {
+        AchievementResponseDto achievement = adminAchievementUseCase.getAchievementById(achievementId);
+        return ResponseEntity.ok(achievement);
+    }
+    
+    /**
+     * Busca achievements por código (incluyendo inactivos y eliminados)
+     */
+    @GetMapping("/code/{code}")
+    public ResponseEntity<AchievementResponseDto> getAchievementByCode(@PathVariable String code) {
+        AchievementResponseDto achievement = adminAchievementUseCase.getAchievementByCode(code);
+        return ResponseEntity.ok(achievement);
+    }
+    
+    /**
+     * Obtiene achievements por tipo (incluyendo inactivos y eliminados)
+     */
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<AchievementResponseDto>> getAchievementsByType(@PathVariable String type) {
+        List<AchievementResponseDto> achievements = adminAchievementUseCase.getAchievementsByType(type);
+        return ResponseEntity.ok(achievements);
+    }
+    
+    // ========================================
+    // MÉTODOS POST (CREACIÓN)
+    // ========================================
     
     /**
      * Crea un nuevo achievement
@@ -35,6 +79,10 @@ public class AdminAchievementController {
         AchievementResponseDto achievement = adminAchievementUseCase.createAchievement(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(achievement);
     }
+    
+    // ========================================
+    // MÉTODOS PUT (ACTUALIZACIÓN COMPLETA)
+    // ========================================
     
     /**
      * Actualiza un achievement existente
@@ -47,14 +95,9 @@ public class AdminAchievementController {
         return ResponseEntity.ok(achievement);
     }
     
-    /**
-     * Elimina (soft delete) un achievement
-     */
-    @DeleteMapping("/{achievementId}")
-    public ResponseEntity<Void> deleteAchievement(@PathVariable Long achievementId) {
-        adminAchievementUseCase.deleteAchievement(achievementId);
-        return ResponseEntity.noContent().build();
-    }
+    // ========================================
+    // MÉTODOS PATCH (ACTUALIZACIÓN PARCIAL)
+    // ========================================
     
     /**
      * Activa/desactiva un achievement
@@ -65,39 +108,17 @@ public class AdminAchievementController {
         return ResponseEntity.ok(achievement);
     }
     
-    /**
-     * Obtiene un achievement específico (incluyendo inactivos)
-     */
-    @GetMapping("/{achievementId}")
-    public ResponseEntity<AchievementResponseDto> getAchievement(@PathVariable Long achievementId) {
-        AchievementResponseDto achievement = adminAchievementUseCase.getAchievementById(achievementId);
-        return ResponseEntity.ok(achievement);
-    }
+    // ========================================
+    // MÉTODOS DELETE (ELIMINACIÓN)
+    // ========================================
     
     /**
-     * Obtiene todos los achievements (incluyendo inactivos) con paginación
+     * Elimina (soft delete) un achievement
+     * Los usuarios que ya lo tienen NO lo pierden, solo no pueden obtenerlo nuevos usuarios
      */
-    @GetMapping
-    public ResponseEntity<Page<AchievementResponseDto>> getAllAchievements(Pageable pageable) {
-        Page<AchievementResponseDto> achievements = adminAchievementUseCase.getAllAchievementsPaginated(pageable);
-        return ResponseEntity.ok(achievements);
-    }
-    
-    /**
-     * Obtiene achievements por tipo (incluyendo inactivos)
-     */
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<AchievementResponseDto>> getAchievementsByType(@PathVariable String type) {
-        List<AchievementResponseDto> achievements = adminAchievementUseCase.getAchievementsByType(type);
-        return ResponseEntity.ok(achievements);
-    }
-    
-    /**
-     * Busca achievements por código (incluyendo inactivos)
-     */
-    @GetMapping("/code/{code}")
-    public ResponseEntity<AchievementResponseDto> getAchievementByCode(@PathVariable String code) {
-        AchievementResponseDto achievement = adminAchievementUseCase.getAchievementByCode(code);
-        return ResponseEntity.ok(achievement);
+    @DeleteMapping("/{achievementId}")
+    public ResponseEntity<Void> deleteAchievement(@PathVariable Long achievementId) {
+        adminAchievementUseCase.deleteAchievement(achievementId);
+        return ResponseEntity.noContent().build();
     }
 }
