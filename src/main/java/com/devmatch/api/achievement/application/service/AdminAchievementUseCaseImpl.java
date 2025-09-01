@@ -165,8 +165,8 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     }
     
     @Override
-    public List<AchievementResponseDto> getAchievementsByType(String type) {
-        log.debug("Admin obteniendo achievements por tipo: {} (incluyendo eliminados)", type);
+    public Page<AchievementResponseDto> getAchievementsByTypePaginated(String type, Pageable pageable) {
+        log.debug("Admin obteniendo achievements por tipo: {} (incluyendo eliminados) con paginación", type);
         
         // Para admin, mostrar TODOS los achievements del tipo (incluyendo eliminados)
         // Como findByType solo trae activos, usamos findAll y filtramos por tipo
@@ -175,7 +175,18 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
             .filter(achievement -> achievement.getType().getValue().equals(type))
             .collect(Collectors.toList());
         
-        return AchievementMapper.toResponseDtoList(achievementsOfType);
+        // Paginación manual
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), achievementsOfType.size());
+        
+        if (start > achievementsOfType.size()) {
+            return Page.empty(pageable);
+        }
+        
+        List<Achievement> pageContent = achievementsOfType.subList(start, end);
+        Page<Achievement> achievementsPage = new PageImpl<>(pageContent, pageable, achievementsOfType.size());
+        
+        return achievementsPage.map(AchievementMapper::toResponseDto);
     }
     
     @Override

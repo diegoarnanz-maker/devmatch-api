@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 /**
  * Controlador REST para la gestión administrativa de achievements.
@@ -25,11 +24,7 @@ import java.util.List;
 public class AdminAchievementController {
     
     private final AdminAchievementUseCase adminAchievementUseCase;
-    
-    // ========================================
-    // MÉTODOS GET (LECTURA) - AL PRINCIPIO
-    // ========================================
-    
+
     /**
      * Obtiene todos los achievements (incluyendo inactivos y eliminados) con paginación
      */
@@ -58,17 +53,15 @@ public class AdminAchievementController {
     }
     
     /**
-     * Obtiene achievements por tipo (incluyendo inactivos y eliminados)
+     * Obtiene achievements por tipo (incluyendo inactivos y eliminados) con paginación
      */
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<AchievementResponseDto>> getAchievementsByType(@PathVariable String type) {
-        List<AchievementResponseDto> achievements = adminAchievementUseCase.getAchievementsByType(type);
+    public ResponseEntity<Page<AchievementResponseDto>> getAchievementsByType(
+            @PathVariable String type, 
+            Pageable pageable) {
+        Page<AchievementResponseDto> achievements = adminAchievementUseCase.getAchievementsByTypePaginated(type, pageable);
         return ResponseEntity.ok(achievements);
     }
-    
-    // ========================================
-    // MÉTODOS POST (CREACIÓN)
-    // ========================================
     
     /**
      * Crea un nuevo achievement
@@ -79,10 +72,6 @@ public class AdminAchievementController {
         AchievementResponseDto achievement = adminAchievementUseCase.createAchievement(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(achievement);
     }
-    
-    // ========================================
-    // MÉTODOS PUT (ACTUALIZACIÓN COMPLETA)
-    // ========================================
     
     /**
      * Actualiza un achievement existente
@@ -95,10 +84,6 @@ public class AdminAchievementController {
         return ResponseEntity.ok(achievement);
     }
     
-    // ========================================
-    // MÉTODOS PATCH (ACTUALIZACIÓN PARCIAL)
-    // ========================================
-    
     /**
      * Activa/desactiva un achievement
      */
@@ -107,10 +92,6 @@ public class AdminAchievementController {
         AchievementResponseDto achievement = adminAchievementUseCase.toggleAchievementStatus(achievementId);
         return ResponseEntity.ok(achievement);
     }
-    
-    // ========================================
-    // MÉTODOS DELETE (ELIMINACIÓN)
-    // ========================================
     
     /**
      * Elimina (soft delete) un achievement
