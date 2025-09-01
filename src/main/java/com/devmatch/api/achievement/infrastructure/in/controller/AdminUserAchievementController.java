@@ -40,7 +40,6 @@ public class AdminUserAchievementController {
     public ResponseEntity<UserAchievementResponseDto> assignAchievement(
             @PathVariable Long userId,
             @Valid @RequestBody AdminUserAchievementRequestDto request) {
-        // Asegurar que el userId del path coincida con el del request
         request.setUserId(userId);
         UserAchievementResponseDto userAchievement = adminUserAchievementUseCase.assignAchievement(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(userAchievement);

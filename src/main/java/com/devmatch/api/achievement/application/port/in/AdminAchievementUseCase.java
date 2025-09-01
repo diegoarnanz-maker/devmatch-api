@@ -5,7 +5,7 @@ import com.devmatch.api.achievement.application.dto.AchievementResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+
 
 /**
  * Puerto de entrada para la gestión administrativa de achievements.
@@ -62,12 +62,13 @@ public interface AdminAchievementUseCase {
     Page<AchievementResponseDto> getAllAchievementsPaginated(Pageable pageable);
     
     /**
-     * Obtiene achievements por tipo (incluyendo inactivos)
+     * Obtiene achievements por tipo (incluyendo inactivos y eliminados) con paginación
      * 
      * @param type Tipo de achievement
-     * @return Lista de achievements del tipo especificado
+     * @param pageable Parámetros de paginación
+     * @return Página de achievements del tipo especificado
      */
-    List<AchievementResponseDto> getAchievementsByType(String type);
+    Page<AchievementResponseDto> getAchievementsByTypePaginated(String type, Pageable pageable);
     
     /**
      * Obtiene un achievement por código (incluyendo inactivos)
