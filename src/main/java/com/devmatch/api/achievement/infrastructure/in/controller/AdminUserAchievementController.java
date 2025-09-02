@@ -17,7 +17,7 @@ import java.util.List;
  * Solo accesible por usuarios con rol ADMIN.
  */
 @RestController
-@RequestMapping("/api/admin/users/{userId}/achievements")
+@RequestMapping("/api/v1/admin/users/{userId}/achievements")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserAchievementController {
@@ -40,19 +40,18 @@ public class AdminUserAchievementController {
     public ResponseEntity<UserAchievementResponseDto> assignAchievement(
             @PathVariable Long userId,
             @Valid @RequestBody AdminUserAchievementRequestDto request) {
-        request.setUserId(userId);
-        UserAchievementResponseDto userAchievement = adminUserAchievementUseCase.assignAchievement(request);
+        UserAchievementResponseDto userAchievement = adminUserAchievementUseCase.assignAchievement(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(userAchievement);
     }
     
     /**
      * Remueve un achievement de un usuario
      */
-    @DeleteMapping("/{achievementCode}")
+    @DeleteMapping("/{achievementId}")
     public ResponseEntity<Void> removeAchievement(
             @PathVariable Long userId,
-            @PathVariable String achievementCode) {
-        adminUserAchievementUseCase.removeAchievement(userId, achievementCode);
+            @PathVariable Long achievementId) {
+        adminUserAchievementUseCase.removeAchievement(userId, achievementId);
         return ResponseEntity.noContent().build();
     }
     
@@ -68,11 +67,11 @@ public class AdminUserAchievementController {
     /**
      * Verifica si un usuario tiene un achievement específico
      */
-    @GetMapping("/{achievementCode}/has")
+    @GetMapping("/{achievementId}/has")
     public ResponseEntity<Boolean> hasUserAchievement(
             @PathVariable Long userId,
-            @PathVariable String achievementCode) {
-        boolean hasAchievement = adminUserAchievementUseCase.hasUserAchievement(userId, achievementCode);
+            @PathVariable Long achievementId) {
+        boolean hasAchievement = adminUserAchievementUseCase.hasUserAchievement(userId, achievementId);
         return ResponseEntity.ok(hasAchievement);
     }
     

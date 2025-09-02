@@ -15,6 +15,9 @@ import com.devmatch.api.user.application.exception.UserAlreadyExistsException;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
 import com.devmatch.api.user.domain.exception.UserOperationNotAllowedException;
 import com.devmatch.api.user.domain.exception.ProfileTypeInUseException;
+import com.devmatch.api.achievement.domain.exception.AchievementNotFoundException;
+import com.devmatch.api.achievement.domain.exception.UserAchievementNotFoundException;
+import com.devmatch.api.achievement.domain.exception.UserAlreadyHasAchievementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -380,6 +383,54 @@ public class GlobalExceptionHandler {
         );
         
         log.error("Error de integridad de datos", ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de achievements no encontrados
+     */
+    @ExceptionHandler(AchievementNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAchievementNotFoundException(AchievementNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.NOT_FOUND.value(),
+            "Achievement no encontrado",
+            ex.getMessage()
+        );
+        
+        log.warn("Achievement no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de user achievements no encontrados
+     */
+    @ExceptionHandler(UserAchievementNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserAchievementNotFoundException(UserAchievementNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.NOT_FOUND.value(),
+            "User Achievement no encontrado",
+            ex.getMessage()
+        );
+        
+        log.warn("User Achievement no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones cuando un usuario ya tiene un achievement
+     */
+    @ExceptionHandler(UserAlreadyHasAchievementException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyHasAchievementException(UserAlreadyHasAchievementException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            "Usuario ya tiene este achievement",
+            ex.getMessage()
+        );
+        
+        log.warn("Usuario ya tiene achievement: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 

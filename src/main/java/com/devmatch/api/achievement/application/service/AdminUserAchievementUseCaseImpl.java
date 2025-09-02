@@ -10,6 +10,7 @@ import com.devmatch.api.achievement.domain.model.UserAchievement;
 import com.devmatch.api.achievement.domain.model.Achievement;
 import com.devmatch.api.achievement.domain.exception.UserAchievementNotFoundException;
 import com.devmatch.api.achievement.domain.exception.AchievementNotFoundException;
+import com.devmatch.api.achievement.domain.exception.UserAlreadyHasAchievementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,23 +48,23 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     }
     
     @Override
-    public UserAchievementResponseDto assignAchievement(AdminUserAchievementRequestDto request) {
-        log.info("Admin asignando achievement '{}' al usuario: {}", 
-                request.getAchievementCode(), request.getUserId());
+    public UserAchievementResponseDto assignAchievement(Long userId, AdminUserAchievementRequestDto request) {
+        log.info("Admin asignando achievement ID '{}' al usuario: {}", 
+                request.getAchievementId(), userId);
         
         // Verificar que el achievement existe
-        Achievement achievement = achievementRepository.findByCode(request.getAchievementCode())
-            .orElseThrow(() -> new AchievementNotFoundException(request.getAchievementCode()));
+        Achievement achievement = achievementRepository.findById(request.getAchievementId())
+            .orElseThrow(() -> new AchievementNotFoundException(request.getAchievementId()));
         
         // Verificar que el usuario no tenga ya este achievement
-        if (userAchievementRepository.existsByUserIdAndAchievementCode(request.getUserId(), request.getAchievementCode())) {
-            throw new RuntimeException("El usuario ya tiene este achievement");
+        if (userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievement.getCode().getValue())) {
+            throw new UserAlreadyHasAchievementException(userId, request.getAchievementId());
         }
         
         // Crear y guardar el UserAchievement
         UserAchievement userAchievement = new UserAchievement(
-            request.getUserId(),
-            new com.devmatch.api.achievement.domain.model.valueobject.AchievementCode(request.getAchievementCode())
+            userId,
+            achievement.getCode()
         );
         
         UserAchievement savedUserAchievement = userAchievementRepository.save(userAchievement);
@@ -72,12 +73,16 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     }
     
     @Override
-    public void removeAchievement(Long userId, String achievementCode) {
-        log.info("Admin removiendo achievement '{}' del usuario: {}", achievementCode, userId);
+    public void removeAchievement(Long userId, Long achievementId) {
+        log.info("Admin removiendo achievement ID '{}' del usuario: {}", achievementId, userId);
+        
+        // Buscar el achievement para obtener su código
+        Achievement achievement = achievementRepository.findById(achievementId)
+            .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
         UserAchievement userAchievement = userAchievementRepository
-            .findByUserIdAndAchievementCode(userId, achievementCode)
-            .orElseThrow(() -> new UserAchievementNotFoundException(userId, achievementCode));
+            .findByUserIdAndAchievementCode(userId, achievement.getCode().getValue())
+            .orElseThrow(() -> new UserAchievementNotFoundException(userId, achievementId));
         
         userAchievementRepository.deleteById(userAchievement.getId());
     }
@@ -92,10 +97,14 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     }
     
     @Override
-    public boolean hasUserAchievement(Long userId, String achievementCode) {
-        log.debug("Admin verificando si usuario {} tiene achievement '{}'", userId, achievementCode);
+    public boolean hasUserAchievement(Long userId, Long achievementId) {
+        log.debug("Admin verificando si usuario {} tiene achievement ID '{}'", userId, achievementId);
         
-        return userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievementCode);
+        // Buscar el achievement para obtener su código
+        Achievement achievement = achievementRepository.findById(achievementId)
+            .orElseThrow(() -> new AchievementNotFoundException(achievementId));
+        
+        return userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievement.getCode().getValue());
     }
     
     @Override

@@ -13,14 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdminUserAchievementRequestDto {
     
-    @NotNull(message = "El ID del usuario es obligatorio")
-    private Long userId;
+
     
-    @NotNull(message = "El código del achievement es obligatorio")
-    private String achievementCode;
-    
-    /**
-     * Si es true, se asigna el achievement. Si es false, se remueve.
-     */
-    private Boolean assign = true;
+    @NotNull(message = "El ID del achievement es obligatorio")
+    private Long achievementId;
 }
