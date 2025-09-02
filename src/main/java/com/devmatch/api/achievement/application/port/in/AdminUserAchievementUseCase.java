@@ -22,18 +22,19 @@ public interface AdminUserAchievementUseCase {
     /**
      * Asigna un achievement a un usuario
      * 
+     * @param userId ID del usuario
      * @param request DTO con la información de asignación
      * @return UserAchievement creado
      */
-    UserAchievementResponseDto assignAchievement(AdminUserAchievementRequestDto request);
+    UserAchievementResponseDto assignAchievement(Long userId, AdminUserAchievementRequestDto request);
     
     /**
      * Remueve un achievement de un usuario
      * 
      * @param userId ID del usuario
-     * @param achievementCode Código del achievement a remover
+     * @param achievementId ID del achievement a remover
      */
-    void removeAchievement(Long userId, String achievementCode);
+    void removeAchievement(Long userId, Long achievementId);
     
     /**
      * Fuerza la verificación de achievements para un usuario
@@ -47,10 +48,10 @@ public interface AdminUserAchievementUseCase {
      * Verifica si un usuario tiene un achievement específico
      * 
      * @param userId ID del usuario
-     * @param achievementCode Código del achievement
+     * @param achievementId ID del achievement
      * @return true si el usuario tiene el achievement, false en caso contrario
      */
-    boolean hasUserAchievement(Long userId, String achievementCode);
+    boolean hasUserAchievement(Long userId, Long achievementId);
     
     /**
      * Obtiene el total de puntos de achievements de un usuario
