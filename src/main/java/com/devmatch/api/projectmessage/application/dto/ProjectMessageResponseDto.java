@@ -21,6 +21,8 @@ public class ProjectMessageResponseDto {
     private Long senderId;
     private String senderUsername; // Nombre del usuario que envió el mensaje
     private String content;
+    private String messageType; // Tipo de mensaje (TEXT, ANNOUNCEMENT, etc.)
+    private Long replyToMessageId; // ID del mensaje al que responde (si aplica)
     private LocalDateTime sentAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

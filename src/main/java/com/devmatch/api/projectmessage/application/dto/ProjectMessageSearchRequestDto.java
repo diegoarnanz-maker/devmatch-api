@@ -18,8 +18,7 @@ public class ProjectMessageSearchRequestDto {
     
     private Long projectId;
     private Long senderId;
-    private String messageType;
-    private String status;
+    private String messageType; // TEXT, ANNOUNCEMENT, TASK_UPDATE, etc.
     private LocalDateTime fromDate;
     private LocalDateTime toDate;
     private String contentSearch; // Búsqueda por contenido
