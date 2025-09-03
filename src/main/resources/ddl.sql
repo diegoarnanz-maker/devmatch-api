@@ -351,27 +351,91 @@ ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'GENERAL' AFTER points;
 
 USE devmatch_db;
 
--- Agregar el campo id como clave primaria
-ALTER TABLE achievement_catalog 
-ADD COLUMN id BIGINT AUTO_INCREMENT FIRST;
-
--- Hacer que id sea la clave primaria
-ALTER TABLE achievement_catalog 
-DROP PRIMARY KEY,
-ADD PRIMARY KEY (id);
-
--- Hacer que code sea único pero no clave primaria
-ALTER TABLE achievement_catalog 
-ADD UNIQUE KEY uk_achievement_code (code);
-
--- Deshabilitar safe update
+-- 1. Deshabilitar safe update
 SET SQL_SAFE_UPDATES = 0;
 
--- Ahora sí puedes hacer el DELETE
-DELETE FROM achievement_catalog;
+-- 2. Eliminar la restricción de clave foránea existente
+ALTER TABLE user_notifications DROP FOREIGN KEY fk_user_notifications_achievement_code;
 
--- Resetear auto-increment
+-- 3. Eliminar la tabla
+DROP TABLE achievement_catalog;
+
+-- 4. Crear la nueva tabla con la estructura correcta
+CREATE TABLE achievement_catalog (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    points INT NOT NULL DEFAULT 10,
+    type VARCHAR(50) NOT NULL DEFAULT 'GENERAL',
+    icon_url VARCHAR(255),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 5. Recrear la restricción de clave foránea
+ALTER TABLE user_notifications 
+ADD CONSTRAINT fk_user_notifications_achievement_code 
+FOREIGN KEY (achievement_code) REFERENCES achievement_catalog(code) ON DELETE SET NULL;
+
+-- 6. Resetear auto-increment
 ALTER TABLE achievement_catalog AUTO_INCREMENT = 1;
 
--- Volver a habilitar safe update
+-- 7. Volver a habilitar safe update
 SET SQL_SAFE_UPDATES = 1;
+
+-- 8. Verificar la nueva estructura
+DESCRIBE achievement_catalog;
+
+-- 9. Insertar los datos
+INSERT INTO achievement_catalog (code, title, description, points, type, icon_url) VALUES
+('PROFILE_COMPLETE', 'Perfil completado', 'Has rellenado todos los campos de tu perfil.', 10, 'GENERAL', 'https://cdn.example.com/icons/profile_complete.png'),
+('FIRST_LOGIN', 'Primer inicio de sesión', 'Te has conectado por primera vez a DevMatch.', 10, 'GENERAL', 'https://cdn.example.com/icons/first_login.png'),
+('FIRST_PROJECT_CREATED', 'Primer proyecto creado', 'Has publicado tu primer proyecto en DevMatch.', 10, 'GENERAL', 'https://cdn.example.com/icons/project_created.png'),
+('THREE_PROJECTS_CREATED', 'Productor activo', 'Has creado tres proyectos en la plataforma.', 10, 'GENERAL', 'https://cdn.example.com/icons/three_projects.png'),
+('FIVE_PROJECTS_CREATED', '¡Eres un constructor!', 'Cinco proyectos creados. Vas a toda máquina.', 10, 'GENERAL', 'https://cdn.example.com/icons/five_projects.png'),
+('PROJECT_COMPLETED', 'Proyecto completado', 'Has finalizado con éxito un proyecto en el que participabas.', 10, 'GENERAL', 'https://cdn.example.com/icons/project_completed.png'),
+('FIRST_PROJECT_JOINED', 'Primer proyecto unido', 'Te has unido como miembro a un proyecto.', 10, 'GENERAL', 'https://cdn.example.com/icons/project_joined.png'),
+('FIVE_PROJECTS_PARTICIPATED', 'Miembro activo', 'Has participado en al menos 5 proyectos.', 10, 'GENERAL', 'https://cdn.example.com/icons/active_member.png'),
+('TEN_PROJECTS_PARTICIPATED', 'Veterano de DevMatch', 'Diez proyectos en tu historial. ¡Impresionante!', 10, 'GENERAL', 'https://cdn.example.com/icons/veteran.png'),
+('FIRST_APPLICATION_SENT', 'Primera solicitud', 'Has enviado tu primera aplicación a un proyecto.', 10, 'GENERAL', 'https://cdn.example.com/icons/application_sent.png'),
+('THREE_APPLICATIONS_SENT', 'Aplicador en serie', 'Has enviado tres solicitudes a proyectos distintos.', 10, 'GENERAL', 'https://cdn.example.com/icons/three_applications.png'),
+('FIVE_APPLICATIONS_SENT', 'A la caza del equipo', 'Cinco solicitudes enviadas. ¡Sigue buscando tu equipo ideal!', 10, 'GENERAL', 'https://cdn.example.com/icons/five_applications.png'),
+('FIRST_REVIEW_WRITTEN', 'Primera review', 'Has valorado tu primer proyecto.', 10, 'GENERAL', 'https://cdn.example.com/icons/review_written.png'),
+('FIVE_REVIEWS_WRITTEN', 'Crítico constructivo', 'Has escrito cinco reviews en proyectos distintos.', 10, 'GENERAL', 'https://cdn.example.com/icons/five_reviews.png'),
+('RECEIVED_FIRST_REVIEW', 'Recibiste tu primera review', 'Un proyecto donde participaste fue valorado por otro usuario.', 10, 'GENERAL', 'https://cdn.example.com/icons/review_received.png'),
+('RECEIVED_TEN_REVIEWS', 'Feedbackador estrella', 'Tus proyectos han recibido al menos 10 reviews.', 10, 'GENERAL', 'https://cdn.example.com/icons/ten_reviews.png'),
+('FIRST_RESPONSE_WRITTEN', 'Primera respuesta', 'Has respondido a una review recibida.', 10, 'GENERAL', 'https://cdn.example.com/icons/response_written.png'),
+('THREE_RESPONSES_WRITTEN', 'Colaborador activo', 'Has respondido a tres reviews de tus proyectos.', 10, 'GENERAL', 'https://cdn.example.com/icons/three_responses.png'),
+('FIRST_TIME_LEADER', 'Líder de equipo', 'Has liderado un proyecto con éxito.', 10, 'GENERAL', 'https://cdn.example.com/icons/team_leader.png'),
+('FIVE_TIMES_LEADER', 'Líder nato', 'Has sido líder en cinco proyectos distintos.', 10, 'GENERAL', 'https://cdn.example.com/icons/natural_leader.png'),
+('FIVE_TAGS_SELECTED', 'Multidisciplinar', 'Has seleccionado al menos cinco habilidades en tu perfil.', 10, 'GENERAL', 'https://cdn.example.com/icons/multidisciplinary.png'),
+('PROFILE_WITH_LINKS', 'Perfil profesional', 'Has completado tu perfil con GitHub, LinkedIn o portfolio.', 10, 'GENERAL', 'https://cdn.example.com/icons/professional_profile.png');
+
+CREATE TABLE message_mentions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    message_id BIGINT NOT NULL,
+    mentioned_user_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mentions_message FOREIGN KEY (message_id) REFERENCES project_messages(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mentions_user FOREIGN KEY (mentioned_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE message_reads (
+    message_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_notified BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (message_id, user_id), -- Clave primaria compuesta
+    CONSTRAINT fk_reads_message FOREIGN KEY (message_id) REFERENCES project_messages(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reads_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE project_messages 
+ADD COLUMN message_type VARCHAR(20) NOT NULL DEFAULT 'TEXT';
+
+ALTER TABLE project_messages 
+ADD COLUMN reply_to_message_id BIGINT NULL,
+ADD CONSTRAINT fk_reply_to FOREIGN KEY (reply_to_message_id) REFERENCES project_messages(id) ON DELETE SET NULL;

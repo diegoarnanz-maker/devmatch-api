@@ -23,11 +23,14 @@ public class ProjectMessageMapper {
      */
     public ProjectMessage toDomain(ProjectMessageRequestDto requestDto, Long senderId) {
         MessageContent content = new MessageContent(requestDto.getContent());
+        MessageType type = MessageType.fromValue(requestDto.getMessageType());
         
         return new ProjectMessage(
             requestDto.getProjectId(),
             senderId,
-            content
+            content,
+            type,
+            requestDto.getReplyToMessageId()
         );
     }
     
@@ -40,6 +43,8 @@ public class ProjectMessageMapper {
             .projectId(message.getProjectId())
             .senderId(message.getSenderId())
             .content(message.getContent().getValue())
+            .messageType(messageTypeToString(message.getType()))
+            .replyToMessageId(message.getReplyToMessageId())
             .sentAt(message.getSentAt())
             .createdAt(message.getCreatedAt())
             .updatedAt(message.getUpdatedAt())
@@ -64,6 +69,8 @@ public class ProjectMessageMapper {
             .senderId(message.getSenderId())
             .senderUsername(username)
             .content(message.getContent().getValue())
+            .messageType(messageTypeToString(message.getType()))
+            .replyToMessageId(message.getReplyToMessageId())
             .sentAt(message.getSentAt())
             .createdAt(message.getCreatedAt())
             .updatedAt(message.getUpdatedAt())
