@@ -6,6 +6,7 @@ import com.devmatch.api.projectmessage.application.dto.ProjectMessageSearchReque
 import com.devmatch.api.projectmessage.application.dto.ProjectMessageUpdateRequestDto;
 import com.devmatch.api.projectmessage.application.mapper.ProjectMessageMapper;
 import com.devmatch.api.projectmessage.application.port.in.ProjectMessageManagementUseCase;
+import com.devmatch.api.projectmessage.application.port.out.MessageReadRepository;
 import com.devmatch.api.projectmessage.application.port.out.ProjectMessageEventPublisher;
 import com.devmatch.api.projectmessage.application.port.out.ProjectMessageRepository;
 import com.devmatch.api.projectmessage.application.port.out.ProjectService;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 public class ProjectMessageManagementService implements ProjectMessageManagementUseCase {
     
     private final ProjectMessageRepository projectMessageRepository;
+    private final MessageReadRepository messageReadRepository;
     private final ProjectMessageMapper projectMessageMapper;
     private final ProjectMessageDomainService projectMessageDomainService;
     private final ProjectService projectService;
@@ -73,7 +75,12 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         
         log.info("Mensaje {} enviado exitosamente", savedMessage.getId());
         
-        return projectMessageMapper.toResponseDto(savedMessage);
+        // Obtener información del usuario remitente
+        String senderUsername = userService.getUsernameById(savedMessage.getSenderId());
+        String senderProfileImageUrl = userService.getUserProfileImageUrl(savedMessage.getSenderId());
+        String senderRole = userService.getUserRoleInProject(savedMessage.getSenderId(), savedMessage.getProjectId());
+        
+        return projectMessageMapper.toResponseDtoWithSender(savedMessage, senderUsername, senderProfileImageUrl, senderRole);
     }
     
     @Override
@@ -171,7 +178,34 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
             throw new ProjectMessageOperationNotAllowedException("No tienes acceso a este mensaje");
         }
         
-        return projectMessageMapper.toResponseDto(message);
+        // MARCAR AUTOMÁTICAMENTE COMO LEÍDO
+        // Solo marcar si el mensaje no es del propio usuario
+        if (!message.getSenderId().equals(userId)) {
+            log.debug("Marcando automáticamente mensaje {} como leído para usuario {}", messageId, userId);
+            
+            // Publicar evento de lectura automática
+            ProjectMessageReadEvent event = new ProjectMessageReadEvent(
+                this, message.getId(), message.getProjectId(), userId
+            );
+            eventPublisher.publishMessageReadEvent(event);
+        }
+        
+        // Obtener información del usuario remitente
+        String senderUsername = userService.getUsernameById(message.getSenderId());
+        String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
+        String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
+        
+        // Verificar si el mensaje ha sido leído por el usuario actual
+        boolean isRead = messageReadRepository.existsByMessageIdAndUserId(messageId, userId);
+        java.time.LocalDateTime readAt = null;
+        if (isRead) {
+            readAt = messageReadRepository.findByMessageIdAndUserId(messageId, userId)
+                    .map(read -> read.getReadAt())
+                    .orElse(null);
+        }
+        
+        return projectMessageMapper.toResponseDtoWithSenderAndReadStatus(
+            message, senderUsername, senderProfileImageUrl, senderRole, isRead, readAt);
     }
     
     @Override
@@ -186,7 +220,14 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         
         Page<ProjectMessage> messages = projectMessageRepository.findByProjectId(projectId, pageable);
         
-        return messages.map(projectMessageMapper::toResponseDto);
+        return messages.map(message -> {
+            // Obtener información del usuario remitente
+            String senderUsername = userService.getUsernameById(message.getSenderId());
+            String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
+            String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
+            
+            return projectMessageMapper.toResponseDtoWithSender(message, senderUsername, senderProfileImageUrl, senderRole);
+        });
     }
     
     @Override
@@ -211,7 +252,14 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
             pageable
         );
         
-        return messages.map(projectMessageMapper::toResponseDto);
+        return messages.map(message -> {
+            // Obtener información del usuario remitente
+            String senderUsername = userService.getUsernameById(message.getSenderId());
+            String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
+            String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
+            
+            return projectMessageMapper.toResponseDtoWithSender(message, senderUsername, senderProfileImageUrl, senderRole);
+        });
     }
     
     @Override
@@ -227,7 +275,14 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         List<ProjectMessage> unreadMessages = projectMessageRepository.findUnreadByProjectAndUser(projectId, userId);
         
         return unreadMessages.stream()
-            .map(projectMessageMapper::toResponseDto)
+            .map(message -> {
+                // Obtener información del usuario remitente
+                String senderUsername = userService.getUsernameById(message.getSenderId());
+                String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
+                String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
+                
+                return projectMessageMapper.toResponseDtoWithSender(message, senderUsername, senderProfileImageUrl, senderRole);
+            })
             .collect(Collectors.toList());
     }
     
@@ -270,8 +325,44 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         // Obtener hilo completo
         List<ProjectMessage> threadMessages = projectMessageRepository.findMessageThread(rootMessageId);
         
+        // MARCAR AUTOMÁTICAMENTE COMO LEÍDOS los mensajes del hilo
+        // Solo marcar mensajes que no son del propio usuario
+        List<ProjectMessage> messagesToMarkAsRead = threadMessages.stream()
+            .filter(message -> !message.getSenderId().equals(userId))
+            .collect(Collectors.toList());
+        
+        if (!messagesToMarkAsRead.isEmpty()) {
+            log.debug("Marcando automáticamente {} mensajes del hilo como leídos para usuario {}", 
+                     messagesToMarkAsRead.size(), userId);
+            
+            // Marcar cada mensaje del hilo como leído
+            for (ProjectMessage message : messagesToMarkAsRead) {
+                ProjectMessageReadEvent event = new ProjectMessageReadEvent(
+                    this, message.getId(), message.getProjectId(), userId
+                );
+                eventPublisher.publishMessageReadEvent(event);
+            }
+        }
+        
         return threadMessages.stream()
-            .map(projectMessageMapper::toResponseDto)
+            .map(message -> {
+                // Obtener información del usuario remitente
+                String senderUsername = userService.getUsernameById(message.getSenderId());
+                String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
+                String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
+                
+                // Verificar si el mensaje ha sido leído por el usuario actual
+                boolean isRead = messageReadRepository.existsByMessageIdAndUserId(message.getId(), userId);
+                java.time.LocalDateTime readAt = null;
+                if (isRead) {
+                    readAt = messageReadRepository.findByMessageIdAndUserId(message.getId(), userId)
+                            .map(read -> read.getReadAt())
+                            .orElse(null);
+                }
+                
+                return projectMessageMapper.toResponseDtoWithSenderAndReadStatus(
+                    message, senderUsername, senderProfileImageUrl, senderRole, isRead, readAt);
+            })
             .collect(Collectors.toList());
     }
     

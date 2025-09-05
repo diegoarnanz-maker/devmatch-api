@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProjectMessageRequestDto {
     
-    @NotNull(message = "El ID del proyecto es obligatorio")
+    // projectId se obtiene del path, no del request body
     private Long projectId;
     
     @NotBlank(message = "El contenido del mensaje es obligatorio")

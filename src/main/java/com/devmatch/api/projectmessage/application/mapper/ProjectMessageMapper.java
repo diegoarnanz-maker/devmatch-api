@@ -75,6 +75,39 @@ public class ProjectMessageMapper {
             .createdAt(message.getCreatedAt())
             .updatedAt(message.getUpdatedAt())
             .isDeleted(message.isDeleted())
+            .isRead(false) // Por defecto no leído, se actualizará en el servicio
+            .readAt(null) // Se actualizará en el servicio si está leído
+            .sender(senderInfo)
+            .build();
+    }
+    
+    /**
+     * Convierte una entidad de dominio a un DTO de respuesta con información del remitente y estado de lectura
+     */
+    public ProjectMessageResponseDto toResponseDtoWithSenderAndReadStatus(ProjectMessage message, String username, 
+                                                                         String profileImageUrl, String role, 
+                                                                         boolean isRead, java.time.LocalDateTime readAt) {
+        ProjectMessageResponseDto.SenderInfo senderInfo = ProjectMessageResponseDto.SenderInfo.builder()
+            .userId(message.getSenderId())
+            .username(username)
+            .profileImageUrl(profileImageUrl)
+            .role(role)
+            .build();
+        
+        return ProjectMessageResponseDto.builder()
+            .id(message.getId())
+            .projectId(message.getProjectId())
+            .senderId(message.getSenderId())
+            .senderUsername(username)
+            .content(message.getContent().getValue())
+            .messageType(messageTypeToString(message.getType()))
+            .replyToMessageId(message.getReplyToMessageId())
+            .sentAt(message.getSentAt())
+            .createdAt(message.getCreatedAt())
+            .updatedAt(message.getUpdatedAt())
+            .isDeleted(message.isDeleted())
+            .isRead(isRead)
+            .readAt(readAt)
             .sender(senderInfo)
             .build();
     }

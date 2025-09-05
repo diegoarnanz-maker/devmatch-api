@@ -1,5 +1,7 @@
 package com.devmatch.api.projectmessage.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +29,8 @@ public class ProjectMessageResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean isDeleted;
+    private boolean isRead; // Indica si el mensaje ha sido leído por el usuario actual
+    private LocalDateTime readAt; // Fecha y hora en que fue leído
     
     // Información adicional para respuestas
     private ProjectMessageResponseDto replyToMessage; // Mensaje al que responde (si aplica)
@@ -44,4 +48,20 @@ public class ProjectMessageResponseDto {
     }
     
     private SenderInfo sender;
+    
+    /**
+     * Getter personalizado para evitar duplicación en JSON
+     */
+    @JsonProperty("isRead")
+    public boolean isRead() {
+        return isRead;
+    }
+    
+    /**
+     * Getter para el campo read (ignorado en JSON)
+     */
+    @JsonIgnore
+    public boolean getRead() {
+        return isRead;
+    }
 }

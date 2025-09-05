@@ -29,6 +29,65 @@ import java.util.List;
 public class ProjectMessageController {
     
     private final ProjectMessageManagementUseCase projectMessageManagementUseCase;
+
+    /**
+     * Obtiene todos los mensajes de un proyecto de forma paginada
+     */
+    @GetMapping("/{projectId}/messages")
+    public ResponseEntity<Page<ProjectMessageResponseDto>> getProjectMessages(
+            @PathVariable Long projectId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            Pageable pageable) {
+        
+        Page<ProjectMessageResponseDto> response = projectMessageManagementUseCase.getProjectMessages(
+            projectId, userPrincipal.getUserId(), pageable);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Obtiene un mensaje específico por su ID
+     */
+    @GetMapping("/{projectId}/messages/{messageId}")
+    public ResponseEntity<ProjectMessageResponseDto> getMessageById(
+            @PathVariable Long projectId,
+            @PathVariable Long messageId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        ProjectMessageResponseDto response = projectMessageManagementUseCase.getMessageById(
+            messageId, userPrincipal.getUserId());
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Obtiene los mensajes no leídos de un usuario en un proyecto
+     */
+    @GetMapping("/{projectId}/messages/unread")
+    public ResponseEntity<List<ProjectMessageResponseDto>> getUnreadMessages(
+            @PathVariable Long projectId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        List<ProjectMessageResponseDto> response = projectMessageManagementUseCase.getUnreadMessages(
+            projectId, userPrincipal.getUserId());
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Obtiene el historial de mensajes de un hilo de conversación
+     */
+    @GetMapping("/{projectId}/messages/{messageId}/thread")
+    public ResponseEntity<List<ProjectMessageResponseDto>> getMessageThread(
+            @PathVariable Long projectId,
+            @PathVariable Long messageId,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        List<ProjectMessageResponseDto> response = projectMessageManagementUseCase.getMessageThread(
+            messageId, userPrincipal.getUserId());
+        
+        return ResponseEntity.ok(response);
+    }
     
     /**
      * Envía un nuevo mensaje en un proyecto
@@ -51,6 +110,25 @@ public class ProjectMessageController {
     }
     
     /**
+     * Busca mensajes con criterios específicos
+     */
+    @PostMapping("/{projectId}/messages/search")
+    public ResponseEntity<Page<ProjectMessageResponseDto>> searchMessages(
+            @PathVariable Long projectId,
+            @RequestBody ProjectMessageSearchRequestDto searchRequest,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
+            Pageable pageable) {
+        
+        // Asegurar que la búsqueda se limite al proyecto especificado
+        searchRequest.setProjectId(projectId);
+        
+        Page<ProjectMessageResponseDto> response = projectMessageManagementUseCase.searchMessages(
+            searchRequest, userPrincipal.getUserId(), pageable);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * Edita el contenido de un mensaje existente
      */
     @PutMapping("/{projectId}/messages/{messageId}")
@@ -67,23 +145,6 @@ public class ProjectMessageController {
             userPrincipal.getUserId(), messageId, request);
         
         return ResponseEntity.ok(response);
-    }
-    
-    /**
-     * Elimina un mensaje (soft delete)
-     */
-    @DeleteMapping("/{projectId}/messages/{messageId}")
-    public ResponseEntity<Void> deleteMessage(
-            @PathVariable Long projectId,
-            @PathVariable Long messageId,
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
-        
-        log.info("Usuario {} eliminando mensaje {} en proyecto {}", 
-                userPrincipal.getUserId(), messageId, projectId);
-        
-        projectMessageManagementUseCase.deleteMessage(userPrincipal.getUserId(), messageId);
-        
-        return ResponseEntity.noContent().build();
     }
     
     /**
@@ -105,69 +166,6 @@ public class ProjectMessageController {
     }
     
     /**
-     * Obtiene un mensaje específico por su ID
-     */
-    @GetMapping("/{projectId}/messages/{messageId}")
-    public ResponseEntity<ProjectMessageResponseDto> getMessageById(
-            @PathVariable Long projectId,
-            @PathVariable Long messageId,
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
-        
-        ProjectMessageResponseDto response = projectMessageManagementUseCase.getMessageById(
-            messageId, userPrincipal.getUserId());
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    /**
-     * Obtiene todos los mensajes de un proyecto de forma paginada
-     */
-    @GetMapping("/{projectId}/messages")
-    public ResponseEntity<Page<ProjectMessageResponseDto>> getProjectMessages(
-            @PathVariable Long projectId,
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            Pageable pageable) {
-        
-        Page<ProjectMessageResponseDto> response = projectMessageManagementUseCase.getProjectMessages(
-            projectId, userPrincipal.getUserId(), pageable);
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    /**
-     * Busca mensajes con criterios específicos
-     */
-    @PostMapping("/{projectId}/messages/search")
-    public ResponseEntity<Page<ProjectMessageResponseDto>> searchMessages(
-            @PathVariable Long projectId,
-            @RequestBody ProjectMessageSearchRequestDto searchRequest,
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal,
-            Pageable pageable) {
-        
-        // Asegurar que la búsqueda se limite al proyecto especificado
-        searchRequest.setProjectId(projectId);
-        
-        Page<ProjectMessageResponseDto> response = projectMessageManagementUseCase.searchMessages(
-            searchRequest, userPrincipal.getUserId(), pageable);
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    /**
-     * Obtiene los mensajes no leídos de un usuario en un proyecto
-     */
-    @GetMapping("/{projectId}/messages/unread")
-    public ResponseEntity<List<ProjectMessageResponseDto>> getUnreadMessages(
-            @PathVariable Long projectId,
-            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
-        
-        List<ProjectMessageResponseDto> response = projectMessageManagementUseCase.getUnreadMessages(
-            projectId, userPrincipal.getUserId());
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    /**
      * Marca todos los mensajes de un proyecto como leídos para un usuario
      */
     @PatchMapping("/{projectId}/messages/read-all")
@@ -184,17 +182,19 @@ public class ProjectMessageController {
     }
     
     /**
-     * Obtiene el historial de mensajes de un hilo de conversación
+     * Elimina un mensaje (soft delete)
      */
-    @GetMapping("/{projectId}/messages/{messageId}/thread")
-    public ResponseEntity<List<ProjectMessageResponseDto>> getMessageThread(
+    @DeleteMapping("/{projectId}/messages/{messageId}")
+    public ResponseEntity<Void> deleteMessage(
             @PathVariable Long projectId,
             @PathVariable Long messageId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        List<ProjectMessageResponseDto> response = projectMessageManagementUseCase.getMessageThread(
-            messageId, userPrincipal.getUserId());
+        log.info("Usuario {} eliminando mensaje {} en proyecto {}", 
+                userPrincipal.getUserId(), messageId, projectId);
         
-        return ResponseEntity.ok(response);
+        projectMessageManagementUseCase.deleteMessage(userPrincipal.getUserId(), messageId);
+        
+        return ResponseEntity.noContent().build();
     }
 }
