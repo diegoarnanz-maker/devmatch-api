@@ -14,6 +14,7 @@ import com.devmatch.api.usernotification.domain.exception.NotificationLimitExcee
 import com.devmatch.api.usernotification.domain.exception.NotificationNotFoundException;
 import com.devmatch.api.usernotification.domain.exception.NotificationUserMismatchException;
 import com.devmatch.api.usernotification.domain.model.Notification;
+import com.devmatch.api.usernotification.domain.model.valueobject.NotificationType;
 import com.devmatch.api.usernotification.domain.service.NotificationDomainService;
 import com.devmatch.api.user.application.port.in.UserQueryUseCase;
 import lombok.RequiredArgsConstructor;
@@ -193,6 +194,26 @@ public class NotificationManagementUseCaseImpl implements NotificationManagement
         String username = userQueryUseCase.findUserById(userId).getUsername();
         
         Notification notification = notificationMapper.createWelcomeNotification(userId, username);
+        Notification savedNotification = notificationRepositoryPort.save(notification);
+        notificationEventPublisherPort.publishNotificationCreated(savedNotification);
+        return notificationMapper.toResponseDto(savedNotification);
+    }
+
+    @Override
+    @Transactional
+    public NotificationResponseDto createSystemMessageNotification(Long userId, Long projectId, String message) {
+        // Validar límite de notificaciones
+        List<Notification> existingNotifications = notificationRepositoryPort.findByUserId(userId);
+        if (!notificationDomainService.canCreateNotification(userId, existingNotifications, MAX_NOTIFICATIONS_PER_USER)) {
+            throw new NotificationLimitExceededException(userId, existingNotifications.size(), MAX_NOTIFICATIONS_PER_USER);
+        }
+
+        // Verificar duplicados
+        if (notificationDomainService.hasRecentDuplicate(userId, NotificationType.SYSTEM_MESSAGE, projectId, existingNotifications, DUPLICATE_TIME_WINDOW_MINUTES)) {
+            throw new NotificationDuplicateException(userId, NotificationType.SYSTEM_MESSAGE, projectId);
+        }
+
+        Notification notification = notificationMapper.createSystemMessageNotification(userId, projectId, message);
         Notification savedNotification = notificationRepositoryPort.save(notification);
         notificationEventPublisherPort.publishNotificationCreated(savedNotification);
         return notificationMapper.toResponseDto(savedNotification);

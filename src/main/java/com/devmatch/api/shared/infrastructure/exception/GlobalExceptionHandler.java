@@ -3,6 +3,7 @@ package com.devmatch.api.shared.infrastructure.exception;
 import com.devmatch.api.project.domain.exception.ProjectNotFoundException;
 import com.devmatch.api.project.domain.exception.ProjectOperationNotAllowedException;
 import com.devmatch.api.project.domain.exception.ProjectLimitExceededException;
+import com.devmatch.api.projectmessage.domain.exception.ProjectMessageOperationNotAllowedException;
 import com.devmatch.api.projectreview.domain.exception.ReviewOperationNotAllowedException;
 import com.devmatch.api.projectreview.domain.exception.ReviewLimitExceededException;
 import com.devmatch.api.role.domain.exception.RoleAlreadyExistsException;
@@ -432,6 +433,22 @@ public class GlobalExceptionHandler {
         
         log.warn("Usuario ya tiene achievement: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
+     * Maneja excepciones de operaciones no permitidas en mensajes de proyecto
+     */
+    @ExceptionHandler(ProjectMessageOperationNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleProjectMessageOperationNotAllowedException(ProjectMessageOperationNotAllowedException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.FORBIDDEN.value(),
+            "Operación no permitida en mensaje de proyecto",
+            ex.getMessage()
+        );
+        
+        log.warn("Operación no permitida en mensaje de proyecto: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     /**

@@ -412,4 +412,29 @@ public class NotificationMapper {
             LocalDateTime.now()
         );
     }
+
+    /**
+     * Crea una notificación de mensaje del sistema.
+     * 
+     * @param userId ID del usuario que recibe la notificación
+     * @param projectId ID del proyecto (opcional)
+     * @param message Mensaje de la notificación
+     * @return Entidad de dominio
+     */
+    public Notification createSystemMessageNotification(Long userId, Long projectId, String message) {
+        return new Notification(
+            null,
+            userId,
+            new NotificationMessage(message),
+            NotificationType.SYSTEM_MESSAGE,
+            projectId,
+            null,
+            null,
+            false,
+            true,
+            false,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+    }
 } 
