@@ -34,12 +34,16 @@ public class MessageContent {
         // Validaciones específicas de negocio para mensajes
         String lowerContent = trimmedContent.toLowerCase();
         if (lowerContent.contains("spam") || 
-            lowerContent.contains("test") ||
-            lowerContent.contains("prueba") ||
-            lowerContent.contains("lorem ipsum") ||
-            lowerContent.contains("mensaje de prueba")) {
+            lowerContent.contains("lorem ipsum")) {
             throw new IllegalArgumentException("El contenido del mensaje contiene palabras no permitidas");
         }
+        
+        // Comentado temporalmente para permitir mensajes de prueba durante desarrollo
+        // if (lowerContent.contains("test") ||
+        //     lowerContent.contains("prueba") ||
+        //     lowerContent.contains("mensaje de prueba")) {
+        //     throw new IllegalArgumentException("El contenido del mensaje contiene palabras no permitidas");
+        // }
         
         this.value = trimmedContent;
     }

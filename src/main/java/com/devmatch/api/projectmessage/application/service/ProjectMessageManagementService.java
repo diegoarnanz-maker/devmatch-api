@@ -220,13 +220,51 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         
         Page<ProjectMessage> messages = projectMessageRepository.findByProjectId(projectId, pageable);
         
+        // MARCAR AUTOMÁTICAMENTE COMO LEÍDOS los mensajes que no son del propio usuario
+        List<ProjectMessage> messagesToMarkAsRead = messages.getContent().stream()
+            .filter(message -> !message.getSenderId().equals(userId))
+            .collect(Collectors.toList());
+        
+        if (!messagesToMarkAsRead.isEmpty()) {
+            log.info("MARCANDO AUTOMÁTICAMENTE {} mensajes como leídos para usuario {}", 
+                     messagesToMarkAsRead.size(), userId);
+            
+            // Marcar cada mensaje como leído
+            for (ProjectMessage message : messagesToMarkAsRead) {
+                log.info("Publicando evento de lectura para mensaje {} (sender: {}, reader: {})", 
+                         message.getId(), message.getSenderId(), userId);
+                
+                ProjectMessageReadEvent event = new ProjectMessageReadEvent(
+                    this, message.getId(), message.getProjectId(), userId
+                );
+                eventPublisher.publishMessageReadEvent(event);
+                
+                log.info("Evento de lectura publicado para mensaje {}", message.getId());
+                
+                // Pequeña pausa para asegurar que el evento se procese
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        } else {
+            log.info("No hay mensajes para marcar como leídos para usuario {}", userId);
+        }
+        
         return messages.map(message -> {
             // Obtener información del usuario remitente
             String senderUsername = userService.getUsernameById(message.getSenderId());
             String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
             String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
             
-            return projectMessageMapper.toResponseDtoWithSender(message, senderUsername, senderProfileImageUrl, senderRole);
+            // Si el mensaje no es del propio usuario, se marcó como leído automáticamente
+            boolean isRead = !message.getSenderId().equals(userId);
+            java.time.LocalDateTime readAt = isRead ? java.time.LocalDateTime.now() : null;
+            
+            return projectMessageMapper.toResponseDtoWithSenderAndReadStatus(
+                message, senderUsername, senderProfileImageUrl, senderRole, isRead, readAt
+            );
         });
     }
     
@@ -252,13 +290,37 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
             pageable
         );
         
+        // MARCAR AUTOMÁTICAMENTE COMO LEÍDOS los mensajes que no son del propio usuario
+        List<ProjectMessage> messagesToMarkAsRead = messages.getContent().stream()
+            .filter(message -> !message.getSenderId().equals(userId))
+            .collect(Collectors.toList());
+        
+        if (!messagesToMarkAsRead.isEmpty()) {
+            log.debug("Marcando automáticamente {} mensajes de búsqueda como leídos para usuario {}", 
+                     messagesToMarkAsRead.size(), userId);
+            
+            // Marcar cada mensaje como leído
+            for (ProjectMessage message : messagesToMarkAsRead) {
+                ProjectMessageReadEvent event = new ProjectMessageReadEvent(
+                    this, message.getId(), message.getProjectId(), userId
+                );
+                eventPublisher.publishMessageReadEvent(event);
+            }
+        }
+        
         return messages.map(message -> {
             // Obtener información del usuario remitente
             String senderUsername = userService.getUsernameById(message.getSenderId());
             String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
             String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
             
-            return projectMessageMapper.toResponseDtoWithSender(message, senderUsername, senderProfileImageUrl, senderRole);
+            // Si el mensaje no es del propio usuario, se marcó como leído automáticamente
+            boolean isRead = !message.getSenderId().equals(userId);
+            java.time.LocalDateTime readAt = isRead ? java.time.LocalDateTime.now() : null;
+            
+            return projectMessageMapper.toResponseDtoWithSenderAndReadStatus(
+                message, senderUsername, senderProfileImageUrl, senderRole, isRead, readAt
+            );
         });
     }
     
@@ -274,6 +336,36 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         
         List<ProjectMessage> unreadMessages = projectMessageRepository.findUnreadByProjectAndUser(projectId, userId);
         
+        // MARCAR AUTOMÁTICAMENTE COMO LEÍDOS los mensajes que no son del propio usuario
+        List<ProjectMessage> messagesToMarkAsRead = unreadMessages.stream()
+            .filter(message -> !message.getSenderId().equals(userId))
+            .collect(Collectors.toList());
+        
+        if (!messagesToMarkAsRead.isEmpty()) {
+            log.info("MARCANDO AUTOMÁTICAMENTE {} mensajes no leídos como leídos para usuario {}", 
+                     messagesToMarkAsRead.size(), userId);
+            
+            // Marcar cada mensaje como leído
+            for (ProjectMessage message : messagesToMarkAsRead) {
+                log.info("Publicando evento de lectura para mensaje {} (sender: {}, reader: {})", 
+                         message.getId(), message.getSenderId(), userId);
+                
+                ProjectMessageReadEvent event = new ProjectMessageReadEvent(
+                    this, message.getId(), message.getProjectId(), userId
+                );
+                eventPublisher.publishMessageReadEvent(event);
+                
+                log.info("Evento de lectura publicado para mensaje {}", message.getId());
+                
+                // Pequeña pausa para asegurar que el evento se procese
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        
         return unreadMessages.stream()
             .map(message -> {
                 // Obtener información del usuario remitente
@@ -281,7 +373,13 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
                 String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
                 String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
                 
-                return projectMessageMapper.toResponseDtoWithSender(message, senderUsername, senderProfileImageUrl, senderRole);
+                // Si el mensaje no es del propio usuario, se marcó como leído automáticamente
+                boolean isRead = !message.getSenderId().equals(userId);
+                java.time.LocalDateTime readAt = isRead ? java.time.LocalDateTime.now() : null;
+                
+                return projectMessageMapper.toResponseDtoWithSenderAndReadStatus(
+                    message, senderUsername, senderProfileImageUrl, senderRole, isRead, readAt
+                );
             })
             .collect(Collectors.toList());
     }
