@@ -163,7 +163,22 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
         
         log.info("Mensaje {} marcado como leído", messageId);
         
-        return projectMessageMapper.toResponseDto(message);
+        // Obtener información del usuario remitente
+        String senderUsername = userService.getUsernameById(message.getSenderId());
+        String senderProfileImageUrl = userService.getUserProfileImageUrl(message.getSenderId());
+        String senderRole = userService.getUserRoleInProject(message.getSenderId(), message.getProjectId());
+        
+        // Verificar si el mensaje ha sido leído por el usuario actual
+        boolean isRead = messageReadRepository.existsByMessageIdAndUserId(messageId, userId);
+        java.time.LocalDateTime readAt = null;
+        if (isRead) {
+            readAt = messageReadRepository.findByMessageIdAndUserId(messageId, userId)
+                    .map(read -> read.getReadAt())
+                    .orElse(null);
+        }
+        
+        return projectMessageMapper.toResponseDtoWithSenderAndReadStatus(
+            message, senderUsername, senderProfileImageUrl, senderRole, isRead, readAt);
     }
     
     @Override

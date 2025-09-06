@@ -98,7 +98,6 @@ public class ProjectMessageController {
             @Valid @RequestBody ProjectMessageRequestDto request,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        log.info("Usuario {} enviando mensaje en proyecto {}", userPrincipal.getUserId(), projectId);
         
         // Asegurar que el projectId del path coincida con el del request
         request.setProjectId(projectId);
@@ -138,8 +137,6 @@ public class ProjectMessageController {
             @Valid @RequestBody ProjectMessageUpdateRequestDto request,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        log.info("Usuario {} editando mensaje {} en proyecto {}", 
-                userPrincipal.getUserId(), messageId, projectId);
         
         ProjectMessageResponseDto response = projectMessageManagementUseCase.editMessage(
             userPrincipal.getUserId(), messageId, request);
@@ -156,8 +153,6 @@ public class ProjectMessageController {
             @PathVariable Long messageId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        log.info("Usuario {} marcando mensaje {} como leído en proyecto {}", 
-                userPrincipal.getUserId(), messageId, projectId);
         
         ProjectMessageResponseDto response = projectMessageManagementUseCase.markMessageAsRead(
             userPrincipal.getUserId(), messageId);
@@ -173,8 +168,6 @@ public class ProjectMessageController {
             @PathVariable Long projectId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        log.info("Usuario {} marcando todos los mensajes como leídos en proyecto {}", 
-                userPrincipal.getUserId(), projectId);
         
         projectMessageManagementUseCase.markAllMessagesAsRead(projectId, userPrincipal.getUserId());
         
@@ -190,8 +183,6 @@ public class ProjectMessageController {
             @PathVariable Long messageId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
-        log.info("Usuario {} eliminando mensaje {} en proyecto {}", 
-                userPrincipal.getUserId(), messageId, projectId);
         
         projectMessageManagementUseCase.deleteMessage(userPrincipal.getUserId(), messageId);
         

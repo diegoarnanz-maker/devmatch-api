@@ -27,10 +27,10 @@ public class ProjectApplicationExpirationService {
     private static final int EXPIRATION_DAYS = 7;
 
     /**
-     * Tarea programada que se ejecuta cada hora para revisar aplicaciones vencidas.
+     * Tarea programada que se ejecuta cada día para revisar aplicaciones vencidas.
      * Busca aplicaciones en estado PENDING que tienen más de 7 días sin respuesta.
      */
-    @Scheduled(fixedRate = 3600000) // Cada hora (3600000 ms = 1 hora)
+    @Scheduled(cron = "0 0 2 * * ?") // Cada día a las 2:00 AM
     public void checkAndExpireApplications() {
         log.info("Iniciando verificación de aplicaciones vencidas...");
         
@@ -50,6 +50,13 @@ public class ProjectApplicationExpirationService {
             
             for (ProjectApplication application : expiredApplications) {
                 try {
+                    // Verificar que la aplicación aún esté en estado PENDING
+                    if (application.getStatus() != ApplicationStatus.PENDING) {
+                        log.debug("Aplicación {} ya no está en estado PENDING (estado actual: {}), saltando", 
+                                application.getId(), application.getStatus());
+                        continue;
+                    }
+                    
                     expireApplication(application);
                 } catch (Exception e) {
                     log.error("Error al expirar aplicación {}: {}", application.getId(), e.getMessage(), e);
@@ -71,6 +78,13 @@ public class ProjectApplicationExpirationService {
     private void expireApplication(ProjectApplication application) {
         log.info("Expirando aplicación {} del usuario {} para proyecto {}", 
                 application.getId(), application.getUserId(), application.getProjectId());
+        
+        // Verificación adicional: asegurar que la aplicación esté en estado PENDING
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            log.warn("Intento de expirar aplicación {} que no está en estado PENDING (estado actual: {}), abortando", 
+                    application.getId(), application.getStatus());
+            return;
+        }
         
         // Cambiar estado a EXPIRED
         application.expire();
