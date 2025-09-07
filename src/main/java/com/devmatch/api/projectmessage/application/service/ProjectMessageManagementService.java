@@ -84,6 +84,48 @@ public class ProjectMessageManagementService implements ProjectMessageManagement
     }
     
     @Override
+    public ProjectMessageResponseDto replyToMessage(Long userId, Long replyToMessageId, ProjectMessageRequestDto request) {
+        log.info("Respondiendo al mensaje {} por usuario {} en proyecto {}", replyToMessageId, userId, request.getProjectId());
+        
+        // Validar que el mensaje al que se responde existe y pertenece al mismo proyecto
+        ProjectMessage originalMessage = findMessageById(replyToMessageId);
+        if (!originalMessage.getProjectId().equals(request.getProjectId())) {
+            throw new ProjectMessageOperationNotAllowedException("El mensaje al que intentas responder no pertenece a este proyecto");
+        }
+        
+        // Validaciones de negocio
+        validateUserCanSendMessage(userId, request.getProjectId());
+        
+        // Verificar límites de rate limiting
+        validateRateLimiting(userId);
+        
+        // Establecer el replyToMessageId automáticamente
+        request.setReplyToMessageId(replyToMessageId);
+        
+        // Crear mensaje de respuesta
+        ProjectMessage replyMessage = projectMessageMapper.toDomain(request, userId);
+        
+        // Guardar mensaje de respuesta
+        ProjectMessage savedReplyMessage = projectMessageRepository.save(replyMessage);
+        
+        // Publicar evento
+        ProjectMessageSentEvent event = new ProjectMessageSentEvent(
+            this, savedReplyMessage.getId(), savedReplyMessage.getProjectId(), 
+            savedReplyMessage.getSenderId(), savedReplyMessage.getType().getValue()
+        );
+        eventPublisher.publishMessageSentEvent(event);
+        
+        log.info("Respuesta {} enviada exitosamente al mensaje {}", savedReplyMessage.getId(), replyToMessageId);
+        
+        // Obtener información del usuario remitente
+        String senderUsername = userService.getUsernameById(savedReplyMessage.getSenderId());
+        String senderProfileImageUrl = userService.getUserProfileImageUrl(savedReplyMessage.getSenderId());
+        String senderRole = userService.getUserRoleInProject(savedReplyMessage.getSenderId(), savedReplyMessage.getProjectId());
+        
+        return projectMessageMapper.toResponseDtoWithSender(savedReplyMessage, senderUsername, senderProfileImageUrl, senderRole);
+    }
+    
+    @Override
     public ProjectMessageResponseDto editMessage(Long userId, Long messageId, ProjectMessageUpdateRequestDto request) {
         log.info("Editando mensaje {} por usuario {}", messageId, userId);
         

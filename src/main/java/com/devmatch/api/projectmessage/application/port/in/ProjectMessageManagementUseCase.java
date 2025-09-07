@@ -24,6 +24,15 @@ public interface ProjectMessageManagementUseCase {
     ProjectMessageResponseDto sendMessage(Long userId, ProjectMessageRequestDto request);
     
     /**
+     * Responde a un mensaje específico en un proyecto
+     * @param userId ID del usuario que responde
+     * @param replyToMessageId ID del mensaje al que se responde
+     * @param request DTO con los datos de la respuesta
+     * @return DTO con los datos del mensaje de respuesta enviado
+     */
+    ProjectMessageResponseDto replyToMessage(Long userId, Long replyToMessageId, ProjectMessageRequestDto request);
+    
+    /**
      * Edita el contenido de un mensaje existente
      * @param userId ID del usuario que edita el mensaje
      * @param messageId ID del mensaje a editar

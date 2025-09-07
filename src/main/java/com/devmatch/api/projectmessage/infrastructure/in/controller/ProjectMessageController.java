@@ -109,6 +109,25 @@ public class ProjectMessageController {
     }
     
     /**
+     * Responde a un mensaje específico en un proyecto
+     */
+    @PostMapping("/{projectId}/messages/{messageId}/reply")
+    public ResponseEntity<ProjectMessageResponseDto> replyToMessage(
+            @PathVariable Long projectId,
+            @PathVariable Long messageId,
+            @Valid @RequestBody ProjectMessageRequestDto request,
+            @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
+        
+        // Asegurar que el projectId del path coincida con el del request
+        request.setProjectId(projectId);
+        
+        ProjectMessageResponseDto response = projectMessageManagementUseCase.replyToMessage(
+            userPrincipal.getUserId(), messageId, request);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
      * Busca mensajes con criterios específicos
      */
     @PostMapping("/{projectId}/messages/search")
