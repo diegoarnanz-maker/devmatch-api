@@ -1,0 +1,440 @@
+{
+  "info": {
+    "name": "DevMatch API Collection",
+    "description": "Colección completa de endpoints de la API DevMatch",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Autenticación",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin@devmatch.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"nuevo@ejemplo.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"María\",\n  \"lastName\": \"García\",\n  \"profileType\": \"DEVELOPER\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "auth", "register"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👤 Usuarios",
+      "item": [
+        {
+          "name": "Obtener mi perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar mi perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Juan Carlos\",\n  \"lastName\": \"Pérez García\",\n  \"profileImageUrl\": \"https://example.com/nuevo-avatar.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏆 Logros",
+      "item": [
+        {
+          "name": "Obtener todos los logros",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/achievements?page=0&size=10&sort=title,asc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "achievements"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "title,asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener logro por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/achievements/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "achievements", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener mis logros",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/achievements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me", "achievements"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verificar si tengo un logro",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/achievements/FIRST_PROJECT/has",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me", "achievements", "FIRST_PROJECT", "has"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🚀 Proyectos",
+      "item": [
+        {
+          "name": "Obtener proyectos públicos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects?page=0&size=10&search=react",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "react"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear nuevo proyecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mi Nuevo Proyecto\",\n  \"description\": \"Descripción detallada del proyecto\",\n  \"visibility\": \"PUBLIC\",\n  \"technologies\": [\"React\", \"Node.js\", \"MongoDB\"],\n  \"tags\": [\"web\", \"javascript\", \"mongodb\"],\n  \"requirements\": \"Conocimientos en React y Node.js\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener proyecto por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💬 Mensajes de Proyecto",
+      "item": [
+        {
+          "name": "Obtener mensajes del proyecto",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/1/messages?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects", "1", "messages"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hola equipo, ¿cómo va el desarrollo?\",\n  \"messageType\": \"TEXT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/1/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects", "1", "messages"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Responder a mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Todo va bien, estamos avanzando con el frontend\",\n  \"messageType\": \"TEXT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/1/messages/5/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "projects", "1", "messages", "5", "reply"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔧 Administración",
+      "item": [
+        {
+          "name": "Obtener estadísticas del sistema",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener todos los usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear nuevo logro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"NEW_ACHIEVEMENT\",\n  \"title\": \"Nuevo Logro\",\n  \"description\": \"Descripción del nuevo logro\",\n  \"points\": 200,\n  \"type\": \"SOCIAL\",\n  \"iconUrl\": \"https://example.com/icons/new.png\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/achievements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "achievements"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

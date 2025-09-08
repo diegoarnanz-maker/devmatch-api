@@ -3,6 +3,12 @@ package com.devmatch.api.achievement.infrastructure.in.controller;
 import com.devmatch.api.achievement.application.dto.AdminAchievementRequestDto;
 import com.devmatch.api.achievement.application.dto.AchievementResponseDto;
 import com.devmatch.api.achievement.application.port.in.AdminAchievementUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +27,22 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/admin/achievements")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "admin-achievement-controller", description = "Endpoints administrativos para gestionar el catálogo de logros")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminAchievementController {
     
     private final AdminAchievementUseCase adminAchievementUseCase;
 
-    /**
-     * Obtiene todos los achievements (incluyendo inactivos y eliminados) con paginación
-     */
+    @Operation(summary = "Obtener todos los logros (Admin)", description = "Retorna TODOS los logros del sistema, incluyendo inactivos y eliminados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de logros obtenida exitosamente"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado"),
+        @ApiResponse(responseCode = "403", description = "Prohibido - Se requiere rol de administrador")
+    })
     @GetMapping
-    public ResponseEntity<Page<AchievementResponseDto>> getAllAchievements(Pageable pageable) {
+    public ResponseEntity<Page<AchievementResponseDto>> getAllAchievements(
+            @Parameter(description = "Parámetros de paginación y ordenación", example = "page=0&size=10&sort=createdAt,desc")
+            Pageable pageable) {
         Page<AchievementResponseDto> achievements = adminAchievementUseCase.getAllAchievementsPaginated(pageable);
         return ResponseEntity.ok(achievements);
     }
@@ -63,11 +76,16 @@ public class AdminAchievementController {
         return ResponseEntity.ok(achievements);
     }
     
-    /**
-     * Crea un nuevo achievement
-     */
+    @Operation(summary = "Crear nuevo logro", description = "Crea un nuevo logro en el sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Logro creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado"),
+        @ApiResponse(responseCode = "403", description = "Prohibido - Se requiere rol de administrador")
+    })
     @PostMapping
     public ResponseEntity<AchievementResponseDto> createAchievement(
+            @Parameter(description = "Datos del nuevo logro")
             @Valid @RequestBody AdminAchievementRequestDto request) {
         AchievementResponseDto achievement = adminAchievementUseCase.createAchievement(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(achievement);

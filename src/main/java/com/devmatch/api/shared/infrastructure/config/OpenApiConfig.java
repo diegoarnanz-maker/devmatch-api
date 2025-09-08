@@ -112,6 +112,7 @@ public class OpenApiConfig {
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT")
+                .name("Authorization")
                 .description("""
                         **Autenticación JWT**
                         
@@ -121,6 +122,8 @@ public class OpenApiConfig {
                         2. Copia el token del response
                         3. Haz clic en **Authorize** y pega el token
                         4. El token expira en 24 horas por defecto
+                        
+                        **Formato:** `Bearer <tu_token_aqui>`
                         """);
     }
 
