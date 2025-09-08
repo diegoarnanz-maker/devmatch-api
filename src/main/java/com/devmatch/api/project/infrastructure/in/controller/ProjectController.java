@@ -24,6 +24,12 @@ import com.devmatch.api.project.application.dto.ProjectMemberRoleRequestDto;
 import com.devmatch.api.project.application.port.in.ProjectManagementUseCase;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,40 +39,47 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
+@Tag(name = "project-controller", description = "Endpoints para gestión de proyectos y colaboración")
 public class ProjectController {
 
     private final ProjectManagementUseCase projectManagementUseCase;
 
     // ===== ENDPOINTS PÚBLICOS (sin autenticación) =====
 
-    /**
-     * Obtiene un proyecto público específico por su ID
-     * Accesible sin autenticación
-     */
+    @Operation(summary = "Obtener proyecto público", description = "Obtiene los detalles de un proyecto público por su ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Proyecto obtenido exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Proyecto no encontrado o no es público")
+    })
     @GetMapping("/public/{projectId}")
-    public ResponseEntity<ProjectResponseDto> getPublicProject(@PathVariable Long projectId) {
+    public ResponseEntity<ProjectResponseDto> getPublicProject(
+            @Parameter(description = "ID del proyecto", example = "1")
+            @PathVariable Long projectId) {
         ProjectResponseDto response = projectManagementUseCase.getPublicProjectById(projectId);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Obtiene todos los proyectos públicos
-     * Accesible sin autenticación
-     */
+    @Operation(summary = "Obtener proyectos públicos", description = "Retorna una lista paginada de todos los proyectos públicos")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de proyectos públicos obtenida exitosamente")
+    })
     @GetMapping("/public")
-    public ResponseEntity<Page<ProjectResponseDto>> getPublicProjects(Pageable pageable) {
+    public ResponseEntity<Page<ProjectResponseDto>> getPublicProjects(
+            @Parameter(description = "Parámetros de paginación y ordenación", example = "page=0&size=10&sort=createdAt,desc")
+            Pageable pageable) {
         Page<ProjectResponseDto> projects = projectManagementUseCase.getAllPublicProjects(pageable);
         return ResponseEntity.ok(projects);
     }
 
-    /**
-     * Busca y filtra proyectos públicos con criterios múltiples
-     * Accesible sin autenticación
-     * Permite filtrar por título, estado, tags, propietario, etc.
-     */
+    @Operation(summary = "Buscar proyectos públicos", description = "Busca y filtra proyectos públicos con criterios múltiples")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda completada exitosamente")
+    })
     @PostMapping("/public/search")
     public ResponseEntity<Page<ProjectResponseDto>> searchPublicProjects(
+            @Parameter(description = "Criterios de búsqueda y filtros")
             @RequestBody(required = false) ProjectPublicSearchRequestDto filter,
+            @Parameter(description = "Parámetros de paginación y ordenación", example = "page=0&size=10&sort=createdAt,desc")
             Pageable pageable) {
         
         // Si no se envía filtro, usar uno vacío para obtener todos los proyectos públicos
@@ -141,12 +154,16 @@ public class ProjectController {
 
     // ===== ENDPOINTS DE GESTIÓN DE PROYECTOS =====
 
-    /**
-     * Crea un nuevo proyecto
-     * Solo usuarios autenticados
-     */
+    @Operation(summary = "Crear nuevo proyecto", description = "Crea un nuevo proyecto en la plataforma")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Proyecto creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<ProjectResponseDto> createProject(
+            @Parameter(description = "Datos del nuevo proyecto")
             @RequestBody @Valid ProjectRequestDto request,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
@@ -154,13 +171,20 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Actualiza un proyecto existente
-     * Solo propietario del proyecto
-     */
+    @Operation(summary = "Actualizar proyecto", description = "Actualiza un proyecto existente (solo el propietario)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Proyecto actualizado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado"),
+        @ApiResponse(responseCode = "403", description = "Prohibido - Solo el propietario puede actualizar"),
+        @ApiResponse(responseCode = "404", description = "Proyecto no encontrado")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectResponseDto> updateProject(
+            @Parameter(description = "ID del proyecto a actualizar", example = "1")
             @PathVariable Long projectId,
+            @Parameter(description = "Datos actualizados del proyecto")
             @RequestBody @Valid ProjectRequestDto request,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         

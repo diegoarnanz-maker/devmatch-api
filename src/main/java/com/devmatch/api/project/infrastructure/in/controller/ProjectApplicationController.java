@@ -4,6 +4,12 @@ import com.devmatch.api.project.application.dto.ProjectApplicationRequestDto;
 import com.devmatch.api.project.application.dto.ProjectApplicationResponseDto;
 import com.devmatch.api.project.application.port.in.ProjectApplicationUseCase;
 import com.devmatch.api.security.infrastructure.out.adapter.UserPrincipalAdapter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,21 +27,25 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/project-applications")
 @RequiredArgsConstructor
+@Tag(name = "project-application-controller", description = "Endpoints para gestionar aplicaciones a proyectos")
+@SecurityRequirement(name = "bearerAuth")
 public class ProjectApplicationController {
 
     private final ProjectApplicationUseCase projectApplicationUseCase;
 
-    /**
-     * Permite a un usuario autenticado aplicar a un proyecto.
-     * 
-     * @param projectId ID del proyecto al que se quiere aplicar
-     * @param request DTO con el mensaje de motivación
-     * @param userPrincipal Usuario autenticado
-     * @return Respuesta HTTP 201 si la aplicación se creó exitosamente
-     */
+    @Operation(summary = "Aplicar a proyecto", description = "Permite a un usuario autenticado aplicar a un proyecto")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Aplicación enviada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado"),
+        @ApiResponse(responseCode = "404", description = "Proyecto no encontrado"),
+        @ApiResponse(responseCode = "409", description = "Ya has aplicado a este proyecto")
+    })
     @PostMapping("/apply/{projectId}")
     public ResponseEntity<Void> applyToProject(
+            @Parameter(description = "ID del proyecto al que se quiere aplicar", example = "1")
             @PathVariable Long projectId,
+            @Parameter(description = "Datos de la aplicación")
             @Valid @RequestBody ProjectApplicationRequestDto request,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
@@ -48,15 +58,16 @@ public class ProjectApplicationController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    /**
-     * Permite al owner de un proyecto ver todas las aplicaciones recibidas.
-     * 
-     * @param projectId ID del proyecto
-     * @param userPrincipal Usuario autenticado (debe ser el owner)
-     * @return Lista de aplicaciones al proyecto
-     */
+    @Operation(summary = "Obtener aplicaciones de proyecto", description = "Permite al owner de un proyecto ver todas las aplicaciones recibidas")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de aplicaciones obtenida exitosamente"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado"),
+        @ApiResponse(responseCode = "403", description = "Prohibido - Solo el owner puede ver las aplicaciones"),
+        @ApiResponse(responseCode = "404", description = "Proyecto no encontrado")
+    })
     @GetMapping("/project/{projectId}")
     public ResponseEntity<List<ProjectApplicationResponseDto>> getProjectApplications(
+            @Parameter(description = "ID del proyecto", example = "1")
             @PathVariable Long projectId,
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
@@ -66,12 +77,11 @@ public class ProjectApplicationController {
         return ResponseEntity.ok(applications);
     }
 
-    /**
-     * Permite a un usuario ver todas sus candidaturas a proyectos.
-     * 
-     * @param userPrincipal Usuario autenticado
-     * @return Lista de candidaturas del usuario
-     */
+    @Operation(summary = "Obtener mis aplicaciones", description = "Permite a un usuario ver todas sus candidaturas a proyectos")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de candidaturas obtenida exitosamente"),
+        @ApiResponse(responseCode = "401", description = "No autorizado - Token JWT inválido o expirado")
+    })
     @GetMapping("/applications/my")
     public ResponseEntity<List<ProjectApplicationResponseDto>> getMyApplications(
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
