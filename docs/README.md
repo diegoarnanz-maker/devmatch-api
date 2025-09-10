@@ -12,6 +12,16 @@ DevMatch es una plataforma colaborativa para desarrolladores que permite crear p
 - [**🚀 Proyectos**](./api/projects.md) - Gestión de proyectos y colaboración
 - [**🔧 Administración**](./api/admin.md) - Endpoints administrativos del sistema
 
+### 🏗️ Arquitectura del Sistema
+- [**🔐 Seguridad**](./architecture/security.md) - Autenticación JWT, autorización y configuración de seguridad
+- [**🔧 Componentes Compartidos**](./architecture/shared.md) - OpenAPI, manejo de excepciones y eventos de dominio
+
+### 🎯 Dominio del Negocio
+- [**🏆 Achievement**](./domain/achievement.md) - Sistema de logros y gamificación
+
+### 📚 Guías y Recursos
+- [**📖 Guía de Documentación**](./documentation-guide.md) - Estrategia híbrida de documentación
+
 ### 📊 Estado de Documentación OpenAPI
 **✅ Controladores Documentados (18/18):**
 - `auth-controller` - Autenticación y registro

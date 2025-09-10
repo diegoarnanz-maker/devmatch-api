@@ -4,7 +4,21 @@ import com.devmatch.api.achievement.domain.model.Achievement;
 
 /**
  * Servicio de dominio para la lógica de negocio relacionada con logros.
- * Contiene las reglas de negocio que no pertenecen a una sola entidad.
+ * 
+ * <p>Contiene las reglas de negocio complejas que no pertenecen a una sola entidad.
+ * Encapsula operaciones que requieren múltiples entidades o validaciones especiales.</p>
+ * 
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *   <li>Validación de desbloqueo de logros</li>
+ *   <li>Categorización y análisis de logros</li>
+ *   <li>Lógica de negocio compleja</li>
+ * </ul>
+ * 
+ * @see <a href="../../../../docs/domain/achievement.md">Documentación completa del dominio</a>
+ * @author DevMatch Team
+ * @version 1.0
+ * @since 2024
  */
 public class AchievementDomainService {
     
