@@ -7,8 +7,21 @@ import com.devmatch.api.shared.domain.model.BaseDomainEntity;
 
 /**
  * Entidad de dominio que representa un logro desbloqueado por un usuario.
- * Corresponde a la tabla user_achievements del DDL.
- * Esta entidad mantiene la relación entre un usuario y un logro específico.
+ * 
+ * <p>Mantiene la relación entre un usuario y un logro específico.
+ * Corresponde a la tabla user_achievements del DDL.</p>
+ * 
+ * <p>Características principales:</p>
+ * <ul>
+ *   <li>Relación usuario-logro</li>
+ *   <li>Timestamp de desbloqueo</li>
+ *   <li>Estado activo/inactivo</li>
+ * </ul>
+ * 
+ * @see <a href="../../../../docs/domain/achievement.md">Documentación completa del dominio</a>
+ * @author DevMatch Team
+ * @version 1.0
+ * @since 2024
  */
 public class UserAchievement extends BaseDomainEntity {
     

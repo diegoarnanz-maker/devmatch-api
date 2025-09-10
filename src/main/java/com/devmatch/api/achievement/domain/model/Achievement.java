@@ -12,8 +12,22 @@ import com.devmatch.api.shared.domain.model.BaseDomainEntity;
 
 /**
  * Entidad de dominio que representa un logro en la plataforma DevMatch.
- * Corresponde a la tabla achievement_catalog del DDL.
- * Un logro es una meta o hito que los usuarios pueden alcanzar.
+ * 
+ * <p>Un logro es una meta o hito que los usuarios pueden alcanzar.
+ * Corresponde a la tabla achievement_catalog del DDL.</p>
+ * 
+ * <p>Características principales:</p>
+ * <ul>
+ *   <li>Código único identificador</li>
+ *   <li>Sistema de puntos por desbloqueo</li>
+ *   <li>Categorización por tipo de actividad</li>
+ *   <li>Estado activo/inactivo</li>
+ * </ul>
+ * 
+ * @see <a href="../../../../docs/domain/achievement.md">Documentación completa del dominio</a>
+ * @author DevMatch Team
+ * @version 1.0
+ * @since 2024
  */
 public class Achievement extends BaseDomainEntity {
     
@@ -24,7 +38,16 @@ public class Achievement extends BaseDomainEntity {
     private final AchievementType type;
     private final AchievementIcon icon;
     
-    // Constructor para crear nuevo logro
+    /**
+     * Constructor para crear un nuevo logro.
+     * 
+     * @param code Código único identificador del logro
+     * @param title Título del logro
+     * @param description Descripción detallada del logro
+     * @param points Puntos que otorga el logro
+     * @param type Tipo/categoría del logro
+     * @param icon URL del icono del logro
+     */
     public Achievement(AchievementCode code, AchievementTitle title, AchievementDescription description,
                       AchievementPoints points, AchievementType type, AchievementIcon icon) {
         this.code = code;
@@ -113,6 +136,12 @@ public class Achievement extends BaseDomainEntity {
     }
     
     // Métodos de negocio
+    
+    /**
+     * Verifica si el logro es apto para principiantes.
+     * 
+     * @return true si es apto para principiantes, false en caso contrario
+     */
     public boolean isBeginnerFriendly() {
         return type.isBeginnerFriendly();
     }
@@ -177,6 +206,12 @@ public class Achievement extends BaseDomainEntity {
         return title.getValue() + " (" + points.getDisplayValue() + " pts)";
     }
     
+    /**
+     * Verifica si un usuario puede desbloquear este logro.
+     * 
+     * @param userId ID del usuario que intenta desbloquear
+     * @return true si puede desbloquearlo, false en caso contrario
+     */
     public boolean canBeUnlockedBy(Long userId) {
         // Lógica para determinar si un usuario puede desbloquear este logro
         // Por ejemplo, verificar requisitos previos, nivel del usuario, etc.
