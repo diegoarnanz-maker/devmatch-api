@@ -9,7 +9,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * DTO para respuestas de proyectos
+ * DTO de respuesta para proyectos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @NoArgsConstructor

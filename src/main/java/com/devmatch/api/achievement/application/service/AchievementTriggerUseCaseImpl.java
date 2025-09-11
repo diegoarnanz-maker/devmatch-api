@@ -66,6 +66,7 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
     
     @Override
     public List<AchievementUnlockedResponseDto> processAchievementTrigger(AchievementTriggerRequestDto request) {
+        // Inicializar criterios y procesar triggers
         if (achievementCriteriaMap == null) {
             achievementCriteriaMap = initializeAchievementCriteria();
         }
@@ -109,16 +110,19 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
     
     @Override
     public List<String> checkPotentialAchievements(Long userId, String triggerType) {
+        // Verificar logros potenciales para el tipo de trigger
         return getAchievementsForTriggerType(triggerType);
     }
     
     @Override
     public int getUserProgressTowardsAchievement(Long userId, String achievementType) {
+        // Calcular progreso del usuario hacia logros (implementación futura)
         return 50;
     }
     
     @Override
     public List<AchievementUnlockedResponseDto> forceAchievementCheck(Long userId) {
+        // Verificación forzada de todos los criterios
         if (achievementCriteriaMap == null) {
             achievementCriteriaMap = initializeAchievementCriteria();
         }

@@ -1,7 +1,10 @@
 package com.devmatch.api.project.domain.exception;
 
 /**
- * Excepción lanzada cuando no se encuentra un miembro del proyecto
+ * Excepción cuando no se encuentra miembro del proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectMemberNotFoundException extends RuntimeException {
     

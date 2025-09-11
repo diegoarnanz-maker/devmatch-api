@@ -3,8 +3,10 @@ package com.devmatch.api.project.domain.model.valueobject;
 import java.util.Objects;
 
 /**
- * Value Object que representa el mensaje de motivación en una aplicación a un proyecto.
- * Encapsula las reglas de validación para el mensaje de motivación.
+ * Mensaje de motivación en aplicación a proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class MotivationMessage {
     private final String value;

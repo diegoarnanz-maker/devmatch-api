@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * DTO para la respuesta de una aplicación a un proyecto.
+ * DTO de respuesta para aplicación a proyecto.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @Builder

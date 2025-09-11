@@ -44,8 +44,6 @@ public class ProjectController {
 
     private final ProjectManagementUseCase projectManagementUseCase;
 
-    // ===== ENDPOINTS PÚBLICOS (sin autenticación) =====
-
     @Operation(summary = "Obtener proyecto público", description = "Obtiene los detalles de un proyecto público por su ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Proyecto obtenido exitosamente"),
@@ -90,8 +88,6 @@ public class ProjectController {
         Page<ProjectResponseDto> projects = projectManagementUseCase.searchPublicProjects(filter, pageable);
         return ResponseEntity.ok(projects);
     }
-
-    // ===== ENDPOINTS DE CONSULTA (con autenticación) =====
 
     /**
      * Obtiene un proyecto específico por su ID
@@ -151,8 +147,6 @@ public class ProjectController {
         );
         return ResponseEntity.ok(projects);
     }
-
-    // ===== ENDPOINTS DE GESTIÓN DE PROYECTOS =====
 
     @Operation(summary = "Crear nuevo proyecto", description = "Crea un nuevo proyecto en la plataforma")
     @ApiResponses(value = {
@@ -259,8 +253,6 @@ public class ProjectController {
         return ResponseEntity.ok(response);
     }
 
-    // ===== ENDPOINTS DE GESTIÓN DE MIEMBROS =====
-
     /**
      * Obtiene los miembros de un proyecto
      * Solo propietario del proyecto
@@ -303,8 +295,6 @@ public class ProjectController {
                 projectId, userId, request.getRole(), userPrincipal.getUserId());
         return ResponseEntity.ok(updatedMember);
     }
-
-    // ===== ENDPOINTS DE GESTIÓN DE TAGS =====
 
     /**
      * Agrega tags a un proyecto

@@ -57,6 +57,7 @@ public class AchievementManagementUseCaseImpl implements AchievementManagementUs
     
     @Override
     public AchievementResponseDto getAchievementById(Long id) {
+        // Obtener logro por ID
         Achievement achievement = achievementRepository.findById(id)
             .orElseThrow(() -> new AchievementNotFoundException(id));
         
@@ -65,6 +66,7 @@ public class AchievementManagementUseCaseImpl implements AchievementManagementUs
     
     @Override
     public AchievementResponseDto getAchievementByCode(String code) {
+        // Obtener logro por código
         Achievement achievement = achievementRepository.findByCode(code)
             .orElseThrow(() -> new AchievementNotFoundException(code));
         
@@ -73,6 +75,7 @@ public class AchievementManagementUseCaseImpl implements AchievementManagementUs
     
     @Override
     public List<AchievementResponseDto> getAllActiveAchievements() {
+        // Obtener todos los logros activos
         List<Achievement> achievements = achievementRepository.findAllActive();
         return AchievementMapper.toResponseDtoList(achievements);
     }
@@ -85,6 +88,7 @@ public class AchievementManagementUseCaseImpl implements AchievementManagementUs
     
     @Override
     public List<AchievementResponseDto> getAchievementsByType(String type) {
+        // Obtener logros por tipo
         List<Achievement> achievements = achievementRepository.findByType(type);
         return AchievementMapper.toResponseDtoList(achievements);
     }

@@ -3,8 +3,8 @@ package com.devmatch.api.project.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando un usuario envía una solicitud para unirse a un proyecto.
- * 
+ * Evento cuando se envía aplicación a proyecto.
+ *
  * @author diegoarnanz-maker
  * @since 2025
  */

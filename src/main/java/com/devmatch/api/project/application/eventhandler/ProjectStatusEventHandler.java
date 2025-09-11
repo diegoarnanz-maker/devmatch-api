@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Event handler para manejar cambios de estado de proyectos.
- * Escucha eventos relacionados con miembros del proyecto y actualiza el estado según corresponda.
+ * Manejador de eventos de estado de proyectos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Slf4j
 @Component

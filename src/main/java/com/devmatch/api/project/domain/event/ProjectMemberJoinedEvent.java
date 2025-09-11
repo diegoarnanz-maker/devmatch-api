@@ -3,14 +3,16 @@ package com.devmatch.api.project.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando un nuevo miembro se une al proyecto.
- * Contiene la información básica del nuevo miembro y del proyecto.
+ * Evento cuando nuevo miembro se une al proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectMemberJoinedEvent extends BaseDomainEvent {
-    private final Long newMemberId;   // ID del nuevo miembro
-    private final Long projectId;     // ID del proyecto
-    private final String projectName; // Nombre del proyecto
-    private final String newMemberRole; // Rol del nuevo miembro
+    private final Long newMemberId;
+    private final Long projectId;
+    private final String projectName;
+    private final String newMemberRole;
 
     public ProjectMemberJoinedEvent(Long newMemberId, Long projectId, String projectName, String newMemberRole) {
         this.newMemberId = newMemberId;

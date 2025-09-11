@@ -15,8 +15,6 @@ import java.util.List;
  */
 public interface AdminTagUseCase {
 
-    // ===== GESTIÓN DE TAGS (CRUD) =====
-
     /**
      * Obtiene todos los tags disponibles en el sistema (incluyendo eliminados), paginados.
      *
@@ -78,8 +76,6 @@ public interface AdminTagUseCase {
      * @return Tag reactivado
      */
     AdminTagResponseDto reactivateTag(Long id);
-
-    // ===== GESTIÓN DE RELACIÓN USUARIO-TAG =====
 
     /**
      * Obtiene los tags de un usuario específico.

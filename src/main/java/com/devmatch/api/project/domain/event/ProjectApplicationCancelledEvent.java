@@ -3,14 +3,16 @@ package com.devmatch.api.project.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando un usuario cancela su solicitud para unirse a un proyecto.
- * Contiene la información básica de la solicitud cancelada.
+ * Evento cuando se cancela aplicación a proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectApplicationCancelledEvent extends BaseDomainEvent {
-    private final Long applicantId;   // ID del usuario que canceló la solicitud
-    private final Long projectId;     // ID del proyecto
-    private final String projectName; // Nombre del proyecto
-    private final Long ownerId;       // ID del propietario del proyecto
+    private final Long applicantId;
+    private final Long projectId;
+    private final String projectName;
+    private final Long ownerId;
 
     public ProjectApplicationCancelledEvent(Long applicantId, Long projectId, String projectName, Long ownerId) {
         this.applicantId = applicantId;

@@ -51,6 +51,7 @@ public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
     @Override
     public List<UserAchievementResponseDto> getUserAchievements(Long userId) {
+        // Obtener logros del usuario
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
         return userAchievements.stream()
@@ -64,6 +65,7 @@ public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
     @Override
     public UserAchievementResponseDto getUserAchievement(Long userId, String achievementCode) {
+        // Obtener logro específico del usuario
         UserAchievement userAchievement = userAchievementRepository
             .findByUserIdAndAchievementCode(userId, achievementCode)
             .orElseThrow(() -> new UserAchievementNotFoundException(userId, achievementCode));
@@ -76,11 +78,13 @@ public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
     @Override
     public boolean hasUserAchievement(Long userId, String achievementCode) {
+        // Verificar si el usuario tiene un logro específico
         return userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievementCode);
     }
     
     @Override
     public int getUserTotalPoints(Long userId) {
+        // Calcular puntos totales del usuario
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
         int totalPoints = 0;

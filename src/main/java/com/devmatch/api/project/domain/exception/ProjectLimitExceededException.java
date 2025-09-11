@@ -1,7 +1,10 @@
 package com.devmatch.api.project.domain.exception;
 
 /**
- * Excepción lanzada cuando un usuario intenta crear más proyectos de los permitidos
+ * Excepción cuando se excede el límite de proyectos por usuario.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectLimitExceededException extends RuntimeException {
     

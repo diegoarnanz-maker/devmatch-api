@@ -3,8 +3,10 @@ package com.devmatch.api.project.domain.model.valueobject;
 import java.util.Objects;
 
 /**
- * Value Object que representa la duración estimada de un proyecto en semanas.
- * Encapsula las reglas de validación para la duración del proyecto.
+ * Duración estimada de proyecto en semanas.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectDuration {
     private final int weeks;

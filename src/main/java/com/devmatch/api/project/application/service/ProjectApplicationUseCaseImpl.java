@@ -18,7 +18,6 @@ import com.devmatch.api.project.domain.model.ProjectApplication;
 import com.devmatch.api.project.domain.model.valueobject.MotivationMessage;
 import com.devmatch.api.user.application.port.out.UserRepositoryPort;
 import com.devmatch.api.user.domain.exception.UserNotFoundException;
-import com.devmatch.api.user.domain.model.User;
 import com.devmatch.api.project.domain.event.ProjectApplicationSubmittedEvent;
 import com.devmatch.api.project.domain.event.ProjectApplicationAcceptedEvent;
 import com.devmatch.api.project.domain.event.ProjectApplicationRejectedEvent;
@@ -28,6 +27,43 @@ import com.devmatch.api.shared.application.port.out.DomainEventPublisher;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Implementación del caso de uso para gestión de aplicaciones a proyectos.
+ * 
+ * <p>Este servicio gestiona todo el ciclo de vida de las aplicaciones de usuarios
+ * a proyectos, desde la solicitud inicial hasta la resolución final por parte
+ * del propietario del proyecto.</p>
+ * 
+ * <h3>Responsabilidades:</h3>
+ * <ul>
+ *   <li>Procesar solicitudes de aplicación a proyectos con validaciones.</li>
+ *   <li>Gestionar el flujo de aprobación/rechazo de aplicaciones.</li>
+ *   <li>Permitir la cancelación de aplicaciones por parte del solicitante.</li>
+ *   <li>Proporcionar consultas de aplicaciones por proyecto y usuario.</li>
+ *   <li>Integrar automáticamente usuarios aceptados como miembros del proyecto.</li>
+ * </ul>
+ * 
+ * <h3>Flujo de trabajo:</h3>
+ * <ol>
+ *   <li>Los usuarios solicitan unirse a proyectos con mensajes de motivación.</li>
+ *   <li>Se validan las condiciones del proyecto y el estado del usuario.</li>
+ *   <li>Los propietarios revisan y deciden sobre las aplicaciones.</li>
+ *   <li>Las aplicaciones aceptadas resultan en la integración del usuario al equipo.</li>
+ *   <li>Se publican eventos de dominio para notificar cambios de estado.</li>
+ * </ol>
+ * 
+ * <h3>Consideraciones de negocio:</h3>
+ * <ul>
+ *   <li>Todas las operaciones están transaccionalmente gestionadas.</li>
+ *   <li>Se aplican validaciones estrictas de permisos y estados.</li>
+ *   <li>Se previene la aplicación duplicada del mismo usuario.</li>
+ *   <li>Se integran automáticamente usuarios aceptados como miembros.</li>
+ *   <li>Se publican eventos para notificar cambios a otros módulos.</li>
+ * </ul>
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -42,114 +78,102 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
 
     @Override
     public void applyToProject(Long projectId, Long userId, String motivationMessage) {
-        // 1. Validar que el proyecto existe
+        // Validar proyecto y usuario
         Project project = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
         
-        // 2. Validar que el usuario existe
-        User user = userRepositoryPort.findById(userId)
+        userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
 
-        // 3. Validar que el proyecto está abierto para aplicaciones
+        // Validar condiciones del proyecto
         if (!project.isOpenForApplications()) {
             throw new ProjectOperationNotAllowedException(
                     "El proyecto con ID " + projectId + " no está abierto para aplicaciones");
         }
 
-        // 4. Validar que el proyecto no está lleno
         int currentTeamSize = projectMemberRepositoryPort.countActiveMembersByProjectId(projectId);
         if (project.isFull(currentTeamSize)) {
             throw new ProjectOperationNotAllowedException(
                     "El proyecto con ID " + projectId + " ya está lleno");
         }
 
-        // 5. Validar que el usuario no es el propietario
         if (project.isOwner(userId)) {
             throw new ProjectOperationNotAllowedException(
                     "El usuario con ID " + userId + " no puede aplicar al proyecto");
         }
 
-        // 6. Validar que el usuario no ha aplicado previamente
         if (projectApplicationRepositoryPort.existsByProjectIdAndUserId(projectId, userId)) {
             throw new ProjectOperationNotAllowedException(
                     "El usuario con ID " + userId + " ya ha aplicado al proyecto con ID " + projectId);
         }
 
-        // 7. Crear la aplicación con validación del mensaje
+        // Crear y guardar aplicación
         MotivationMessage validatedMessage = new MotivationMessage(motivationMessage);
         ProjectApplication application = new ProjectApplication(projectId, userId, validatedMessage);
         
-        // 8. Guardar la aplicación
         projectApplicationRepositoryPort.save(application);
         
-        // 9. Publicar evento de solicitud enviada
+        // Notificar evento
         domainEventPublisher.publish(new ProjectApplicationSubmittedEvent(
-            project.getOwnerId(),     // Propietario (para referencia)
-            projectId,                // ID del proyecto
-            project.getTitle().getValue(), // Nombre del proyecto
-            userId                    // Usuario que solicita (recibe confirmación)
+            project.getOwnerId(),
+            projectId,
+            project.getTitle().getValue(),
+            userId
         ));
     }
 
     @Override
     public List<ProjectApplicationResponseDto> getProjectApplications(Long projectId, Long ownerId) {
-        // 1. Validar que el proyecto existe
+        // Validar proyecto y permisos
         Project project = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
         
-        // 2. Validar que el usuario es el propietario del proyecto
         if (!project.isOwner(ownerId)) {
             throw new ProjectOperationNotAllowedException(
                     "El usuario con ID " + ownerId + " no es el propietario del proyecto con ID " + projectId);
         }
         
-        // 3. Obtener todas las aplicaciones del proyecto
+        // Obtener y marcar aplicaciones como vistas
         List<ProjectApplication> applications = projectApplicationRepositoryPort.findByProjectId(projectId);
         
-        // 4. Marcar las aplicaciones como vistas por el owner y guardarlas
         List<ProjectApplication> updatedApplications = applications.stream()
                 .map(application -> {
                     if (application.isSeenByOwner()) {
-                        // Si ya está marcada como vista, no la modificamos
                         return application;
                     }
-                    // Marcar como vista y guardar
                     ProjectApplication markedApplication = application.markAsSeen();
                     return projectApplicationRepositoryPort.save(markedApplication);
                 })
                 .toList();
         
-        // 5. Convertir a DTOs y retornar
+        // Convertir a DTOs
         return projectApplicationMapper.toResponseDtoList(updatedApplications);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ProjectApplicationResponseDto> getUserApplications(Long userId) {
-        // 1. Validar que el usuario existe
+        // Validar usuario y obtener aplicaciones
         userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
         
-        // 2. Obtener todas las aplicaciones del usuario
         List<ProjectApplication> applications = projectApplicationRepositoryPort.findByUserId(userId);
         
-        // 3. Convertir a DTOs y retornar
+        // Convertir a DTOs
         return projectApplicationMapper.toResponseDtoList(applications);
     }
 
     @Override
     public void acceptApplication(Long projectId, Long applicationId, Long ownerId) {
-        // 1. Validar que el proyecto existe
+        // Validar proyecto, permisos y aplicación
         Project project = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
         
-        // 2. Validar que el usuario es el propietario del proyecto
         if (!project.isOwner(ownerId)) {
             throw new ProjectOperationNotAllowedException(
                     "El usuario con ID " + ownerId + " no es el propietario del proyecto con ID " + projectId);
         }
         
-        // 3. Validar que la aplicación existe y pertenece al proyecto
         ProjectApplication application = projectApplicationRepositoryPort.findById(applicationId)
                 .orElseThrow(() -> new ProjectOperationNotAllowedException(
                         "Aplicación con ID " + applicationId + " no encontrada"));
@@ -159,57 +183,50 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
                     "La aplicación con ID " + applicationId + " no pertenece al proyecto con ID " + projectId);
         }
         
-        // 4. Validar que la aplicación está pendiente
         if (!application.isPending()) {
             throw new ProjectOperationNotAllowedException(
                     "La aplicación con ID " + applicationId + " ya no está pendiente");
         }
         
-        // 5. Validar que el proyecto no está lleno
         int currentTeamSize = projectMemberRepositoryPort.countActiveMembersByProjectId(projectId);
         if (project.isFull(currentTeamSize)) {
             throw new ProjectOperationNotAllowedException(
                     "El proyecto con ID " + projectId + " ya está lleno");
         }
         
-        // 6. Aceptar la aplicación
+        // Aceptar aplicación y agregar como miembro
         ProjectApplication acceptedApplication = application.accept();
         
-        // 7. Guardar la aplicación actualizada
         projectApplicationRepositoryPort.save(acceptedApplication);
         
-        // 8. Agregar al usuario como miembro del proyecto
         projectMemberRepositoryPort.addMember(projectId, acceptedApplication.getUserId(), "DEVELOPER", false);
         
-        // 9. Publicar evento de solicitud aceptada
+        // Notificar eventos
         domainEventPublisher.publish(new ProjectApplicationAcceptedEvent(
-            acceptedApplication.getUserId(), // Usuario que fue aceptado
-            projectId,                      // ID del proyecto
-            project.getTitle().getValue()   // Nombre del proyecto
+            acceptedApplication.getUserId(),
+            projectId,
+            project.getTitle().getValue()
         ));
         
-        // 10. Publicar evento de nuevo miembro unido
         domainEventPublisher.publish(new ProjectMemberJoinedEvent(
-            acceptedApplication.getUserId(), // ID del nuevo miembro
-            projectId,                      // ID del proyecto
-            project.getTitle().getValue(),  // Nombre del proyecto
-            "DEVELOPER"                     // Rol del nuevo miembro
+            acceptedApplication.getUserId(),
+            projectId,
+            project.getTitle().getValue(),
+            "DEVELOPER"
         ));
     }
 
     @Override
     public void rejectApplication(Long projectId, Long applicationId, Long ownerId) {
-        // 1. Validar que el proyecto existe
+        // Validar proyecto, permisos y aplicación
         Project project = projectRepositoryPort.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
         
-        // 2. Validar que el usuario es el propietario del proyecto
         if (!project.isOwner(ownerId)) {
             throw new ProjectOperationNotAllowedException(
                     "El usuario con ID " + ownerId + " no es el propietario del proyecto con ID " + projectId);
         }
         
-        // 3. Validar que la aplicación existe y pertenece al proyecto
         ProjectApplication application = projectApplicationRepositoryPort.findById(applicationId)
                 .orElseThrow(() -> new ProjectOperationNotAllowedException(
                         "Aplicación con ID " + applicationId + " no encontrada"));
@@ -219,61 +236,56 @@ public class ProjectApplicationUseCaseImpl implements ProjectApplicationUseCase 
                     "La aplicación con ID " + applicationId + " no pertenece al proyecto con ID " + projectId);
         }
         
-        // 4. Validar que la aplicación está pendiente
         if (!application.isPending()) {
             throw new ProjectOperationNotAllowedException(
                     "La aplicación con ID " + applicationId + " ya no está pendiente");
         }
         
-        // 5. Rechazar la aplicación
+        // Rechazar aplicación y notificar
         ProjectApplication rejectedApplication = application.reject();
         
-        // 6. Guardar la aplicación actualizada
         projectApplicationRepositoryPort.save(rejectedApplication);
         
-        // 7. Publicar evento de solicitud rechazada
+        // Notificar evento
         domainEventPublisher.publish(new ProjectApplicationRejectedEvent(
-            rejectedApplication.getUserId(), // Usuario que fue rechazado
-            projectId,                      // ID del proyecto
-            project.getTitle().getValue()   // Nombre del proyecto
+            rejectedApplication.getUserId(),
+            projectId,
+            project.getTitle().getValue()
         ));
     }
 
     @Override
     public void cancelApplication(Long applicationId, Long userId) {
-        // 1. Validar que la aplicación existe
+        // Validar aplicación y permisos
         ProjectApplication application = projectApplicationRepositoryPort.findById(applicationId)
                 .orElseThrow(() -> new ProjectOperationNotAllowedException(
                         "Aplicación con ID " + applicationId + " no encontrada"));
         
-        // 2. Validar que el usuario es el que aplicó
         if (!application.getUserId().equals(userId)) {
             throw new ProjectOperationNotAllowedException(
                     "El usuario con ID " + userId + " no puede cancelar la aplicación con ID " + applicationId);
         }
         
-        // 3. Validar que la aplicación puede ser cancelada
         if (!application.canBeCancelled()) {
             throw new ProjectOperationNotAllowedException(
                     "La aplicación con ID " + applicationId + " no puede ser cancelada");
         }
         
-        // 4. Cancelar la aplicación
+        // Cancelar aplicación y notificar
         ProjectApplication cancelledApplication = application.cancel();
         
-        // 5. Guardar la aplicación actualizada
         projectApplicationRepositoryPort.save(cancelledApplication);
         
-        // 6. Obtener información del proyecto para el evento
+        // Obtener proyecto para evento
         Project project = projectRepositoryPort.findById(application.getProjectId())
                 .orElseThrow(() -> new ProjectNotFoundException(application.getProjectId()));
         
-        // 7. Publicar evento de aplicación cancelada
+        // Notificar evento
         domainEventPublisher.publish(new ProjectApplicationCancelledEvent(
-            cancelledApplication.getUserId(), // Usuario que canceló
-            application.getProjectId(),       // ID del proyecto
-            project.getTitle().getValue(),    // Nombre del proyecto
-            project.getOwnerId()             // ID del propietario
+            cancelledApplication.getUserId(),
+            application.getProjectId(),
+            project.getTitle().getValue(),
+            project.getOwnerId()
         ));
     }
 

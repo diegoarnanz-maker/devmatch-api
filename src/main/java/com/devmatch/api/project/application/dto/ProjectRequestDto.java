@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * DTO para solicitudes de creación y actualización de proyectos
+ * DTO de solicitud para proyectos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @NoArgsConstructor
