@@ -1,7 +1,10 @@
 package com.devmatch.api.project.domain.exception;
 
 /**
- * Excepción lanzada cuando no se encuentra una aplicación a proyecto
+ * Excepción cuando no se encuentra aplicación a proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectApplicationNotFoundException extends RuntimeException {
     

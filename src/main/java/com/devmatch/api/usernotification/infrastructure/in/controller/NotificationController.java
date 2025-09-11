@@ -38,8 +38,6 @@ public class NotificationController {
     private final NotificationManagementUseCase notificationManagementUseCase;
     private final NotificationQueryUseCase notificationQueryUseCase;
 
-    // ==================== ENDPOINTS INTERNOS (SISTEMA) ====================
-
     @Operation(summary = "Crear notificación de aplicación a proyecto (Interno)", description = "Crea una notificación de aplicación a proyecto (llamada interna del sistema)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Notificación creada exitosamente"),
@@ -187,8 +185,6 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // ==================== ENDPOINTS DE USUARIO (PROTEGIDOS) ====================
-
     @Operation(summary = "Obtener mis notificaciones", description = "Obtiene las notificaciones del usuario autenticado con paginación")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notificaciones obtenidas exitosamente"),
@@ -270,8 +266,6 @@ public class NotificationController {
     }
 
 
-
-    // ==================== ENDPOINTS DE GESTIÓN DE USUARIO ====================
 
     @Operation(summary = "Obtener notificación por ID", description = "Obtiene una notificación específica del usuario autenticado")
     @ApiResponses(value = {

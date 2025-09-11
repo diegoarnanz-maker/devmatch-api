@@ -3,15 +3,16 @@ package com.devmatch.api.project.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando una solicitud para unirse a un proyecto expira automáticamente
- * después de 7 días sin respuesta del propietario del proyecto.
- * Contiene la información básica de la solicitud expirada.
+ * Evento cuando expira aplicación a proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectApplicationExpiredEvent extends BaseDomainEvent {
-    private final Long applicantId;   // ID del usuario que aplicó
-    private final Long projectId;     // ID del proyecto
-    private final String projectName; // Nombre del proyecto
-    private final Long ownerId;       // ID del propietario del proyecto
+    private final Long applicantId;
+    private final Long projectId;
+    private final String projectName;
+    private final Long ownerId;
 
     public ProjectApplicationExpiredEvent(Long applicantId, Long projectId, String projectName, Long ownerId) {
         this.applicantId = applicantId;

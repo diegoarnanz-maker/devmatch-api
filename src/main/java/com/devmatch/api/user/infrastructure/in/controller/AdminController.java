@@ -123,8 +123,6 @@ public class AdminController {
         return ResponseEntity.ok(deletedUser);
     }
 
-    // ===== ENDPOINTS DE GESTIÓN DE TIPOS DE PERFIL =====
-
     @Operation(summary = "Obtener todos los tipos de perfil (Admin)", description = "Obtiene todos los tipos de perfil disponibles")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de tipos de perfil obtenida exitosamente"),

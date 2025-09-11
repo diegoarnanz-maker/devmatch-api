@@ -4,8 +4,10 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * DTO para filtrar proyectos públicos.
- * Todos los campos son opcionales, permitiendo filtros flexibles.
+ * DTO de solicitud para búsqueda de proyectos públicos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 public class ProjectPublicSearchRequestDto {

@@ -64,7 +64,7 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public List<UserAchievementResponseDto> getUserAchievements(Long userId) {
-        
+        // Obtener logros del usuario
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
         return userAchievements.stream()
@@ -78,7 +78,7 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public UserAchievementResponseDto assignAchievement(Long userId, AdminUserAchievementRequestDto request) {
-        
+        // Validar logro y crear asignación
         Achievement achievement = achievementRepository.findById(request.getAchievementId())
             .orElseThrow(() -> new AchievementNotFoundException(request.getAchievementId()));
         
@@ -98,7 +98,7 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public void removeAchievement(Long userId, Long achievementId) {
-        
+        // Buscar y eliminar logro del usuario
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -111,7 +111,7 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public List<UserAchievementResponseDto> forceAchievementCheck(Long userId) {
-        
+        // Verificación forzada de logros (implementación futura)
         return List.of();
     }
     
@@ -125,6 +125,7 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public int getUserTotalPoints(Long userId) {
+        // Calcular puntos totales del usuario
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
         int totalPoints = 0;

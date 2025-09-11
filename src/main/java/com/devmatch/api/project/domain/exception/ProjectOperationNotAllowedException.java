@@ -1,7 +1,10 @@
 package com.devmatch.api.project.domain.exception;
 
 /**
- * Excepción lanzada cuando se intenta realizar una operación no permitida en un proyecto
+ * Excepción cuando operación no permitida en proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectOperationNotAllowedException extends RuntimeException {
     

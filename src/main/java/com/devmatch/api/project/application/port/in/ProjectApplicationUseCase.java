@@ -3,6 +3,12 @@ package com.devmatch.api.project.application.port.in;
 import com.devmatch.api.project.application.dto.ProjectApplicationResponseDto;
 import java.util.List;
 
+/**
+ * Puerto de entrada para gestión de aplicaciones a proyectos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
+ */
 public interface ProjectApplicationUseCase {
 
     void applyToProject(Long projectId, Long userId, String motivationMessage);

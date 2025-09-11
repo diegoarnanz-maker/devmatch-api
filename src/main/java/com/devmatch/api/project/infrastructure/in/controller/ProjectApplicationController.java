@@ -93,12 +93,7 @@ public class ProjectApplicationController {
     }
 
     /**
-     * Permite al owner de un proyecto aceptar una aplicación específica.
-     * 
-     * @param projectId ID del proyecto
-     * @param applicationId ID de la aplicación a aceptar
-     * @param userPrincipal Usuario autenticado (debe ser el owner)
-     * @return Respuesta HTTP 200 si la aplicación se aceptó exitosamente
+     * Permite al owner de un proyecto aceptar una aplicación específica
      */
     @PutMapping("/{projectId}/applications/{applicationId}/accept")
     public ResponseEntity<Void> acceptApplication(
@@ -112,12 +107,7 @@ public class ProjectApplicationController {
     }
 
     /**
-     * Permite al owner de un proyecto rechazar una aplicación específica.
-     * 
-     * @param projectId ID del proyecto
-     * @param applicationId ID de la aplicación a rechazar
-     * @param userPrincipal Usuario autenticado (debe ser el owner)
-     * @return Respuesta HTTP 200 si la aplicación se rechazó exitosamente
+     * Permite al owner de un proyecto rechazar una aplicación específica
      */
     @PutMapping("/{projectId}/applications/{applicationId}/reject")
     public ResponseEntity<Void> rejectApplication(
@@ -131,12 +121,7 @@ public class ProjectApplicationController {
     }
 
     /**
-     * Permite a un usuario cancelar su propia aplicación a un proyecto.
-     * Solo se puede cancelar si la aplicación está pendiente.
-     * 
-     * @param applicationId ID de la aplicación a cancelar
-     * @param userPrincipal Usuario autenticado (debe ser el que aplicó)
-     * @return Respuesta HTTP 200 si la aplicación se canceló exitosamente
+     * Permite a un usuario cancelar su propia aplicación a un proyecto
      */
     @DeleteMapping("/applications/{applicationId}/cancel")
     public ResponseEntity<Void> cancelApplication(

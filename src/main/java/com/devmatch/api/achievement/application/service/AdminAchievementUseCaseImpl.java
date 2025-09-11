@@ -62,7 +62,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto createAchievement(AdminAchievementRequestDto request) {
-        
+        // Crear nuevo logro
         Achievement achievement = new Achievement(
             new com.devmatch.api.achievement.domain.model.valueobject.AchievementCode(request.getCode()),
             new com.devmatch.api.achievement.domain.model.valueobject.AchievementTitle(request.getTitle()),
@@ -79,7 +79,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto updateAchievement(Long achievementId, AdminAchievementRequestDto request) {
-        
+        // Buscar y actualizar logro existente
         Achievement existingAchievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -103,7 +103,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public void deleteAchievement(Long achievementId) {
-        
+        // Soft delete del logro
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -127,7 +127,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto toggleAchievementStatus(Long achievementId) {
-        
+        // Cambiar estado activo/inactivo del logro
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -152,6 +152,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto getAchievementById(Long achievementId) {
+        // Obtener logro por ID
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -197,6 +198,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto getAchievementByCode(String code) {
+        // Obtener logro por código
         Achievement achievement = achievementRepository.findByCode(code)
             .orElseThrow(() -> new AchievementNotFoundException(code));
         

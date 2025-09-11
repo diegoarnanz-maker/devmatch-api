@@ -6,7 +6,10 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 /**
- * DTO para gestionar tags de un proyecto
+ * DTO de solicitud para gestión de tags de proyecto.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @NoArgsConstructor

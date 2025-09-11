@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Mapper para convertir entre entidades de dominio y DTOs de aplicaciones de proyectos
+ * Mapper para convertir entre entidades de dominio y DTOs.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Component
 @RequiredArgsConstructor

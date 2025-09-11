@@ -8,7 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para solicitar el cambio de estado de un proyecto
+ * DTO de solicitud para cambio de estado de proyecto.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @NoArgsConstructor

@@ -12,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 /**
- * Caso de uso para la gestión de proyectos (CRUD y operaciones de negocio)
- * Permite a usuarios crear, actualizar, eliminar y gestionar sus proyectos
+ * Puerto de entrada para gestión de proyectos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public interface ProjectManagementUseCase {
 

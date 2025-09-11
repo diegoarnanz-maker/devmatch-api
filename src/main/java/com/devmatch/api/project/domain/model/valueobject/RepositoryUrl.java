@@ -5,8 +5,10 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
- * Value Object que representa la URL de un repositorio.
- * Encapsula las reglas de validación para URLs de repositorios (principalmente GitHub).
+ * URL de repositorio de código.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class RepositoryUrl {
     private final String value;

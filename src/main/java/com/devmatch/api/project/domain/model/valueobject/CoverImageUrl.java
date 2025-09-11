@@ -5,8 +5,10 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
- * Value Object que representa la URL de la imagen de portada de un proyecto.
- * Encapsula las reglas de validación para URLs de imágenes.
+ * URL de imagen de portada de proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class CoverImageUrl {
     private final String value;

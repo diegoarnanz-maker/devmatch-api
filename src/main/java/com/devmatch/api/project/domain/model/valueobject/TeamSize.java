@@ -3,8 +3,10 @@ package com.devmatch.api.project.domain.model.valueobject;
 import java.util.Objects;
 
 /**
- * Value Object que representa el tamaño del equipo de un proyecto.
- * Encapsula las reglas de validación para el número máximo de miembros.
+ * Tamaño máximo del equipo de proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class TeamSize {
     private final int value;

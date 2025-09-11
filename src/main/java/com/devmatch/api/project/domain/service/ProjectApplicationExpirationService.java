@@ -13,8 +13,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Servicio de dominio que maneja la expiración automática de aplicaciones a proyectos.
- * Se ejecuta periódicamente para revisar aplicaciones que han estado pendientes por más de 7 días.
+ * Servicio de dominio para expiración automática de aplicaciones a proyectos.
+ * 
+ * <p>Maneja la lógica de negocio para expirar aplicaciones pendientes
+ * que han superado el tiempo límite establecido.</p>
+ * 
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *   <li>Expiración automática de aplicaciones vencidas</li>
+ *   <li>Notificación de eventos de expiración</li>
+ *   <li>Validación de estados de aplicación</li>
+ * </ul>
+ * 
+ * @see <a href="../../../../docs/domain/project.md">Documentación completa del dominio</a>
+ * @author diegoarnanz-maker
+ * @version 1.0
+ * @since 2025
  */
 @Slf4j
 @Service
@@ -27,33 +41,25 @@ public class ProjectApplicationExpirationService {
     private static final int EXPIRATION_DAYS = 7;
 
     /**
-     * Tarea programada que se ejecuta cada día para revisar aplicaciones vencidas.
-     * Busca aplicaciones en estado PENDING que tienen más de 7 días sin respuesta.
+     * Verifica y expira aplicaciones vencidas automáticamente.
      */
     @Scheduled(cron = "0 0 2 * * ?") // Cada día a las 2:00 AM
     public void checkAndExpireApplications() {
-        log.info("Iniciando verificación de aplicaciones vencidas...");
-        
         try {
             LocalDateTime expirationThreshold = LocalDateTime.now().minusDays(EXPIRATION_DAYS);
             
-            // Buscar aplicaciones pendientes que han superado el umbral de expiración
+            // Buscar aplicaciones pendientes expiradas
             List<ProjectApplication> expiredApplications = projectApplicationRepositoryPort
                 .findPendingApplicationsOlderThan(expirationThreshold);
             
             if (expiredApplications.isEmpty()) {
-                log.debug("No se encontraron aplicaciones vencidas");
                 return;
             }
             
-            log.info("Se encontraron {} aplicaciones vencidas para procesar", expiredApplications.size());
-            
             for (ProjectApplication application : expiredApplications) {
                 try {
-                    // Verificar que la aplicación aún esté en estado PENDING
+                    // Verificar estado PENDING
                     if (application.getStatus() != ApplicationStatus.PENDING) {
-                        log.debug("Aplicación {} ya no está en estado PENDING (estado actual: {}), saltando", 
-                                application.getId(), application.getStatus());
                         continue;
                     }
                     
@@ -63,7 +69,6 @@ public class ProjectApplicationExpirationService {
                 }
             }
             
-            log.info("Procesamiento de aplicaciones vencidas completado");
             
         } catch (Exception e) {
             log.error("Error durante la verificación de aplicaciones vencidas", e);
@@ -71,28 +76,26 @@ public class ProjectApplicationExpirationService {
     }
 
     /**
-     * Expira una aplicación específica, cambiando su estado a EXPIRED.
-     * 
+     * Expira una aplicación específica.
+     *
      * @param application La aplicación a expirar
      */
     private void expireApplication(ProjectApplication application) {
-        log.info("Expirando aplicación {} del usuario {} para proyecto {}", 
-                application.getId(), application.getUserId(), application.getProjectId());
+        log.info("Expirando aplicación {} para proyecto {}", 
+                application.getId(), application.getProjectId());
         
-        // Verificación adicional: asegurar que la aplicación esté en estado PENDING
+        // Verificar estado PENDING
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            log.warn("Intento de expirar aplicación {} que no está en estado PENDING (estado actual: {}), abortando", 
-                    application.getId(), application.getStatus());
             return;
         }
         
-        // Cambiar estado a EXPIRED
+        // Expirar aplicación
         application.expire();
         
-        // Guardar la aplicación actualizada
+        // Guardar cambios
         projectApplicationRepositoryPort.save(application);
         
-        // Publicar evento de dominio
+        // Notificar evento
         domainEventPublisher.publish(new com.devmatch.api.project.domain.event.ProjectApplicationExpiredEvent(
             application.getUserId(),
             application.getProjectId(),
@@ -100,12 +103,11 @@ public class ProjectApplicationExpirationService {
             null // No tenemos acceso directo al ownerId desde aquí
         ));
         
-        log.info("Aplicación {} expirada exitosamente", application.getId());
     }
 
     /**
-     * Método manual para expirar una aplicación específica (útil para testing).
-     * 
+     * Expira manualmente una aplicación específica.
+     *
      * @param applicationId ID de la aplicación a expirar
      */
     public void manuallyExpireApplication(Long applicationId) {

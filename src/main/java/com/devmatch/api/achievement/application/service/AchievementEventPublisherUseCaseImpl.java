@@ -51,7 +51,7 @@ public class AchievementEventPublisherUseCaseImpl implements AchievementEventPub
     
     @Override
     public void publishAchievementUnlocked(AchievementUnlockedEvent event) {
-        
+        // Publicar evento de logro desbloqueado
         try {
             applicationEventPublisher.publishEvent(event);
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class AchievementEventPublisherUseCaseImpl implements AchievementEventPub
     
     @Override
     public void publishUserAchievementEarned(UserAchievementEarnedEvent event) {
-        
+        // Publicar evento de logro ganado
         try {
             applicationEventPublisher.publishEvent(event);
         } catch (Exception e) {
@@ -71,17 +71,21 @@ public class AchievementEventPublisherUseCaseImpl implements AchievementEventPub
     
     @Override
     public void publishAchievementCreated(com.devmatch.api.achievement.domain.event.AchievementCreatedEvent event) {
+        // Publicar evento de logro creado (implementación futura)
     }
     
     @Override
     public void publishAchievementUpdated(com.devmatch.api.achievement.domain.event.AchievementUpdatedEvent event) {
+        // Publicar evento de logro actualizado (implementación futura)
     }
     
     @Override
     public void publishAchievementDeleted(com.devmatch.api.achievement.domain.event.AchievementDeletedEvent event) {
+        // Publicar evento de logro eliminado (implementación futura)
     }
     
     @Override
     public void publishAchievementProgress(com.devmatch.api.achievement.domain.event.AchievementProgressEvent event) {
+        // Publicar evento de progreso de logro (implementación futura)
     }
 }

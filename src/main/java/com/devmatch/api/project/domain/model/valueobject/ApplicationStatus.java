@@ -1,8 +1,10 @@
 package com.devmatch.api.project.domain.model.valueobject;
 
 /**
- * Value object que representa el estado de una aplicación a un proyecto.
- * Basado en la tabla project_applications del DDL.
+ * Estados posibles de una aplicación a proyecto.
+ *
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public enum ApplicationStatus {
     PENDING("PENDING", "Pendiente de revisión"),
