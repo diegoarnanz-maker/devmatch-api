@@ -12,7 +12,6 @@ import com.devmatch.api.achievement.domain.exception.UserAchievementNotFoundExce
 import com.devmatch.api.achievement.domain.exception.AchievementNotFoundException;
 import com.devmatch.api.achievement.domain.exception.UserAlreadyHasAchievementException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +19,43 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementación del caso de uso para gestión administrativa de achievements de usuarios.
- * Solo accesible por administradores.
+ * Implementación del caso de uso para gestión administrativa de logros de usuarios.
+ * 
+ * <p>Este servicio implementa la lógica de negocio para operaciones administrativas
+ * sobre logros específicos de usuarios. Solo es accesible por usuarios con rol de
+ * administrador y permite gestionar logros de cualquier usuario del sistema.</p>
+ * 
+ * <h3>Responsabilidades:</h3>
+ * <ul>
+ *   <li>Consultar logros de usuarios específicos</li>
+ *   <li>Asignar logros manualmente a usuarios</li>
+ *   <li>Remover logros de usuarios</li>
+ *   <li>Forzar verificación de logros</li>
+ *   <li>Verificar posesión de logros</li>
+ *   <li>Calcular puntos totales por usuario</li>
+ * </ul>
+ * 
+ * <h3>Flujo de trabajo:</h3>
+ * <ol>
+ *   <li>Valida permisos de administrador</li>
+ *   <li>Verifica existencia de logros y usuarios</li>
+ *   <li>Aplica reglas de negocio (no duplicados)</li>
+ *   <li>Persiste cambios en repositorios</li>
+ *   <li>Retorna DTOs enriquecidos</li>
+ * </ol>
+ * 
+ * <h3>Consideraciones de negocio:</h3>
+ * <ul>
+ *   <li>No duplicados: Un usuario no puede tener el mismo logro dos veces</li>
+ *   <li>Validaciones: Logros y usuarios deben existir</li>
+ *   <li>Auditoría: Registro de operaciones administrativas</li>
+ * </ul>
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional
 public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseCase {
     
@@ -34,7 +64,6 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public List<UserAchievementResponseDto> getUserAchievements(Long userId) {
-        log.info("Admin obteniendo achievements del usuario: {}", userId);
         
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
@@ -49,19 +78,14 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public UserAchievementResponseDto assignAchievement(Long userId, AdminUserAchievementRequestDto request) {
-        log.info("Admin asignando achievement ID '{}' al usuario: {}", 
-                request.getAchievementId(), userId);
         
-        // Verificar que el achievement existe
         Achievement achievement = achievementRepository.findById(request.getAchievementId())
             .orElseThrow(() -> new AchievementNotFoundException(request.getAchievementId()));
         
-        // Verificar que el usuario no tenga ya este achievement
         if (userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievement.getCode().getValue())) {
             throw new UserAlreadyHasAchievementException(userId, request.getAchievementId());
         }
         
-        // Crear y guardar el UserAchievement
         UserAchievement userAchievement = new UserAchievement(
             userId,
             achievement.getCode()
@@ -74,9 +98,7 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public void removeAchievement(Long userId, Long achievementId) {
-        log.info("Admin removiendo achievement ID '{}' del usuario: {}", achievementId, userId);
         
-        // Buscar el achievement para obtener su código
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -89,18 +111,12 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public List<UserAchievementResponseDto> forceAchievementCheck(Long userId) {
-        log.info("Admin forzando verificación de achievements para usuario: {}", userId);
         
-        // Por ahora, retornamos una lista vacía
-        // En el futuro, esto se conectará con el sistema de triggers
         return List.of();
     }
     
     @Override
     public boolean hasUserAchievement(Long userId, Long achievementId) {
-        log.debug("Admin verificando si usuario {} tiene achievement ID '{}'", userId, achievementId);
-        
-        // Buscar el achievement para obtener su código
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -109,8 +125,6 @@ public class AdminUserAchievementUseCaseImpl implements AdminUserAchievementUseC
     
     @Override
     public int getUserTotalPoints(Long userId) {
-        log.debug("Admin calculando puntos totales del usuario: {}", userId);
-        
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
         int totalPoints = 0;

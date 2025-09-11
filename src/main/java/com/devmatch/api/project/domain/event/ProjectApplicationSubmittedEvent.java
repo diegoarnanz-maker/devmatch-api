@@ -4,13 +4,15 @@ import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
  * Evento de dominio que se dispara cuando un usuario envía una solicitud para unirse a un proyecto.
- * Contiene la información básica de la solicitud.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectApplicationSubmittedEvent extends BaseDomainEvent {
-    private final Long ownerId;      // ID del propietario del proyecto
-    private final Long projectId;    // ID del proyecto
-    private final String projectName; // Nombre del proyecto
-    private final Long applicantId;  // ID del usuario que solicita
+    private final Long ownerId;
+    private final Long projectId;
+    private final String projectName;
+    private final Long applicantId;
 
     public ProjectApplicationSubmittedEvent(Long ownerId, Long projectId, String projectName, Long applicantId) {
         this.ownerId = ownerId;

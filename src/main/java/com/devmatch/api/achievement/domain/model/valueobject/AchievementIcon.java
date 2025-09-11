@@ -6,7 +6,10 @@ import java.net.MalformedURLException;
 
 /**
  * Value Object que representa el icono de un logro.
- * Encapsula las reglas de validación y formato de la URL del icono.
+ * Valida URL del icono y formato (máximo 500 caracteres).
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementIcon {
     private final String value;

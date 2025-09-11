@@ -4,8 +4,11 @@ import java.util.Objects;
 
 /**
  * Value Object que representa el tipo de un logro.
- * Permite tipos dinámicos para que el admin pueda gestionar logros flexibly.
- * Encapsula las reglas de validación y formato del tipo.
+ * Valida formato (A-Z_) y longitud (3-50 caracteres).
+ * Incluye tipos predefinidos: PROFILE, PROJECT_CREATION, etc.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementType {
     private final String value;

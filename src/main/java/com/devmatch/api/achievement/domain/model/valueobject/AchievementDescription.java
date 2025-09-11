@@ -4,7 +4,10 @@ import java.util.Objects;
 
 /**
  * Value Object que representa la descripción de un logro.
- * Encapsula las reglas de validación y formato de la descripción.
+ * Valida longitud (10-500 caracteres) y formato con caracteres permitidos.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementDescription {
     private final String value;

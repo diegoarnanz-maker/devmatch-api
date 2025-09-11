@@ -16,9 +16,9 @@ import com.devmatch.api.achievement.domain.model.Achievement;
  * </ul>
  * 
  * @see <a href="../../../../docs/domain/achievement.md">Documentación completa del dominio</a>
- * @author DevMatch Team
+ * @author diegoarnanz-maker
  * @version 1.0
- * @since 2024
+ * @since 2025
  */
 public class AchievementDomainService {
     

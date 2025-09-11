@@ -6,8 +6,10 @@ import com.devmatch.api.achievement.application.dto.UserAchievementResponseDto;
 import java.util.List;
 
 /**
- * Puerto de entrada para la gestión administrativa de achievements de usuarios.
- * Define las operaciones que solo pueden realizar administradores.
+ * Puerto de entrada para gestión administrativa de logros de usuarios.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public interface AdminUserAchievementUseCase {
     

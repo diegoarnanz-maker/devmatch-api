@@ -3,18 +3,20 @@ package com.devmatch.api.achievement.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando un usuario gana un achievement.
- * Contiene la información del achievement ganado y el usuario.
+ * Evento de dominio que se dispara cuando un usuario gana un logro.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class UserAchievementEarnedEvent extends BaseDomainEvent {
-    private final Long userId;           // ID del usuario que ganó el achievement
-    private final Long userAchievementId; // ID del user achievement
-    private final Long achievementId;    // ID del achievement
-    private final String achievementCode; // Código del achievement
-    private final String achievementName; // Nombre del achievement
-    private final String achievementDescription; // Descripción del achievement
-    private final String achievementIcon; // Icono del achievement
-    private final String earnedAt;       // Fecha/hora cuando se ganó
+    private final Long userId;
+    private final Long userAchievementId;
+    private final Long achievementId;
+    private final String achievementCode;
+    private final String achievementName;
+    private final String achievementDescription;
+    private final String achievementIcon;
+    private final String earnedAt;
 
     public UserAchievementEarnedEvent(Long userId, Long userAchievementId, Long achievementId, 
                                      String achievementCode, String achievementName, 

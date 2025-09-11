@@ -1,8 +1,10 @@
 package com.devmatch.api.achievement.application.dto;
 
 /**
- * DTO simple para mostrar el progreso de un achievement.
- * Usa solo campos que existen en la base de datos.
+ * DTO de respuesta para progreso de logros.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementProgressDto {
     

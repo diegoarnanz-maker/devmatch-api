@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 /**
  * Mapper para convertir entre entidades Achievement y DTOs.
- * Proporciona métodos para mapear en ambas direcciones.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementMapper {
     

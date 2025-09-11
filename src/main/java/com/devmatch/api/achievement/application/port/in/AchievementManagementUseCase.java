@@ -7,8 +7,10 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 /**
- * Puerto de entrada para la gestión de achievements.
- * Define las operaciones de consulta de achievements (solo lectura).
+ * Puerto de entrada para gestión de logros.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public interface AchievementManagementUseCase {
     

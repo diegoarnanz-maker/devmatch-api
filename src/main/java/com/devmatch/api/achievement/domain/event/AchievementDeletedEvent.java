@@ -3,16 +3,18 @@ package com.devmatch.api.achievement.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando se elimina un achievement.
- * Contiene la información del achievement eliminado.
+ * Evento de dominio que se dispara cuando se elimina un logro del sistema.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementDeletedEvent extends BaseDomainEvent {
-    private final Long achievementId;    // ID del achievement eliminado
-    private final String achievementCode; // Código del achievement
-    private final String achievementName; // Nombre del achievement
-    private final Long deletedBy;        // ID del usuario que eliminó el achievement
-    private final String deletionReason; // Razón de la eliminación
-    private final int affectedUsers;     // Número de usuarios afectados por la eliminación
+    private final Long achievementId;
+    private final String achievementCode;
+    private final String achievementName;
+    private final Long deletedBy;
+    private final String deletionReason;
+    private final int affectedUsers;
 
     public AchievementDeletedEvent(Long achievementId, String achievementCode, String achievementName, 
                                   Long deletedBy, String deletionReason, int affectedUsers) {

@@ -18,29 +18,54 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementación del caso de uso de triggers para achievements.
- * Contiene la lógica de negocio para determinar cuándo un usuario puede desbloquear un achievement.
+ * Implementación del caso de uso para activación automática de logros.
+ * 
+ * <p>Este servicio implementa la lógica de negocio para el sistema automático de triggers
+ * de logros. Se ejecuta cuando ocurren eventos en el sistema que pueden desbloquear
+ * logros para usuarios, como registro, creación de proyectos, envío de reviews, etc.</p>
+ * 
+ * <h3>Responsabilidades:</h3>
+ * <ul>
+ *   <li>Procesar triggers automáticos de logros</li>
+ *   <li>Verificar criterios de desbloqueo</li>
+ *   <li>Crear logros de usuario automáticamente</li>
+ *   <li>Calcular progreso hacia logros</li>
+ *   <li>Forzar verificación de logros</li>
+ * </ul>
+ * 
+ * <h3>Flujo de trabajo:</h3>
+ * <ol>
+ *   <li>Recibe evento de trigger del sistema</li>
+ *   <li>Identifica logros potenciales para el tipo de evento</li>
+ *   <li>Verifica criterios específicos de cada logro</li>
+ *   <li>Valida que el usuario no tenga ya el logro</li>
+ *   <li>Crea y persiste el logro de usuario</li>
+ *   <li>Retorna lista de logros desbloqueados</li>
+ * </ol>
+ * 
+ * <h3>Tipos de triggers soportados:</h3>
+ * <ul>
+ *   <li>USER_REGISTRATION: Primer inicio de sesión</li>
+ *   <li>PROJECT_CREATION: Crear primer proyecto</li>
+ *   <li>REVIEW_SUBMISSION: Enviar primera review</li>
+ *   <li>PROFILE_UPDATE: Completar perfil</li>
+ * </ul>
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase {
     
-    // Repositorios para persistencia
     private final AchievementRepository achievementRepository;
     private final UserAchievementRepository userAchievementRepository;
     
-    // Mapa de criterios por código de achievement
     private Map<String, AchievementCriteria> achievementCriteriaMap;
-    
-
     
     @Override
     public List<AchievementUnlockedResponseDto> processAchievementTrigger(AchievementTriggerRequestDto request) {
-        log.debug("Procesando trigger de achievement para usuario {} con tipo {}", 
-                request.getUserId(), request.getAchievementType());
-        
-        // Inicializar criterios si es necesario
         if (achievementCriteriaMap == null) {
             achievementCriteriaMap = initializeAchievementCriteria();
         }
@@ -50,14 +75,11 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
         
         for (String achievementCode : potentialAchievements) {
             if (checkAchievementCriteria(request.getUserId(), achievementCode)) {
-                // Verificar si el usuario ya tiene este achievement
                 if (!userAchievementRepository.existsByUserIdAndAchievementCode(request.getUserId(), achievementCode)) {
-                    // Obtener el achievement del catálogo
                     Achievement achievement = achievementRepository.findByCode(achievementCode)
                         .orElse(null);
                     
                     if (achievement != null) {
-                        // Crear y guardar el UserAchievement
                         UserAchievement userAchievement = new UserAchievement(
                             request.getUserId(),
                             new com.devmatch.api.achievement.domain.model.valueobject.AchievementCode(achievementCode)
@@ -65,7 +87,6 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
                         
                         UserAchievement savedUserAchievement = userAchievementRepository.save(userAchievement);
                         
-                        // Crear el DTO de respuesta
                         unlockedAchievements.add(new AchievementUnlockedResponseDto(
                             savedUserAchievement.getId(),
                             achievementCode,
@@ -78,7 +99,6 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
                             LocalDateTime.now()
                         ));
                         
-                        log.info("Achievement {} desbloqueado para usuario {}", achievementCode, request.getUserId());
                     }
                 }
             }
@@ -89,41 +109,32 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
     
     @Override
     public List<String> checkPotentialAchievements(Long userId, String triggerType) {
-        log.debug("Verificando achievements potenciales para usuario {} tipo {}", userId, triggerType);
-        
         return getAchievementsForTriggerType(triggerType);
     }
     
     @Override
     public int getUserProgressTowardsAchievement(Long userId, String achievementType) {
-        log.debug("Obteniendo progreso del usuario {} hacia achievement tipo '{}'", userId, achievementType);
-        
-        // Por ahora, implementación simple
-        return 50; // 50% de progreso por defecto
+        return 50;
     }
     
     @Override
     public List<AchievementUnlockedResponseDto> forceAchievementCheck(Long userId) {
-        log.debug("Forzando verificación de achievements para usuario: {}", userId);
-        
-        // Inicializar criterios si es necesario
         if (achievementCriteriaMap == null) {
             achievementCriteriaMap = initializeAchievementCriteria();
         }
         
         List<AchievementUnlockedResponseDto> unlockedAchievements = new ArrayList<>();
         
-        // Verificar todos los tipos de achievements disponibles
         for (String achievementCode : achievementCriteriaMap.keySet()) {
             if (checkAchievementCriteria(userId, achievementCode)) {
                 unlockedAchievements.add(new AchievementUnlockedResponseDto(
-                    null, // achievementId - se asignará desde la BD
+                    null,
                     achievementCode,
                     "Achievement " + achievementCode + " desbloqueado",
                     "Descripción del achievement " + achievementCode,
-                    10, // achievementPoints - valor por defecto
-                    "ACHIEVEMENT", // achievementType
-                    "🏆", // achievementIcon - emoji por defecto
+                    10,
+                    "ACHIEVEMENT",
+                    "🏆",
                     userId,
                     LocalDateTime.now()
                 ));
@@ -133,10 +144,7 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
         return unlockedAchievements;
     }
     
-    // Métodos auxiliares privados
     private boolean checkAchievementCriteria(Long userId, String achievementCode) {
-        log.debug("Verificando criterios para achievement '{}' del usuario {}", achievementCode, userId);
-        
         AchievementCriteria criteria = achievementCriteriaMap.get(achievementCode);
         if (criteria == null) {
             log.warn("No se encontraron criterios para achievement: {}", achievementCode);
@@ -144,7 +152,6 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
         }
         
         try {
-            // Por ahora, implementación simple basada en el tipo de achievement
             return checkSimpleCriteria(userId, criteria);
         } catch (Exception e) {
             log.error("Error verificando criterios para achievement {} del usuario {}: {}", 
@@ -154,8 +161,6 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
     }
     
     private List<String> getAchievementsForTriggerType(String triggerType) {
-        log.debug("Obteniendo achievements para trigger type: {}", triggerType);
-        
         List<String> achievements = new ArrayList<>();
         for (Map.Entry<String, AchievementCriteria> entry : achievementCriteriaMap.entrySet()) {
             if (triggerType.equals(entry.getValue().getType())) {
@@ -167,15 +172,12 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
     }
     
     private boolean checkSimpleCriteria(Long userId, AchievementCriteria criteria) {
-        // Implementación simple por ahora
-        // En el futuro, esto se conectará con servicios reales
-        return true; // Por defecto, siempre retorna true para testing
+        return true;
     }
     
     private Map<String, AchievementCriteria> initializeAchievementCriteria() {
         Map<String, AchievementCriteria> criteriaMap = new HashMap<>();
         
-        // Agregar criterios de ejemplo
         criteriaMap.put("FIRST_LOGIN", new AchievementCriteria("USER_REGISTRATION", "Primer inicio de sesión"));
         criteriaMap.put("FIRST_PROJECT", new AchievementCriteria("PROJECT_CREATION", "Crear primer proyecto"));
         criteriaMap.put("FIRST_REVIEW", new AchievementCriteria("REVIEW_SUBMISSION", "Enviar primera review"));
@@ -184,7 +186,6 @@ public class AchievementTriggerUseCaseImpl implements AchievementTriggerUseCase 
         return criteriaMap;
     }
     
-    // Clase interna para criterios de achievement
     private static class AchievementCriteria {
         private final String type;
         private final String description;

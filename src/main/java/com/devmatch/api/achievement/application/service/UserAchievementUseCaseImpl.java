@@ -9,7 +9,6 @@ import com.devmatch.api.achievement.domain.model.UserAchievement;
 import com.devmatch.api.achievement.domain.model.Achievement;
 import com.devmatch.api.achievement.domain.exception.UserAchievementNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +16,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementación del caso de uso para gestión de user achievements.
- * Proporciona operaciones relacionadas con achievements de usuarios.
+ * Implementación del caso de uso para gestión de logros de usuarios.
+ * 
+ * <p>Este servicio actúa como orquestador entre la capa de dominio y la infraestructura,
+ * implementando los casos de uso relacionados con logros de usuarios. Maneja las operaciones
+ * de consulta, verificación y cálculo de puntos de logros para usuarios autenticados.</p>
+ * 
+ * <h3>Responsabilidades:</h3>
+ * <ul>
+ *   <li>Obtener logros de un usuario específico</li>
+ *   <li>Verificar si un usuario tiene un logro particular</li>
+ *   <li>Calcular puntos totales acumulados por usuario</li>
+ *   <li>Enriquecer datos de logros con información del catálogo</li>
+ * </ul>
+ * 
+ * <h3>Flujo de trabajo:</h3>
+ * <ol>
+ *   <li>Recibe solicitudes de la capa de infraestructura (controladores)</li>
+ *   <li>Consulta repositorios de dominio para obtener datos</li>
+ *   <li>Aplica mappers para convertir entidades a DTOs</li>
+ *   <li>Retorna datos enriquecidos al cliente</li>
+ * </ol>
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
@@ -31,11 +51,8 @@ public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
     @Override
     public List<UserAchievementResponseDto> getUserAchievements(Long userId) {
-        log.debug("Obteniendo achievements del usuario: {}", userId);
-        
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
-        // Enriquecer con información del achievement
         return userAchievements.stream()
             .map(userAchievement -> {
                 Achievement achievement = achievementRepository.findByCode(
@@ -47,8 +64,6 @@ public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
     @Override
     public UserAchievementResponseDto getUserAchievement(Long userId, String achievementCode) {
-        log.debug("Obteniendo achievement '{}' del usuario: {}", achievementCode, userId);
-        
         UserAchievement userAchievement = userAchievementRepository
             .findByUserIdAndAchievementCode(userId, achievementCode)
             .orElseThrow(() -> new UserAchievementNotFoundException(userId, achievementCode));
@@ -61,15 +76,11 @@ public class UserAchievementUseCaseImpl implements UserAchievementUseCase {
     
     @Override
     public boolean hasUserAchievement(Long userId, String achievementCode) {
-        log.debug("Verificando si usuario {} tiene achievement '{}'", userId, achievementCode);
-        
         return userAchievementRepository.existsByUserIdAndAchievementCode(userId, achievementCode);
     }
     
     @Override
     public int getUserTotalPoints(Long userId) {
-        log.debug("Calculando puntos totales del usuario: {}", userId);
-        
         List<UserAchievement> userAchievements = userAchievementRepository.findByUserId(userId);
         
         int totalPoints = 0;

@@ -8,7 +8,6 @@ import com.devmatch.api.achievement.application.mapper.AchievementMapper;
 import com.devmatch.api.achievement.domain.model.Achievement;
 import com.devmatch.api.achievement.domain.exception.AchievementNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
@@ -20,12 +19,42 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementación del caso de uso para gestión administrativa de achievements.
- * Solo accesible por administradores.
+ * Implementación del caso de uso para gestión administrativa de logros.
+ * 
+ * <p>Este servicio implementa la lógica de negocio para operaciones administrativas
+ * sobre logros del sistema. Solo es accesible por usuarios con rol de administrador
+ * y maneja el ciclo de vida completo de los logros.</p>
+ * 
+ * <h3>Responsabilidades:</h3>
+ * <ul>
+ *   <li>Crear nuevos logros en el catálogo</li>
+ *   <li>Actualizar información de logros existentes</li>
+ *   <li>Eliminar logros (soft delete)</li>
+ *   <li>Activar/desactivar logros</li>
+ *   <li>Consultar logros incluyendo eliminados</li>
+ * </ul>
+ * 
+ * <h3>Flujo de trabajo:</h3>
+ * <ol>
+ *   <li>Valida permisos de administrador</li>
+ *   <li>Crea/actualiza entidades de dominio con value objects</li>
+ *   <li>Persiste cambios en el repositorio</li>
+ *   <li>Publica eventos de dominio si es necesario</li>
+ *   <li>Retorna DTOs de respuesta</li>
+ * </ol>
+ * 
+ * <h3>Consideraciones de negocio:</h3>
+ * <ul>
+ *   <li>Soft delete: Los usuarios existentes mantienen sus logros</li>
+ *   <li>Validaciones: Códigos únicos, campos obligatorios</li>
+ *   <li>Auditoría: Registro de fechas de creación y actualización</li>
+ * </ul>
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional
 public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
@@ -33,9 +62,7 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto createAchievement(AdminAchievementRequestDto request) {
-        log.info("Admin creando achievement: {}", request.getCode());
         
-        // Crear entidad de dominio
         Achievement achievement = new Achievement(
             new com.devmatch.api.achievement.domain.model.valueobject.AchievementCode(request.getCode()),
             new com.devmatch.api.achievement.domain.model.valueobject.AchievementTitle(request.getTitle()),
@@ -45,7 +72,6 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
             new com.devmatch.api.achievement.domain.model.valueobject.AchievementIcon(request.getIconUrl())
         );
         
-        // Guardar en repositorio
         Achievement savedAchievement = achievementRepository.save(achievement);
         
         return AchievementMapper.toResponseDto(savedAchievement);
@@ -53,12 +79,10 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto updateAchievement(Long achievementId, AdminAchievementRequestDto request) {
-        log.info("Admin actualizando achievement {}: {}", achievementId, request.getCode());
         
         Achievement existingAchievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
-        // Actualizar campos
         Achievement updatedAchievement = new Achievement(
             achievementId,
             new com.devmatch.api.achievement.domain.model.valueobject.AchievementCode(request.getCode()),
@@ -79,13 +103,10 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public void deleteAchievement(Long achievementId) {
-        log.info("Admin realizando soft delete del achievement: {}", achievementId);
         
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
-        // Soft delete - marcar como eliminado pero mantener datos
-        // Los usuarios que ya lo tienen NO lo pierden, solo no pueden obtenerlo nuevos usuarios
         Achievement deletedAchievement = new Achievement(
             achievementId,
             achievement.getCode(),
@@ -94,25 +115,22 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
             achievement.getPoints(),
             achievement.getType(),
             achievement.getIcon(),
-            false, // isActive = false (no disponible para nuevos usuarios)
-            true,  // isDeleted = true (marcado como eliminado)
+            false,
+            true,
             achievement.getCreatedAt(),
             LocalDateTime.now()
         );
         
         achievementRepository.save(deletedAchievement);
         
-        log.info("Achievement {} marcado como eliminado. Los usuarios existentes mantienen su logro y puntos.", achievementId);
     }
     
     @Override
     public AchievementResponseDto toggleAchievementStatus(Long achievementId) {
-        log.info("Admin cambiando estado del achievement: {}", achievementId);
         
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
-        // Toggle del estado
         boolean newStatus = !achievement.isActive();
         Achievement updatedAchievement = new Achievement(
             achievementId,
@@ -134,8 +152,6 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto getAchievementById(Long achievementId) {
-        log.debug("Admin obteniendo achievement por ID: {}", achievementId);
-        
         Achievement achievement = achievementRepository.findById(achievementId)
             .orElseThrow(() -> new AchievementNotFoundException(achievementId));
         
@@ -144,13 +160,8 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public Page<AchievementResponseDto> getAllAchievementsPaginated(Pageable pageable) {
-        log.debug("Admin obteniendo todos los achievements (incluyendo eliminados)");
-        
-        // Para admin, mostrar TODOS los achievements (activos, inactivos y eliminados)
-        // Como no tenemos findAll(Pageable), usamos findAll() y luego paginamos manualmente
         List<Achievement> allAchievements = achievementRepository.findAll();
         
-        // Paginación manual
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), allAchievements.size());
         
@@ -166,16 +177,11 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public Page<AchievementResponseDto> getAchievementsByTypePaginated(String type, Pageable pageable) {
-        log.debug("Admin obteniendo achievements por tipo: {} (incluyendo eliminados) con paginación", type);
-        
-        // Para admin, mostrar TODOS los achievements del tipo (incluyendo eliminados)
-        // Como findByType solo trae activos, usamos findAll y filtramos por tipo
         List<Achievement> allAchievements = achievementRepository.findAll();
         List<Achievement> achievementsOfType = allAchievements.stream()
             .filter(achievement -> achievement.getType().getValue().equals(type))
             .collect(Collectors.toList());
         
-        // Paginación manual
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), achievementsOfType.size());
         
@@ -191,8 +197,6 @@ public class AdminAchievementUseCaseImpl implements AdminAchievementUseCase {
     
     @Override
     public AchievementResponseDto getAchievementByCode(String code) {
-        log.debug("Admin obteniendo achievement por código: {}", code);
-        
         Achievement achievement = achievementRepository.findByCode(code)
             .orElseThrow(() -> new AchievementNotFoundException(code));
         

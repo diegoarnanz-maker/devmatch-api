@@ -3,15 +3,17 @@ package com.devmatch.api.achievement.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando un usuario desbloquea un achievement.
- * Contiene la información del achievement desbloqueado y el usuario.
+ * Evento de dominio que se dispara cuando un usuario desbloquea un logro.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementUnlockedEvent extends BaseDomainEvent {
-    private final Long userId;           // ID del usuario que desbloqueó el achievement
-    private final Long achievementId;    // ID del achievement desbloqueado
-    private final String achievementCode; // Código del achievement
-    private final String achievementName; // Nombre del achievement
-    private final String achievementDescription; // Descripción del achievement
+    private final Long userId;
+    private final Long achievementId;
+    private final String achievementCode;
+    private final String achievementName;
+    private final String achievementDescription;
 
     public AchievementUnlockedEvent(Long userId, Long achievementId, String achievementCode, 
                                    String achievementName, String achievementDescription) {

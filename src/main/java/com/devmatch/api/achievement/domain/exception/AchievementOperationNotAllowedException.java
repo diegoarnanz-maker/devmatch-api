@@ -1,7 +1,10 @@
 package com.devmatch.api.achievement.domain.exception;
 
 /**
- * Excepción lanzada cuando se intenta realizar una operación no permitida en un achievement
+ * Excepción del dominio que se lanza cuando se intenta realizar una operación no permitida en un logro.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementOperationNotAllowedException extends RuntimeException {
     
