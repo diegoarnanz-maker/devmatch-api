@@ -1,7 +1,10 @@
 package com.devmatch.api.project.domain.exception;
 
 /**
- * Excepción lanzada cuando ya existe una aplicación al proyecto
+ * Excepción lanzada cuando ya existe una aplicación al proyecto.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectApplicationAlreadyExistsException extends RuntimeException {
     

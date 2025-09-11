@@ -4,7 +4,10 @@ import java.util.Objects;
 
 /**
  * Value Object que representa la descripción de un proyecto.
- * Encapsula las reglas de validación y formato de la descripción.
+ * Valida longitud (20-2000 caracteres) y palabras mínimas (5).
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class ProjectDescription {
     private final String value;

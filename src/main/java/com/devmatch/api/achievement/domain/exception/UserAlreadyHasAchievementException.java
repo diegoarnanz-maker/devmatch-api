@@ -1,7 +1,10 @@
 package com.devmatch.api.achievement.domain.exception;
 
 /**
- * Excepción lanzada cuando un usuario ya tiene un achievement específico.
+ * Excepción del dominio que se lanza cuando un usuario ya posee un logro específico.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class UserAlreadyHasAchievementException extends RuntimeException {
     

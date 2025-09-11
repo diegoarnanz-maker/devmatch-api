@@ -5,20 +5,8 @@ import java.util.Objects;
 /**
  * Value Object que representa el código único de un logro.
  * 
- * <p>Encapsula las reglas de validación y formato del código.
- * Debe seguir el patrón ^[A-Z_]+$ y tener entre 3-50 caracteres.</p>
- * 
- * <p>Ejemplos válidos:</p>
- * <ul>
- *   <li>FIRST_PROJECT</li>
- *   <li>REVIEW_MASTER</li>
- *   <li>COLLABORATION_EXPERT</li>
- * </ul>
- * 
- * @see <a href="../../../../../docs/domain/achievement.md#achievementcode">Documentación completa</a>
- * @author DevMatch Team
- * @version 1.0
- * @since 2024
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementCode {
     private final String value;

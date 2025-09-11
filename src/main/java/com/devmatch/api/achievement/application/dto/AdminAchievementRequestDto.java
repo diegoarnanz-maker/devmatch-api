@@ -9,7 +9,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para crear y actualizar achievements por parte de administradores.
+ * DTO de solicitud para crear y actualizar logros.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @NoArgsConstructor

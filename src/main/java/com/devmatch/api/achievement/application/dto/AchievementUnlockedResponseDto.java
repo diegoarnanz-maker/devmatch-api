@@ -3,8 +3,10 @@ package com.devmatch.api.achievement.application.dto;
 import java.time.LocalDateTime;
 
 /**
- * DTO simple para achievements desbloqueados automáticamente.
- * Usa solo campos que existen en la base de datos.
+ * DTO de respuesta para logros desbloqueados.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementUnlockedResponseDto {
     

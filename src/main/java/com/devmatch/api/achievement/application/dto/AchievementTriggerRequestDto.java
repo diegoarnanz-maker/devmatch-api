@@ -3,8 +3,10 @@ package com.devmatch.api.achievement.application.dto;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * DTO simple para triggers automáticos de achievements.
- * Usa solo campos que existen en la base de datos.
+ * DTO de solicitud para activación automática de logros.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementTriggerRequestDto {
     

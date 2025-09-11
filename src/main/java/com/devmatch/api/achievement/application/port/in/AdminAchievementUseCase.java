@@ -8,8 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 
 /**
- * Puerto de entrada para la gestión administrativa de achievements.
- * Define las operaciones que solo pueden realizar administradores.
+ * Puerto de entrada para gestión administrativa de logros.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public interface AdminAchievementUseCase {
     

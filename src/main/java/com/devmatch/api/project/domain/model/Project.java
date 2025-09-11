@@ -10,6 +10,70 @@ import com.devmatch.api.project.domain.model.valueobject.CoverImageUrl;
 import com.devmatch.api.project.domain.model.valueobject.ProjectDuration;
 import com.devmatch.api.project.domain.model.valueobject.TeamSize;
 
+/**
+ * Entidad principal del dominio que representa un proyecto en el sistema.
+ * 
+ * <p>Un proyecto es la unidad central de trabajo en DevMatch, donde los desarrolladores
+ * pueden colaborar, compartir conocimientos y construir soluciones juntos. Esta entidad
+ * encapsula toda la información y comportamiento relacionado con un proyecto específico.</p>
+ * 
+ * <h3>Características principales:</h3>
+ * <ul>
+ *   <li><strong>Identidad única:</strong> Cada proyecto tiene un ID único e inmutable</li>
+ *   <li><strong>Propietario:</strong> Un usuario que crea y gestiona el proyecto</li>
+ *   <li><strong>Estado:</strong> Controla el ciclo de vida del proyecto (DRAFT, ACTIVE, COMPLETED, CANCELLED)</li>
+ *   <li><strong>Visibilidad:</strong> Puede ser público o privado</li>
+ *   <li><strong>Colaboración:</strong> Permite que otros usuarios se unan como miembros</li>
+ * </ul>
+ * 
+ * <h3>Value Objects utilizados:</h3>
+ * <ul>
+ *   <li><strong>ProjectTitle:</strong> Título del proyecto con validaciones</li>
+ *   <li><strong>ProjectDescription:</strong> Descripción detallada del proyecto</li>
+ *   <li><strong>ProjectStatus:</strong> Estado actual del proyecto</li>
+ *   <li><strong>RepositoryUrl:</strong> URL del repositorio de código</li>
+ *   <li><strong>CoverImageUrl:</strong> URL de la imagen de portada</li>
+ *   <li><strong>ProjectDuration:</strong> Duración estimada del proyecto</li>
+ *   <li><strong>TeamSize:</strong> Tamaño máximo del equipo</li>
+ * </ul>
+ * 
+ * <h3>Reglas de negocio:</h3>
+ * <ul>
+ *   <li>Un proyecto debe tener un propietario válido</li>
+ *   <li>El estado del proyecto determina qué operaciones son permitidas</li>
+ *   <li>Los proyectos públicos son visibles para todos los usuarios</li>
+ *   <li>Los proyectos privados solo son visibles para miembros</li>
+ *   <li>Un proyecto no puede ser eliminado si tiene miembros activos</li>
+ * </ul>
+ * 
+ * <h3>Ejemplos de uso:</h3>
+ * <pre>{@code
+ * // Crear un nuevo proyecto
+ * Project project = new Project(
+ *     new ProjectTitle("Mi Proyecto Web"),
+ *     new ProjectDescription("Una aplicación web moderna"),
+ *     ProjectStatus.DRAFT,
+ *     userId,
+ *     new RepositoryUrl("https://github.com/user/project"),
+ *     new CoverImageUrl("https://example.com/image.jpg"),
+ *     new ProjectDuration(30),
+ *     new TeamSize(5),
+ *     true
+ * );
+ * 
+ * // Verificar si el proyecto está activo
+ * boolean isActive = project.isActive();
+ * 
+ * // Obtener información del proyecto
+ * String title = project.getTitle().getValue();
+ * ProjectStatus status = project.getStatus();
+ * }</pre>
+ * 
+ * @see <a href="../../../../../docs/domain/project.md">Documentación completa del dominio</a>
+ * @author diegoarnanz-maker
+ * @version 1.0
+ * @since 2025
+ */
 public class Project {
     private final Long id;
     private final ProjectTitle title;

@@ -9,12 +9,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Manejador de eventos que escucha cuando un usuario se registra.
+ * Manejador de eventos de registro de usuario.
  * 
- * ¿Qué hace?
- * - Escucha el evento UserRegisteredEvent
- * - Crea automáticamente el logro FIRST_LOGIN para el usuario
- * - No requiere intervención manual
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Slf4j
 @Component

@@ -3,16 +3,19 @@ package com.devmatch.api.achievement.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando se crea un nuevo achievement.
- * Contiene la información del achievement creado.
+ * Evento de dominio que se dispara cuando se crea un nuevo logro.
+ * Contiene información del logro creado y del usuario que lo creó.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementCreatedEvent extends BaseDomainEvent {
-    private final Long achievementId;    // ID del achievement creado
-    private final String achievementCode; // Código del achievement
-    private final String achievementName; // Nombre del achievement
-    private final String achievementDescription; // Descripción del achievement
-    private final String achievementIcon; // Icono del achievement
-    private final Long createdBy;        // ID del usuario que creó el achievement
+    private final Long achievementId;
+    private final String achievementCode;
+    private final String achievementName;
+    private final String achievementDescription;
+    private final String achievementIcon;
+    private final Long createdBy;
 
     public AchievementCreatedEvent(Long achievementId, String achievementCode, String achievementName, 
                                   String achievementDescription, String achievementIcon, Long createdBy) {

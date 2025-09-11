@@ -6,7 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para asignar achievements a usuarios por parte de administradores.
+ * DTO de solicitud para asignar logros a usuarios.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 @Data
 @NoArgsConstructor

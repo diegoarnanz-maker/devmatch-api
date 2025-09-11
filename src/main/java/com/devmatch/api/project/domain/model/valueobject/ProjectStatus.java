@@ -1,7 +1,11 @@
 package com.devmatch.api.project.domain.model.valueobject;
 
 /**
- * Estados posibles de un proyecto en la plataforma DevMatch
+ * Estados posibles de un proyecto en la plataforma DevMatch.
+ * Controla el ciclo de vida del proyecto.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public enum ProjectStatus {
     

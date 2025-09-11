@@ -3,18 +3,20 @@ package com.devmatch.api.achievement.domain.event;
 import com.devmatch.api.shared.domain.model.BaseDomainEvent;
 
 /**
- * Evento de dominio que se dispara cuando hay progreso hacia un achievement.
- * Contiene la información del progreso del usuario hacia el achievement.
+ * Evento de dominio que se dispara cuando hay progreso hacia un logro.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementProgressEvent extends BaseDomainEvent {
-    private final Long userId;           // ID del usuario
-    private final Long achievementId;    // ID del achievement
-    private final String achievementCode; // Código del achievement
-    private final String achievementName; // Nombre del achievement
-    private final int currentProgress;   // Progreso actual
-    private final int requiredProgress;  // Progreso requerido
-    private final double progressPercentage; // Porcentaje de progreso
-    private final String progressType;   // Tipo de progreso (ej: "projects_joined", "reviews_given")
+    private final Long userId;
+    private final Long achievementId;
+    private final String achievementCode;
+    private final String achievementName;
+    private final int currentProgress;
+    private final int requiredProgress;
+    private final double progressPercentage;
+    private final String progressType;
 
     public AchievementProgressEvent(Long userId, Long achievementId, String achievementCode, 
                                    String achievementName, int currentProgress, int requiredProgress, 

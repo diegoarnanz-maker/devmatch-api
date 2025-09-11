@@ -4,7 +4,10 @@ import java.util.Objects;
 
 /**
  * Value Object que representa los puntos de un logro.
- * Encapsula las reglas de validación y formato de los puntos.
+ * Valida rango (1-1000 puntos) y operaciones aritméticas.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementPoints {
     private final int value;

@@ -6,8 +6,41 @@ import com.devmatch.api.project.domain.model.valueobject.ApplicationStatus;
 import com.devmatch.api.project.domain.model.valueobject.MotivationMessage;
 
 /**
- * Entidad de dominio que representa una aplicación a un proyecto.
- * Basada en la tabla project_applications del DDL.
+ * Entidad de dominio que representa una aplicación de un usuario a un proyecto.
+ * 
+ * <p>Esta entidad modela la relación entre un usuario y un proyecto cuando el usuario
+ * solicita unirse al proyecto. Contiene toda la información necesaria para que el
+ * propietario del proyecto pueda evaluar y decidir sobre la aplicación.</p>
+ * 
+ * <h3>Características principales:</h3>
+ * <ul>
+ *   <li><strong>Relación usuario-proyecto:</strong> Conecta un usuario específico con un proyecto</li>
+ *   <li><strong>Estado de aplicación:</strong> Controla el flujo de la aplicación (PENDING, ACCEPTED, REJECTED, CANCELLED)</li>
+ *   <li><strong>Mensaje de motivación:</strong> Permite al usuario explicar por qué quiere unirse</li>
+ *   <li><strong>Seguimiento:</strong> Rastrea si el propietario ha visto la aplicación</li>
+ *   <li><strong>Temporal:</strong> Registra fechas de envío y resolución</li>
+ * </ul>
+ * 
+ * <h3>Estados de aplicación:</h3>
+ * <ul>
+ *   <li><strong>PENDING:</strong> Aplicación enviada, esperando respuesta</li>
+ *   <li><strong>ACCEPTED:</strong> Aplicación aceptada por el propietario</li>
+ *   <li><strong>REJECTED:</strong> Aplicación rechazada por el propietario</li>
+ *   <li><strong>CANCELLED:</strong> Aplicación cancelada por el usuario</li>
+ * </ul>
+ * 
+ * <h3>Reglas de negocio:</h3>
+ * <ul>
+ *   <li>Un usuario solo puede aplicar una vez por proyecto</li>
+ *   <li>El propietario no puede aplicar a su propio proyecto</li>
+ *   <li>Las aplicaciones expiran después de un tiempo determinado</li>
+ *   <li>Una vez aceptada, la aplicación no puede ser cancelada</li>
+ * </ul>
+ * 
+ * @see <a href="../../../../../docs/domain/project.md">Documentación completa del dominio</a>
+ * @author diegoarnanz-maker
+ * @version 1.0
+ * @since 2025
  */
 public class ProjectApplication {
     private final Long id;

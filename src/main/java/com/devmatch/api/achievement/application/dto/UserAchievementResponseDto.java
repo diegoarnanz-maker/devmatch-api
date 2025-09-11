@@ -3,8 +3,10 @@ package com.devmatch.api.achievement.application.dto;
 import java.time.LocalDateTime;
 
 /**
- * DTO para respuestas de user achievements.
- * Contiene la información de un achievement desbloqueado por un usuario.
+ * DTO de respuesta para logros de usuario.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class UserAchievementResponseDto {
     

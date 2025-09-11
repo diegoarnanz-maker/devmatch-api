@@ -6,8 +6,10 @@ import com.devmatch.api.achievement.application.dto.AchievementUnlockedResponseD
 import java.util.List;
 
 /**
- * Puerto de entrada para el sistema automático de triggers de achievements.
- * Se ejecuta automáticamente cuando ocurren eventos en el sistema que pueden desbloquear achievements.
+ * Puerto de entrada para activación automática de logros.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public interface AchievementTriggerUseCase {
     

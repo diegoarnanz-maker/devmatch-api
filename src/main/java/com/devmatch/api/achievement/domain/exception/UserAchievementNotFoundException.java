@@ -1,7 +1,10 @@
 package com.devmatch.api.achievement.domain.exception;
 
 /**
- * Excepción lanzada cuando no se encuentra un user achievement
+ * Excepción del dominio que se lanza cuando no se encuentra un logro de usuario específico.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class UserAchievementNotFoundException extends RuntimeException {
     

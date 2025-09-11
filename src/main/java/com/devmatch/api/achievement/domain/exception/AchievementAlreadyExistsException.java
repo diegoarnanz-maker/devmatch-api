@@ -1,7 +1,10 @@
 package com.devmatch.api.achievement.domain.exception;
 
 /**
- * Excepción lanzada cuando se intenta crear un achievement que ya existe
+ * Excepción lanzada cuando se intenta crear un logro que ya existe.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementAlreadyExistsException extends RuntimeException {
     

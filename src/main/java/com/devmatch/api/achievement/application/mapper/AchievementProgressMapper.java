@@ -5,7 +5,9 @@ import com.devmatch.api.achievement.application.dto.AchievementProgressDto;
 
 /**
  * Mapper para convertir entre entidades Achievement y DTOs de progreso.
- * Proporciona métodos para mapear información de progreso.
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementProgressMapper {
     

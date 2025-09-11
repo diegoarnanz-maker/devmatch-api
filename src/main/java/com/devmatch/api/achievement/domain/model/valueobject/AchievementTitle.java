@@ -4,7 +4,10 @@ import java.util.Objects;
 
 /**
  * Value Object que representa el título de un logro.
- * Encapsula las reglas de validación y formato del título.
+ * Valida formato y longitud (5-100 caracteres).
+ * 
+ * @author diegoarnanz-maker
+ * @since 2025
  */
 public class AchievementTitle {
     private final String value;
