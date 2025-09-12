@@ -131,14 +131,15 @@ public class ProjectController {
             @AuthenticationPrincipal UserPrincipalAdapter userPrincipal) {
         
         // Crear DTO de filtros con los parámetros recibidos
-        ProjectPublicSearchRequestDto filter = new ProjectPublicSearchRequestDto();
-        filter.setTitle(title);
-        filter.setStatus(status);
-        filter.setIsActive(isActive);
-        filter.setMinTeamSize(minTeamSize);
-        filter.setMaxTeamSize(maxTeamSize);
-        filter.setMinDurationWeeks(minDurationWeeks);
-        filter.setMaxDurationWeeks(maxDurationWeeks);
+        ProjectPublicSearchRequestDto filter = ProjectPublicSearchRequestDto.builder()
+                .title(title)
+                .status(status)
+                .isActive(isActive)
+                .minTeamSize(minTeamSize)
+                .maxTeamSize(maxTeamSize)
+                .minDurationWeeks(minDurationWeeks)
+                .maxDurationWeeks(maxDurationWeeks)
+                .build();
         
         List<ProjectResponseDto> projects = projectManagementUseCase.getProjectsByOwnerWithSecurity(
                 ownerId, 
